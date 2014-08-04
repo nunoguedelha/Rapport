@@ -1,0 +1,258 @@
+\documentclass{report}
+
+%Packages pour les langues
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+%Package pour la mise en forme (marges)
+\usepackage[a4paper]{geometry}
+\geometry{hscale=0.85,vscale=0.85,centering}
+%Packages pour les formules de Maths
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+%Packages des images
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+%Package pour colorier le code Matlab (copyright Jérémy Fauvel)
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{color}
+
+%Code pour afficher du code Matlab
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
+\lstset{language=Matlab, frame=none, basicstyle=\small\ttfamily, keywordstyle=[1]\color{Blue}\bfseries, keywordstyle=[2]\color{Purple}, keywordstyle=[3]\color{Blue}\underbar, identifierstyle=, commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, stringstyle=\color{Purple}, showstringspaces=false, tabsize=5, morekeywords={xlim,ylim,var,alpha,factorial,poissrnd,normpdf,normcdf}, morekeywords=[2]{on, off, interp}, morekeywords=[3]{FindESS, homework_example}, morecomment=[l][\color{Blue}]{...}, numbers=left, firstnumber=1, numberstyle=\tiny\color{Red}, stepnumber=1}
+
+
+
+\begin{document}
+\begin{titlepage}
+\title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
+\date{3 Mars 2014 - 31 Août 2014}
+\author{Auteur: \bsc{Guedelha} Nuno \\ Tuteur: \bsc{Stasse} Olivier}
+\end{titlepage}
+
+
+
+\graphicspath{{illustrations/}}
+\maketitle
+
+%Rennomer la table des matières en Sommaire
+\renewcommand{\contentsname}{Sommaire}
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+Je voudrais remercier, avant tout, tous ceux qui ont rendu cette expérience possible, et très enrichissante.
+
+Je tiens à remercier dans un premier temps, toute l’équipe pédagogique du Master I.R.R. et les intervenants professionnels responsables de la formation, pour avoir assuré la partie académique de celle-ci. Je remercie Mme. Viviane Cadenat et M. Michel Taix pour leurs conseils sur les critères de choix d'une formation de 2ème cycle en Robotique, qui ont facilité mon orientation à l'origine de mon inscription en Master I.R.R.
+
+Je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.
+
+Je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’elles m’ont permis de vivre durant ces six mois au sein du LAAS :
+
+Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’elle m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport
+
+Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.
+
+Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.
+\vspace{0.3cm} % retour à la ligne
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+\section*{contexte}
+
+
+\section*{problème posé et objectifs}
+
+
+\section*{étude bibliographique}
+
+
+\section*{annonce du plan}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Concepts généraux sur le contrôle dynamique des robots totalement actionnés}
+
+\section{généralités sur le contrôle en couple ou position (vitesse ou accélération), et cas d'utilisation}
+
+\section{dynamique directe / inverse et cas d'utilisation}
+
+dynamique directe => simulation
+\vspace{0.3cm}
+
+dynamique inverse => contrôle en couple
+\vspace{0.3cm}
+
+dynamique hybride => contrôle en couple, avec articulations spéciales:
+\vspace{0.3cm}
+
+	- articulation Freeflyer à la base du robot
+
+	- articulation flexible	ou contraintes de force sur la trajectoir de l'outil terminal
+	
+	- usinage (force appliquée le long d'une trajectoire
+	
+	- manipulation de pièces
+
+
+\section{contrôle d'un robot humanoïde: modèle du double pendule inversé}
+
+modèle du double pendule innversé
+
+filtre de Kallmann
+
+cinématique inverse vers l'espace des configurations
+
+dynamique inverse dans l'espace des configurations
+
+Problème de la flexibilité de la semelle du pied de HRP2
+
+Asservissement du couple "Backdrive" appliqué de la cheville au sol
+
+Application à la stabilisation du robot (Shuuji Kajita)
+
+=> algorithme dynamique hybride nécessaire.
+
+\section{implémentation et contraintes}
+- performances: précision, vitesse d'exécution , taille du code\vspace{0.3cm}
+- interface (vecteurs d'entrée / sortie)\vspace{0.3cm}
+- langage de programmation\vspace{0.3cm}
+- Algorithme générique pour tous les modèles URDF de robots (arbre cinématique), mais optimisé pour chaque modèle spécifique (template et meta-programing)\vspace{0.3cm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
+
+\section{algèbre spatiale de Roy Featherstone}
+Formalisme compacte et plus adapté :\vspace{0.3cm}
+- au calcul numérique et récursif\vspace{0.3cm}
+- au parcours en profondeur d'abord d'arbres cinématiques\vspace{0.3cm}
+
+\section{l'algorithme hybride en quatre étapes}
+
+\subsection{mise en place de l'équation de mouvement et séparation des variable connues/inconnues}
+
+\subsection{calcul de C'}
+description de l'algorithme RNEA
+
+\subsection{calcul de H11 (sous-matrice d'inertie)}
+description de la construction de H et optimisation par défaut "branch sparsity"
+
+\subsection{résolution du système linéaire}
+=> Eigen solver, ddq1
+
+\subsection{résolution de Tau2}
+
+\subsection{reconstruction des vecteurs de sortie: ddq et Tau}
+
+
+\section{optimisations de l'algorithme et de code}
+
+\subsection{jcalc et le calcul des matrices de passage jXi}
+correction d'une erreur de code dans le repo officiel concernant les opérations sur matrices à axes fixes x, y ou z.
+
+\subsection{"branch sparsity" dans l'algorithme CRBA (calcul de H)}
+
+\subsection{solveur Eigen}
+branch sparsity => SparseMatrix, SimplicialLLT ou SimplicialLDLT
+
+\subsection{Forward Dynamics (FD) sparsity}
+- parseur URDF
+
+- réduction de l'arbre cinématique et RNEA sur cet arbre
+
+- H11 (+ H21, H12) à partir de CRBA complété.
+
+
+
+\section{tests unitaires, validation et mesures de performances}
+
+- tests unitaires des fonctions et sous-fonctions implémentées
+
+- mesure du temps d'exécution de chacune des étapes
+
+- évolution de ces mesures en fonction du nombre d'articulations FD
+
+- temps d'exécution global
+
+- précision obtenue
+
+- utilisation de vecteurs aléatoires pour les tests unitaires
+
+\section{future intégration dans le système de tâches "stack of tasks" de HRP2}
+
+TBD
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Application au contrôle de couple "Backdrive" pour la stabilisation du robot: prise en compte de la flexibilité de l'appui au sol}
+
+\section{retour sur le modèle de pendule inversé et le problème de la flexibilité de la semelle}
+
+\section{framework de simulation intégré à metapod}
+
+\section{prise en compte des paramètres identifiés de HRP2}
+
+\section{génération et projection des couples de actifs et passifs de la cheville sur la trajectoire planifiée}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+%
+
+\section*{Bilan du travail}
+
+- objectif initial
+
+- concepts acquis:
+
+	- algèbre spatiale et algorithmes de Featherstone
+	
+	- metapod
+	
+	- outils et environnement de développement (cmake, Eigen, Boost, Template/Mete-programmation)
+
+- correction du code source metapod de départ (calculdes matrices de passage Xs)
+
+- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
+
+- extention des optimisations de Featherstone pour le calcul de H21
+
+- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
+
+- [complément suggéré à l'algorithmede Kajita]
+
+
+\section*{Bilan personnel}
+
+- appliqué et étendu les conceptsde modélisation et contrôle de robots vus en Master IRR
+
+- bonne introduction à la robotique humanoïde
+
+- outils de développement appréciés
+
+- contact avec le monde de la recherche
+
+- acquis de l'expérience en Méta-programmation et algorithmes dynamiques
+
+
+\section*{Perspectives}
+
+- ingénieur de recherche dans un laboratoire (CNRS, LIRMM, IIT, NTU, ...) pour 1 ou 2 ans
+
+- Thèse puis poste poste d'ingénieur de recherche dans une entreprise (Aldébaran, PAL, autre PME, ...)
+
+
+\end{document}
