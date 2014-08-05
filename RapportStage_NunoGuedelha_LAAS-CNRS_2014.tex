@@ -14,10 +14,15 @@
 \usepackage{mathrsfs}
 %Packages des images
 \usepackage{graphicx}
+\usepackage{subfigure}
 \usepackage{wrapfig}
 \usepackage{caption}
-\usepackage{subcaption}
+%\usepackage{subcaption}
 \usepackage{float}
+%Packages pour le glossaire
+\usepackage{glossaries}
+%\usepackage[xindy]{glossaries}
+\makeglossaries
 %Package pour colorier le code Matlab (copyright Jérémy Fauvel)
 \usepackage{listings}
 \usepackage[usenames,dvipsnames]{color}
@@ -48,23 +53,28 @@
 \chapter*{Remerciements}
 \addcontentsline{toc}{chapter}{Remerciements}
 
-Je voudrais remercier, avant tout, tous ceux qui ont rendu cette expérience possible, et très enrichissante.
+Je voudrais remercier, avant tout, tous ceux qui ont rendu cette expérience possible, et très enrichissante.\\
+Je tiens à remercier dans un premier temps, toute l’équipe pédagogique du Master I.R.R. et les intervenants professionnels responsables de la formation, pour avoir assuré la partie académique de celle-ci. Je remercie Mme. Viviane Cadenat et M. Michel Taix pour leurs conseils sur les critères de choix d'une formation de 2ème cycle en Robotique, qui ont facilité mon orientation à l'origine de mon inscription en Master I.R.R.\\
+Je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.\\
+Je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’elles m’ont permis de vivre durant ces six mois au sein du LAAS :\\
+Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’elle m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport.\\
+Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.\\
+Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.\\
 
-Je tiens à remercier dans un premier temps, toute l’équipe pédagogique du Master I.R.R. et les intervenants professionnels responsables de la formation, pour avoir assuré la partie académique de celle-ci. Je remercie Mme. Viviane Cadenat et M. Michel Taix pour leurs conseils sur les critères de choix d'une formation de 2ème cycle en Robotique, qui ont facilité mon orientation à l'origine de mon inscription en Master I.R.R.
-
-Je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.
-
-Je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’elles m’ont permis de vivre durant ces six mois au sein du LAAS :
-
-Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’elle m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport
-
-Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.
-
-Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.
 \vspace{0.3cm} % retour à la ligne
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newacronym{rneaLabel}{RNEA}{Recursive Newton-Euler Algorithm}
+\newacronym{crbaLabel}{CRBA}{Composite Rigid Body Algorithm}
+\newacronym{abaLabel}{ABA}{Articulated Body Algorithm}
+
+\glsaddall
+\printglossary
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
@@ -133,12 +143,87 @@ Application à la stabilisation du robot (Shuuji Kajita)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{algèbre spatiale de Roy Featherstone}
+%Formalisme compacte et plus adapté :\vspace{0.3cm}
+%- au calcul numérique et récursif\vspace{0.3cm}
+%- au parcours en profondeur d'abord d'arbres cinématiques\vspace{0.3cm}
+L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{rneaLabel}}), l'algorithme "corps rigide composite" (\emph{\gls{crbaLabel}}) et l'algorithme de corps articulés (\emph{\gls{abaLabel}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{rneaLabel} et le \gls{crbaLabel}.\\
+
+
+\section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle de système}
+
+L'algèbre spatiale est un système de notation très concis et léger pour décrire la vitesse, l'accélération et les forces appliquées à des corps rigides, à l'aide de vecteurs à six dimensions (tenseurs) dits vecteurs spatiaux. Cette notation réduit grandement la taille des équations de mouvement des modèles cinématique et dynamique du robot. En particulier, elle simplifie la transformation des tenseurs entre les repères liés aux différents corps du robot. Quelques exemples seront donnés après la présentation de ces fondements.\\
+
+
+\subsection{Vecteurs spatiaux: espaces mathématique et bases}
+
+Pour décrire le mouvement d'un corps rigide dans un espace 3D, et ayant six degrés de liberté, nous devons décrire le déplacement en translation et en rotation. Pour cela, on définit des tenseurs combinant ces deux types de grandeurs dans des espaces de vecteurs à six dimensions (6D). On définit ainsi :\\
+\begin{itemize}
+\item dans un espace noté $M^{6}$, un tenseur de mouvement pour les vitesses ou accélérations du corps
+\item dans l'espace noté $F^{6}$, un tenseur de forces pour les forces et les couples appliqués à ce même corps
+\end{itemize}
+On définit des bases dans ces espaces, ainsi que les opérateurs : somme, produit scalaire, produit vectoriel.\\
+Le vecteur de coordonnée $\underline{m}=[m_{1},...,m_{6}]^T$ représente le vecteur $m$ dans la base ${d_{1},...,d_{6}}$ dans $M^{6}$.
+De même, $\underline{f}=[f_{1},...,f_{6}]^T$ représente le vecteur $f$ dans la base ${e_{1},...,e_{6}}$ dans $F^{6}$.
+Ces bases sont réciproques, normales :
+
+$$
+d_{i}\cdot e_{j}=
+\begin{cases}
+0 : i \neq j\\
+1 : i = j
+\end{cases}
+$$
+
+Ainsi le produit scalaire entre ces vecteurs s'exprime:
+
+$$
+"\cdot" : M^{6} \times D^{6} \mapsto R
+\qquad
+\qquad
+m \cdot f = \underline{m}^T f
+$$
+
+\subsection{Vitesse}
+
+On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $w$, et en translation avec une vitesse linéaire $v_{p}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
+
+\begin{figure}[H]
+\begin{center}
+  \subfigure[Rotation autour d'un point du solide $P$]{\includegraphics[width=7cm, page=1]{figs/figures}}\hspace{2cm}
+  \subfigure[Rotation autour du centre du repère $O$]{\includegraphics[width=7cm, page=2]{figs/figures}}\\
+  \caption{Vitesse d'un objet en mouvement quelconque (translation et rotation simultanées). Un nouveau point de vue pour le vecteur spatial.}  % legende
+  \label{vitessePointCoincidant} % pour citer le numéro de figure
+\end{center}
+\end{figure}
+
+
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit $C$ le point de ce champ coïncidant avec le centre su repère $O$, donc le point du solide étendu coïncidant avec $O$ au moment où on mesure la vitesse du solide.\\
+La vitesse du point $P$ dans ce repère est donnée par:
+
+
+
+
+$$
+v_{p}=
+$$
+\subsection{Force}
+
+\subsection{Coordonnées de Plücker et transformation de bases}
+
+
+\section{construction de l'équation de mouvement du système complet}
+
+\section{Dynamique inverse et \gls{rneaLabel}}
+
+\section{Dynamique durecte et \gls{crbaLabel}}
+
+
+
 \chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
 
-\section{algèbre spatiale de Roy Featherstone}
-Formalisme compacte et plus adapté :\vspace{0.3cm}
-- au calcul numérique et récursif\vspace{0.3cm}
-- au parcours en profondeur d'abord d'arbres cinématiques\vspace{0.3cm}
+Ce dernier est décomposé en cinq étapes incluant le déroulement complet d'un \gls{rneaLabel}, ainsi que d'un \gls{crbaLabel} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal. Pour cette raison, il seront également décrits dans cette section. Les notations spécifiques à cette algèbre permettent une formulation très simplifiée des relations cinématiques et dynamiques.\\
+
 
 \section{l'algorithme hybride en quatre étapes}
 
@@ -253,6 +338,24 @@ TBD
 - ingénieur de recherche dans un laboratoire (CNRS, LIRMM, IIT, NTU, ...) pour 1 ou 2 ans
 
 - Thèse puis poste poste d'ingénieur de recherche dans une entreprise (Aldébaran, PAL, autre PME, ...)
+
+
+
+\begin{thebibliography}{9}
+
+\bibitem{Featherstone}
+  Roy Featherstone,
+  \emph{Rigid Body Dynamics Algorithms}.
+  Springer Science+Business Media, LLC,
+  2nd edition,
+  2008.
+
+\end{thebibliography}
+
+\appendix
+
+\chapter{Notations en Algèbre spatiale}
+
 
 
 \end{document}
