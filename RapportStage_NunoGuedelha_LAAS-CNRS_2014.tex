@@ -33,6 +33,8 @@
 
 
 
+
+
 \begin{document}
 \begin{titlepage}
 \title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
@@ -48,6 +50,14 @@
 %Rennomer la table des matières en Sommaire
 \renewcommand{\contentsname}{Sommaire}
 \tableofcontents
+\listoffigures
+\listoftables
+
+%=============== Macros =================
+
+\input{./tex/macros.tex}
+
+%========================================
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter*{Remerciements}
@@ -170,8 +180,8 @@ Ces bases sont réciproques, normales :
 $$
 d_{i}\cdot e_{j}=
 \begin{cases}
-0 : i \neq j\\
-1 : i = j
+0 \colon i \neq j\\
+1 \colon i = j
 \end{cases}
 $$
 
@@ -186,27 +196,167 @@ $$
 
 \subsection{Vitesse}
 
-On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $w$, et en translation avec une vitesse linéaire $v_{p}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
+On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $w$, et en translation avec une vitesse linéaire $v_{P}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
+
+\twoFig[H]
+{Rotation autour d'un point du solide $P$}
+{Rotation autour du centre du repère $O$}
+{7cm}{7cm}
+{1}{2}
+{Vitesse d'un objet en mouvement quelconque (translation et rotation simultanées). Un nouveau point de vue pour le vecteur spatial.}
+{vitessePointCoincidant}
+
+
+Soit $P'$ un point quelconque lié au corps solide $C$ (donc fixe dans n'importe quel repère lié au solide). La vitesse du point $P'$ dans $R$ est donnée par	$v_{P'}=v_{P}+\overrightarrow{P'P} \times w$ .\\
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. On notera sa vitesse $v_{O}$. Comme pour le point $P'$ évoqué précedemment, on a:
+$$
+v_{O} = v_{P} + w \times \overrightarrow{PO}\\
+\Leftrightarrow v_{P} = v_{O} - w \times \overrightarrow{PO} = v_{O} + w \times \overrightarrow{OP}
+$$
+
+On peut donc voir le corps $C$ comme un solide en translation à la vitesse $v_{O}$ et en rotation autour d'un axe passant par $O$ (parallèle à l'axe défini initialement) à la vitesse angulaire $w$. La vitesse de tout point $P$ de ce solide dans le repère $R(O,x,y,z)$ est alors donnée par:
+\begin{equation}
+v_{P} = v_{O} + w \times \overrightarrow{OP}
+\quad\quad
+\footnote{Bien que la vitesse $v_{P}$ soit définie en fonction de $O$, elle ne dépend pas de l'origine choisie puisqu'il s'agit du vecteur vitesse associé à $P$ par le champ de vitesses du solide, qui lui est indépendant de l'origine. En effet, $v_{O}$ et $\overrightarrow{OP}$ dépendent tous deux de $O$, mais ces dépendances se compensent.}
+\end{equation}
+
+On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des tenseurs de mouvement $M^{6}$:\\
+
+\begin{figure}[H]
+\begin{minipage}{.3\textwidth}
+  \begin{center}
+  \includegraphics[width=4cm, page=3]{figs/figures}
+  \end{center}
+\end{minipage}
+\begin{minipage}{.3\textwidth} \hfill
+  \begin{align*}
+  D_{O} = \lbrace &\textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \\
+  &\textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \subset M^{6}
+  \end{align*}
+\end{minipage}
+\begin{minipage}{.4\textwidth} \hfill
+  \begin{tabbing}
+  \= $\textbf{d}_{Ox}$ \= vecteur unitaire de rotation autour de $O_{x}$\\
+  \> $\textbf{d}_{Oy}$ \> vecteur unitaire de rotation autour de $O_{y}$\\
+  \> $\textbf{d}_{Oz}$ \> vecteur unitaire de rotation autour de $O_{z}$\\
+  \> $\textbf{d}_{x}$  \> vecteur unitaire de translation le long de $O_{x}$\\
+  \> $\textbf{d}_{y}$  \> vecteur unitaire de translation le long de $O_{y}$\\
+  \> $\textbf{d}_{z}$  \> vecteur unitaire de translation le long de $O_{z}$\\
+  \end{tabbing}
+\end{minipage}
+\caption{Base de \emph{Plücker} dans $M^{6}$}
+\label{basePlucker}
+\end{figure}
+
+Voici les coordonnées cartésiennes de $w$ et $v_{O}$, ainsi que leur concaténation constituant les coordonnées du vecteur spatial $\widehat{v}$ dans la base de \emph{Plücker}:\\
+
+\begin{minipage}{.55\textwidth}
+$$
+\underline{w}=
+\begin{bmatrix}
+w_{x} \\
+w_{y} \\
+w_{z}
+\end{bmatrix}
+\quad \texttt{et} \quad
+\underline{v}_{O}=
+\begin{bmatrix}
+v_{Ox} \\
+v_{Oy} \\
+v_{Oz}
+\end{bmatrix}
+\quad \Rightarrow \quad
+\underline{\widehat{v}}_{O}=
+\begin{bmatrix}
+\underline{w} \\
+\underline{v}_{O}
+\end{bmatrix}
+=
+\begin{bmatrix}
+w_{x} \\
+w_{y} \\
+w_{z} \\
+v_{Ox} \\
+v_{Oy} \\
+v_{Oz}
+\end{bmatrix}
+$$
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+\begin{align*}
+\quad \texttt{représentant} \quad
+\widehat{v} = 
+  &w_{x}\textbf{d}_{Ox} + w_{y}\textbf{d}_{Oy} + w_{z}\textbf{d}_{Oz} \\
+  &+ v_{Ox}\textbf{d}_{x} + v_{Oy}\textbf{d}_{y} + v_{Oz}\textbf{d}_{z}
+\end{align*}
+\end{minipage}
+
+\vspace{0.3cm} % retour à la ligne
+
+Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie. Si on définit deux bases de \emph{Plücker} différentes $D_{O}$ et $D_{O'}$, centrées respectivement sur $O$ et $O'$, ainsi que les vecteurs spatiaux associés $\widehat{v}$ et $\widehat{v'}$, on obtient:
+
+\begin{align}
+\widehat{v}  &= \underline{v}_{O} \cdot D_{O} \notag \\
+\widehat{v'} &= \underline{v}_{O'} \cdot D_{O'} \notag \\
+^{D_{O}}\widehat{v} \quad &= \quad ^{D_{O}}\widehat{v'}
+\end{align}
+
+
+Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ dans la même base de \emph{Plücker} sont identiques. Il faut noter que si les deux bases ont la même orientation, elles auront les mêmes vecteurs unitaires de translation ($\textbf{d}_{x}$, $\textbf{d}_{y}$ et $\textbf{d}_{z}$), mais les vecteurs unitaires de rotations diffèrent si $O \neq O'$ ne sont pas confondus, comme illustré dans l'exemple ci-dessous:
 
 \begin{figure}[H]
 \begin{center}
-  \subfigure[Rotation autour d'un point du solide $P$]{\includegraphics[width=7cm, page=1]{figs/figures}}\hspace{2cm}
-  \subfigure[Rotation autour du centre du repère $O$]{\includegraphics[width=7cm, page=2]{figs/figures}}\\
-  \caption{Vitesse d'un objet en mouvement quelconque (translation et rotation simultanées). Un nouveau point de vue pour le vecteur spatial.}  % legende
+  \subfigure[Deux bases de \emph{Plücker} de même orientation.]{\includegraphics[width=5cm, page=4]{figs/figures}}\hspace{1cm}
+  \subfigure[Expression de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$ (vue de dessus).]{\includegraphics[width=5cm, page=5]{figs/figures}}\hspace{1cm}
+  \subfigure[cas de $\textbf{d}_{Pz}$ (vue de dessus).]{\includegraphics[width=5cm, page=6]{figs/figures}}\\
+  \caption{Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}  % legende \\
   \label{vitessePointCoincidant} % pour citer le numéro de figure
 \end{center}
 \end{figure}
 
 
-On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit $C$ le point de ce champ coïncidant avec le centre su repère $O$, donc le point du solide étendu coïncidant avec $O$ au moment où on mesure la vitesse du solide.\\
-La vitesse du point $P$ dans ce repère est donnée par:
+\begin{figure}[H]
+\begin{minipage}{.3\textwidth}
+  \begin{center}
+  \includegraphics[width=4cm, page=4]{figs/figures}
+  \end{center}
+\end{minipage}
+\begin{minipage}{.3\textwidth} \hfill
+  \begin{align*}
+  D_{O} = \{ \textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \\
+  \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \} \subset M^{6}
+  \end{align*}
+\end{minipage}
+\begin{minipage}{.4\textwidth} \hfill
+  \begin{tabbing}
+  \= $\textbf{d}_{Ox}$ \= vecteur unitaire de rotation autour de $O_{x}$\\
+  \> $\textbf{d}_{Oy}$ \> vecteur unitaire de rotation autour de $O_{y}$\\
+  \> $\textbf{d}_{Oz}$ \> vecteur unitaire de rotation autour de $O_{z}$\\
+  \> $\textbf{d}_{x}$  \> vecteur unitaire de translation le long de $O_{x}$\\
+  \> $\textbf{d}_{y}$  \> vecteur unitaire de translation le long de $O_{y}$\\
+  \> $\textbf{d}_{z}$  \> vecteur unitaire de translation le long de $O_{z}$\\
+  \end{tabbing}
+\end{minipage}
+\caption{Base de \emph{Plücker} dans $M^{6}$}
+\label{basePlucker}
+\end{figure}
 
 
 
+\threeFig[H]
+{Deux bases de \emph{Plücker} de même orientation.}
+{Expression de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
+{cas de $\textbf{d}_{Pz}$ (projection suivant $\textbf{d}_{z}$).}
+{4}{5}{6}
+{Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
+{vitessePointCoincidant}
 
-$$
-v_{p}=
-$$
+
+Nous pouvons trouver la démonstration de cette propriété d'invariance dans l'annexe \ref{appx_dem}. 
+
+
+
 \subsection{Force}
 
 \subsection{Coordonnées de Plücker et transformation de bases}
@@ -341,6 +491,19 @@ TBD
 
 
 
+\appendix
+
+\chapter{Notations en Algèbre spatiale} \label{appx_notations}
+
+\chapter{Quelques démonstrations en algèbre spatiale} \label{appx_dem}
+
+\section{Invariance du vecteur spacial $\widehat{v}$}
+
+
+
+% Bibliography:
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
 \begin{thebibliography}{9}
 
 \bibitem{Featherstone}
@@ -351,11 +514,6 @@ TBD
   2008.
 
 \end{thebibliography}
-
-\appendix
-
-\chapter{Notations en Algèbre spatiale}
-
 
 
 \end{document}
