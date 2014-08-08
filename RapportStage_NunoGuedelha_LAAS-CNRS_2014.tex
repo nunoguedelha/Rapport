@@ -14,7 +14,8 @@
 \usepackage{mathrsfs}
 %Packages des images
 \usepackage{graphicx}
-\usepackage{subfigure}
+%\usepackage{subfigure}
+\usepackage{subfig}
 \usepackage{wrapfig}
 \usepackage{caption}
 %\usepackage{subcaption}
@@ -31,7 +32,8 @@
 \definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
 \lstset{language=Matlab, frame=none, basicstyle=\small\ttfamily, keywordstyle=[1]\color{Blue}\bfseries, keywordstyle=[2]\color{Purple}, keywordstyle=[3]\color{Blue}\underbar, identifierstyle=, commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, stringstyle=\color{Purple}, showstringspaces=false, tabsize=5, morekeywords={xlim,ylim,var,alpha,factorial,poissrnd,normpdf,normcdf}, morekeywords=[2]{on, off, interp}, morekeywords=[3]{FindESS, homework_example}, morecomment=[l][\color{Blue}]{...}, numbers=left, firstnumber=1, numberstyle=\tiny\color{Red}, stepnumber=1}
 
-
+%Outils pour les string
+\usepackage{xstring}
 
 
 
@@ -194,15 +196,13 @@ $$
 m \cdot f = \underline{m}^T f
 $$
 
-\subsection{Vitesse}
+\subsection{Vitesse}\label{algSpa_Vitesse}
 
 On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $w$, et en translation avec une vitesse linéaire $v_{P}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
 
-\twoFig[H]
-{Rotation autour d'un point du solide $P$}
-{Rotation autour du centre du repère $O$}
-{7cm}{7cm}
-{1}{2}
+\dispTwoFig[H]
+{1}{Rotation autour d'un point du solide $P$}
+{2}{Rotation autour du centre du repère $O$}
 {Vitesse d'un objet en mouvement quelconque (translation et rotation simultanées). Un nouveau point de vue pour le vecteur spatial.}
 {vitessePointCoincidant}
 
@@ -224,18 +224,15 @@ v_{P} = v_{O} + w \times \overrightarrow{OP}
 On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des tenseurs de mouvement $M^{6}$:\\
 
 \begin{figure}[H]
-\begin{minipage}{.3\textwidth}
-  \begin{center}
-  \includegraphics[width=4cm, page=3]{figs/figures}
-  \end{center}
-\end{minipage}
-\begin{minipage}{.3\textwidth} \hfill
+\minipages[3]{.3}{.3}{.4}
+{%
+  \dispFig[H]{3}{4cm}{}{}
+}{%
   \begin{align*}
   D_{O} = \lbrace &\textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \\
   &\textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \subset M^{6}
   \end{align*}
-\end{minipage}
-\begin{minipage}{.4\textwidth} \hfill
+}{%
   \begin{tabbing}
   \= $\textbf{d}_{Ox}$ \= vecteur unitaire de rotation autour de $O_{x}$\\
   \> $\textbf{d}_{Oy}$ \> vecteur unitaire de rotation autour de $O_{y}$\\
@@ -244,9 +241,9 @@ On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $
   \> $\textbf{d}_{y}$  \> vecteur unitaire de translation le long de $O_{y}$\\
   \> $\textbf{d}_{z}$  \> vecteur unitaire de translation le long de $O_{z}$\\
   \end{tabbing}
-\end{minipage}
+}
 \caption{Base de \emph{Plücker} dans $M^{6}$}
-\label{basePlucker}
+\label{fig_basePlucker}
 \end{figure}
 
 Voici les coordonnées cartésiennes de $w$ et $v_{O}$, ainsi que leur concaténation constituant les coordonnées du vecteur spatial $\widehat{v}$ dans la base de \emph{Plücker}:\\
@@ -294,70 +291,52 @@ $$
 
 \vspace{0.3cm} % retour à la ligne
 
-Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie. Si on définit deux bases de \emph{Plücker} différentes $D_{O}$ et $D_{O'}$, centrées respectivement sur $O$ et $O'$, ainsi que les vecteurs spatiaux associés $\widehat{v}$ et $\widehat{v'}$, on obtient:
+Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie. Si on définit deux bases de \emph{Plücker} différentes $D_{O}$ et $D_{P}$, centrées respectivement sur $O$ et $P$, ainsi que les vecteurs spatiaux associés $\widehat{v}$ et $\widehat{v'}$, on obtient:
 
 \begin{align}
 \widehat{v}  &= \underline{v}_{O} \cdot D_{O} \notag \\
-\widehat{v'} &= \underline{v}_{O'} \cdot D_{O'} \notag \\
+\widehat{v'} &= \underline{v}_{P} \cdot D_{P} \notag \\
 ^{D_{O}}\widehat{v} \quad &= \quad ^{D_{O}}\widehat{v'}
+\label{equ_invariant}
 \end{align}
 
 
-Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ dans la même base de \emph{Plücker} sont identiques. Il faut noter que si les deux bases ont la même orientation, elles auront les mêmes vecteurs unitaires de translation ($\textbf{d}_{x}$, $\textbf{d}_{y}$ et $\textbf{d}_{z}$), mais les vecteurs unitaires de rotations diffèrent si $O \neq O'$ ne sont pas confondus, comme illustré dans l'exemple ci-dessous:
+Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ dans la même base de \emph{Plücker} sont identiques \eqref{equ_invariant}. Il faut noter que si les deux bases ont la même orientation, elles auront les mêmes vecteurs unitaires de translation ($\textbf{d}_{x}$, $\textbf{d}_{y}$ et $\textbf{d}_{z}$), mais les vecteurs unitaires de rotations diffèrent si $O \neq P$ ne sont pas confondus, comme illustré dans le l'exemple de cas simple ci-dessous:
 
 \begin{figure}[H]
 \begin{center}
-  \subfigure[Deux bases de \emph{Plücker} de même orientation.]{\includegraphics[width=5cm, page=4]{figs/figures}}\hspace{1cm}
-  \subfigure[Expression de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$ (vue de dessus).]{\includegraphics[width=5cm, page=5]{figs/figures}}\hspace{1cm}
-  \subfigure[cas de $\textbf{d}_{Pz}$ (vue de dessus).]{\includegraphics[width=5cm, page=6]{figs/figures}}\\
-  \caption{Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}  % legende \\
-  \label{vitessePointCoincidant} % pour citer le numéro de figure
+  \subfloat[Equivalence des vecteurs de translation.]{\includegraphics[width=5cm, page=4]{figs/figures}}\hspace{1cm}
+  \subfloat[Visualisation de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.]{\includegraphics[width=5cm, page=5]{figs/figures}}\hspace{1cm}
+  \subfloat[Expression des vecteurs de rotation dans $D_{O}$]%
+  {
+  \begin{minipage}{5cm} \hfill
+    \begin{align*}
+      \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
+      \textbf{d}_{Py} &= \textbf{d}_{Oy}+r \textbf{d}_{z} \\
+      \textbf{d}_{Pz} &= \textbf{d}_{Px}-r \textbf{d}_{y}
+    \end{align*}
+  \end{minipage}
+  } \hfill
+  \caption{Transformation des vecteurs unitaires de mouvement entre deux bases de \emph{Plücker} de même orientation}  % legende
+  \label{fig_transPlucker}    % pour citer le numéro de figure
 \end{center}
 \end{figure}
 
+Pour rapidement comprendre ces transformations, on peut visualiser un corps tournant autour de l'axe $P_{y}$ à la vitesse $w_{y}$. On définit initialement le vecteur spatial $\widehat{v'}$ en $P$ (\cad considérant l'axe de rotation du corps autour de $P_{y}$) est alors $w_{y}\textbf{d}_{Py}$. Or la vitesse d'un point lié au corps et passant par $O$ (par rapport au repère fixe $R(O,x,y,z)$) vaut $rw_{y}\textbf{d}_{z}$. Le vecteur spatial en $O$ (\cad considérant le corps en rotation autour de l'axe $O_{y}$) est alors $\widehat{v}=\textbf{d}_{Oy}+r\textbf{d}_{z}$.
 
-\begin{figure}[H]
-\begin{minipage}{.3\textwidth}
-  \begin{center}
-  \includegraphics[width=4cm, page=4]{figs/figures}
-  \end{center}
-\end{minipage}
-\begin{minipage}{.3\textwidth} \hfill
-  \begin{align*}
-  D_{O} = \{ \textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \\
-  \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \} \subset M^{6}
-  \end{align*}
-\end{minipage}
-\begin{minipage}{.4\textwidth} \hfill
-  \begin{tabbing}
-  \= $\textbf{d}_{Ox}$ \= vecteur unitaire de rotation autour de $O_{x}$\\
-  \> $\textbf{d}_{Oy}$ \> vecteur unitaire de rotation autour de $O_{y}$\\
-  \> $\textbf{d}_{Oz}$ \> vecteur unitaire de rotation autour de $O_{z}$\\
-  \> $\textbf{d}_{x}$  \> vecteur unitaire de translation le long de $O_{x}$\\
-  \> $\textbf{d}_{y}$  \> vecteur unitaire de translation le long de $O_{y}$\\
-  \> $\textbf{d}_{z}$  \> vecteur unitaire de translation le long de $O_{z}$\\
-  \end{tabbing}
-\end{minipage}
-\caption{Base de \emph{Plücker} dans $M^{6}$}
-\label{basePlucker}
-\end{figure}
-
-
-
-\threeFig[H]
-{Deux bases de \emph{Plücker} de même orientation.}
-{Expression de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
-{cas de $\textbf{d}_{Pz}$ (projection suivant $\textbf{d}_{z}$).}
-{4}{5}{6}
-{Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
-{vitessePointCoincidant}
-
-
-Nous pouvons trouver la démonstration de cette propriété d'invariance dans l'annexe \ref{appx_dem}. 
+La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
 
 
 
 \subsection{Force}
+
+Nous nous intéressons à présent aux forces appliquées au corps rigide $\emph{C}$. Soit une force quelconque appliquée au solide. On la décompose en une somme:
+\begin{itemize}
+\item d'une force linéaire passant par un point donné $P$ de $\emph{C}$
+\item d'un couple $\textbf{n}_{P}$ autour d'un axe passant par $P$
+\end{itemize}
+
+
 
 \subsection{Coordonnées de Plücker et transformation de bases}
 
@@ -491,29 +470,13 @@ TBD
 
 
 
-\appendix
-
-\chapter{Notations en Algèbre spatiale} \label{appx_notations}
-
-\chapter{Quelques démonstrations en algèbre spatiale} \label{appx_dem}
-
-\section{Invariance du vecteur spacial $\widehat{v}$}
+% Annexes
+\input{./tex/appendix.tex}
 
 
 
 % Bibliography:
-\clearpage
-\addcontentsline{toc}{chapter}{Bibliography}
-\begin{thebibliography}{9}
-
-\bibitem{Featherstone}
-  Roy Featherstone,
-  \emph{Rigid Body Dynamics Algorithms}.
-  Springer Science+Business Media, LLC,
-  2nd edition,
-  2008.
-
-\end{thebibliography}
+\input{./tex/bib.tex}
 
 
 \end{document}

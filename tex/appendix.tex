@@ -1,0 +1,102 @@
+
+\appendix
+
+\chapter{Notations en Algèbre spatiale} \label{appx_notations}
+
+\chapter{Quelques démonstrations en algèbre spatiale} \label{appx_dem}
+
+\section{Invariance du vecteur spacial $\widehat{v}$}
+
+\subsection{invariance entre deux bases de \emph{Plücker} ayant la même orientation}
+
+Nous allons démontrer l'invariance du vecteur spatial dans le cas simple illustré ci-dessous:
+
+\dispThreeFig[H]
+{4}{Deux bases de \emph{Plücker} de même orientation.}
+{5}{Expression de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
+{6}{cas de $\textbf{d}_{Pz}$ (projection suivant $\textbf{d}_{z}$).}
+{Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
+{vitessePointCoincidant}
+
+On considère les deux bases de \emph{Plücker}:
+
+\begin{align*}
+D_{O} = \lbrace &\textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
+D_{P} = \lbrace &\textbf{d}_{Px}, \textbf{d}_{Py}, \textbf{d}_{Py}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
+\end{align*}
+
+Dans la section \ref{algSpa_Vitesse}, figure \ref{fig_transPlucker}, nous avons montré la relation entre les vecteurs unitaires de mouvement des deux bases de \emph{Plücker} $D_{O}$ et $D_{P}$:
+
+\begin{align*}
+  \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
+  \textbf{d}_{Py} &= \textbf{d}_{Oy}+r \textbf{d}_{z} \\
+  \textbf{d}_{Pz} &= \textbf{d}_{Oz}-r \textbf{d}_{y}
+\end{align*}
+
+On considère à présent un corps $C$ en translation et en rotation autour d'un axe quelconque dans l'espace. Le vecteur spatial $\widehat{v}$ de ce corps en $O$, s'exprime dans la base de \emph{Plücker} $D_{O}$ comme suit:
+
+\begin{equation*}
+  \widehat{v} = w_{x}\textbf{d}_{Ox} + w_{y}\textbf{d}_{Oy} + w_{z}\textbf{d}_{Oz} + v_{Ox}\textbf{d}_{x} + v_{Oy}\textbf{d}_{y} + v_{Oz}\textbf{d}_{z}
+\end{equation*}
+
+Le vecteur spatial $\widehat{v'}$ de ce corps en $P$, s'exprime dans la base de \emph{Plücker} $D_{P}$ comme suit:
+
+\begin{equation*}
+  \widehat{v'} = w_{x}\textbf{d}_{Px} + w_{y}\textbf{d}_{Py} + w_{z}\textbf{d}_{Pz} + v_{Px}\textbf{d}_{x} + v_{Py}\textbf{d}_{y} + v_{Pz}\textbf{d}_{z}
+\end{equation*}
+
+Nous voulons l'exprimer dans la base $D_{O}$. $w_{x}$, $w_{y}$ et $w_{z}$ sont connus. Calculons $v_{Px}$, $v_{Py}$ et $v_{Pz}$:
+
+\minipages[2]{.4}{.6}{}
+{%
+\begin{alignat*}{3}
+  & &&\phantom{xxx} v_{P} &&= v_{O} + w \times \overrightarrow{OP} \\
+  \vspace{0.5cm}
+  &\iff &&\phantom{xxx} \underline{v}_{P}
+  &&=
+  \underline{v}_{O}+\underline{w}\times
+  \begin{bmatrix}
+    r\\
+    0\\
+    0
+  \end{bmatrix} \\
+  \vspace{0.5cm}
+  &\iff
+  &&\begin{bmatrix}
+    v_{Px} \\
+    v_{Py} \\
+    v_{Pz}
+  \end{bmatrix}
+  &&=
+  \begin{bmatrix}
+    v_{Ox}\\
+    v_{Oy}+w_{z}r\\
+    v_{Oz}-w_{y}r
+  \end{bmatrix}
+  \quad \texttt{or} \quad
+  \widehat{\underline{v}'}
+  =
+  \begin{bmatrix}
+    \underline{w} \\
+    \underline{v}_{P}
+  \end{bmatrix}
+\end{alignat*}
+}
+{%
+\begin{alignat*}{2}
+  &\iff
+  \widehat{v'} &&= w_{x}\textbf{d}_{Px} + w_{y}\textbf{d}_{Py} + w_{z}\textbf{d}_{Pz} \\
+  &            &&\phantom{{}={}} + v_{Px}\textbf{d}_{x} + v_{Py}\textbf{d}_{y} + v_{Pz}\textbf{d}_{z} \\
+  &            &&= w_{x}\textbf{d}_{Ox} + w_{y}(\textbf{d}_{Oy}+r\textbf{d}_{z}) + w_{z}(\textbf{d}_{Oz}-r\textbf{d}_{y}) \\
+  &            &&\phantom{{}={}} + v_{Ox}\textbf{d}_{x} + (v_{Oy}+w_{z}r)\textbf{d}_{y} + (v_{Oz}-w_{y}r)\textbf{d}_{z} \\
+  &            &&= w_{x}\textbf{d}_{Ox} + w_{y}\textbf{d}_{Oy} + w_{z}\textbf{d}_{Oz} + v_{Ox}\textbf{d}_{x} + v_{Oy}\textbf{d}_{y} + v_{Oz}\textbf{d}_{z} \\
+  &            &&= \widehat{v}
+\end{alignat*}
+}
+{}
+
+Nous avons ainsi montré l'équivalence des deux vecturs spatiaux $\widehat{v}$ et $\widehat{v'}$.
+
+\subsection{invariance entre deux bases de \emph{Plücker} quelconques}
+
+

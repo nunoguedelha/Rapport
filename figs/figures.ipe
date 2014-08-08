@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70005" creator="Ipe 7.1.4">
-<info created="D:20140805171831" modified="D:20140807102510"/>
+<info created="D:20140805171831" modified="D:20140807224826"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -668,15 +668,15 @@ $\textbf{d}_{z}$
 $P$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11259.89 -1791598.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.313" height="7.412" depth="0" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11243.89 -1791582.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.313" height="7.412" depth="0" valign="baseline">\begin{LARGE}
 $z$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11323.89 -1791698.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="23.294" height="7.412" depth="0" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11323.89 -1791706.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="23.294" height="7.412" depth="0" valign="baseline">\begin{LARGE}
 $x$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11171.89 -1791698.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.552" height="7.41" depth="3.35" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11167.89 -1791706.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.552" height="7.41" depth="3.35" valign="baseline">\begin{LARGE}
 $y$
 \end{LARGE}
 </text>
@@ -696,11 +696,11 @@ $y$
 $\textbf{d}_{Px}$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11219.89 -1791718.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="40.281" height="11.952" depth="4.91" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11219.89 -1791718.96" transformations="translations" pos="427.993 712.88" stroke="red" type="label" width="40.281" height="11.952" depth="4.91" valign="baseline">\begin{LARGE}
 $\textbf{d}_{Py}$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11231.89 -1791606.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="40.115" height="11.957" depth="2.58" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11231.89 -1791606.96" transformations="translations" pos="427.993 712.88" stroke="seagreen" type="label" width="40.115" height="11.957" depth="2.58" valign="baseline">\begin{LARGE}
 $\textbf{d}_{Pz}$
 \end{LARGE}
 </text>
@@ -716,31 +716,31 @@ $\textbf{d}_{Pz}$
 320 640 m
 384 608 l
 </path>
-<text matrix="26.6983 0 0 2514.07 -11119.89 -1791622.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="27.066" height="11.764" depth="0" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11099.89 -1791602.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="27.066" height="11.764" depth="0" valign="baseline">\begin{LARGE}
 $O$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11131.89 -1791534.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.313" height="7.412" depth="0" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11115.89 -1791518.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.313" height="7.412" depth="0" valign="baseline">\begin{LARGE}
 $z$
 \end{LARGE}
 </text>
-<text matrix="26.6983 0 0 2514.07 -11043.89 -1791634.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.552" height="7.41" depth="3.35" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11039.89 -1791642.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="22.552" height="7.41" depth="3.35" valign="baseline">\begin{LARGE}
 $y$
 \end{LARGE}
 </text>
-<path matrix="1 0 0 1 -104 -4" stroke="blue" pen="ultrafat" rarrow="normal/normal">
+<path matrix="1 0 0 1 -104 -4" stroke="seagreen" pen="ultrafat" rarrow="normal/normal">
 380 664 m
 412 648 l
 </path>
-<text matrix="26.6983 0 0 2514.07 -11159.89 -1791562.96" transformations="translations" pos="427.993 712.88" stroke="blue" type="label" width="52.564" height="11.952" depth="4.91" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11159.89 -1791562.96" transformations="translations" pos="427.993 712.88" stroke="seagreen" type="label" width="52.564" height="11.952" depth="4.91" valign="baseline">\begin{LARGE}
 $-r\textbf{d}_{y}$
 \end{LARGE}
 </text>
-<path matrix="1 0 0 1 -48 -48" stroke="blue" pen="ultrafat" arrow="normal/normal">
+<path matrix="1 0 0 1 -48 -48" stroke="red" pen="ultrafat" arrow="normal/normal">
 384 692 m
 384 724 l
 </path>
-<text matrix="26.6983 0 0 2514.07 -11087.89 -1791574.96" transformations="translations" pos="427.993 712.88" stroke="blue" type="label" width="39.008" height="11.957" depth="2.58" valign="baseline">\begin{LARGE}
+<text matrix="26.6983 0 0 2514.07 -11087.89 -1791574.96" transformations="translations" pos="427.993 712.88" stroke="red" type="label" width="39.008" height="11.957" depth="2.58" valign="baseline">\begin{LARGE}
 $r\textbf{d}_{z}$
 \end{LARGE}
 </text>
@@ -748,6 +748,30 @@ $r\textbf{d}_{z}$
 320 640 m
 256 608 l
 </path>
+<path stroke="black" arrow="normal/normal" rarrow="normal/normal">
+208 564 m
+320 620 l
+</path>
+<text matrix="26.6983 0 0 2514.07 -11167.89 -1791650.96" transformations="translations" pos="427.993 712.88" stroke="black" type="label" width="19.406" height="6.177" depth="0" valign="baseline">\begin{Large}
+$r$
+\end{Large}
+</text>
+<path matrix="0.967067 0.13431 -0.330036 0.311864 149.392 384.444" stroke="0.18 0.545 0.341" pen="fat" arrow="normal/normal">
+443.93 806.288 m
+19.4836 0 0 19.4836 444.372 786.81 455.546 802.771 a
+</path>
+<text matrix="26.6983 0 0 2514.07 -11087.89 -1791542.96" transformations="translations" pos="427.993 712.88" stroke="0.18 0.545 0.341" type="label" width="40.215" height="11.957" depth="2.58" valign="baseline">\begin{LARGE}
+$\textbf{d}_{Oz}$
+\end{LARGE}
+</text>
+<path matrix="0.0119702 -0.976276 0.350792 0.28832 78.197 812.405" stroke="red" pen="1.2" arrow="normal/normal">
+443.93 806.288 m
+19.4836 0 0 19.4836 444.372 786.81 455.546 802.771 a
+</path>
+<text matrix="26.6983 0 0 2514.07 -11107.89 -1791642.96" transformations="translations" pos="427.993 712.88" stroke="red" type="label" width="40.381" height="11.952" depth="4.91" valign="baseline">\begin{LARGE}
+$\textbf{d}_{Oy}$
+\end{LARGE}
+</text>
 </page>
 <page>
 <layer name="alpha"/>
