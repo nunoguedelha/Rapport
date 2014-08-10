@@ -96,5 +96,19 @@
 
 %=============== autres macro textuelles ===================================
 
-\newcommand{\cad}[0]{c'est à dire }
+\newcommand{\cad}[0]{\texttt{c'est à dire}}
 
+\newcommand{\valTextwidth}[0]{\thetextwidth}
+
+\newcommand{\valTextwidthUnit}[1]{\printinunitsof{#1}\prntlen{\textwidth}}
+
+%affichage des largeurs de zone texte
+%\usepackage{layouts}
+%\printinunitsof{cm}\prntlen{\textwidth}
+
+\newcommand{\newglossdef}[3]
+{\newglossaryentry{#1}%
+{%
+  name={#2},%
+  description={#3}%
+}}

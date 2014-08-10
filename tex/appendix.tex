@@ -1,7 +1,74 @@
 
-\appendix
-
 \chapter{Notations en Algèbre spatiale} \label{appx_notations}
+
+\chapter{Concepts et théorèmes en mécanique du solide à la base de l'algèbre spatiale} \label{appx_torseursToalgSpa}
+
+\section{Les torseurs} \label{appx_torseursToalgSpa_torseurs}
+
+\subsection{Définition} \label{appx_torseursToalgSpa_torseurs_def}
+Les théorèmes généraux de la dynamique des systèmes matériels mettent en jeux deux ensembles de vecteurs liés: celui des quantités de mouvement (cinématique) et celui des forces (dynamique). Ces ensembles n'interviennent que par les torseurs qui leur sont associés. On appelle torseur ($T$) l'ensemble d'un champ antisymétrique $M(A)$ et de son vecteur $S$. $M(A)$ et $S$ sont appelés respectivement \emph{moment} et \emph{vecteur} du torseur $[T]$.
+
+\vspace{0.3cm} % retour à la ligne
+
+\minipages[2]
+{.3}{.7}{}
+{%
+\begin{equation*}
+[\underline{T}]=
+\begin{bmatrix}
+  \underline{S} \\
+  \underline{M}(O)
+\end{bmatrix}
+\end{equation*}
+}
+{%
+\begin{equation}
+M(A)=M(B)+AB \times S \textnormal{ ou } M(B)=M(A)+S \times AB
+\end{equation}
+}
+{}
+
+\vspace{0.3cm} % retour à la ligne
+
+Le champ antisymétrique en question n'est pas forcément un champ de vecteurs liés. C'est le cas, par exemple, du torseur cinématique d'un solide en mouvement, constitué à partir du champ antisymétrique des vitesses du solide (vitesse d'un point du solide coïncidant avec un point fixe de l'espace). nous développons ce point dans la section \ref{appx_torseursToalgSpa_torseurs_appl}.
+
+\subsection{Propriétés} \label{appx_torseursToalgSpa_torseurs_prop}
+
+Nous regroupons dans cette section les propriétés des torseurs qui sont directement héritées et utilisées en algèbre spatiale.
+
+\begin{alignat*}{4}
+  & \textbf{\textsc{é}galité:} \qquad
+    && [T_{1}]=[T_{2}] && \implies && \textbf{S}_{1}=\textbf{S}_{2} \textnormal{ et } \textbf{M}_{1}(A)=\textbf{M}_{2}(A) \\
+  & \textbf{Somme:} \qquad
+    && [T]=[T_{1}]+[T_{2}] && \implies && \textbf{S}=\textbf{S}_{1}+\textbf{S}_{2} \textnormal{ et } \textbf{M}(A)=\textbf{M}_{1}(A)+\textbf{M}_{2}(A) \\
+  & \textbf{Multiplication par un scalaire:} \qquad
+    && [T_{1}]=\lambda [T_{2}] && \implies && \textbf{S}_{1}=\lambda \textbf{S}_{2} \textnormal{ et } \textbf{M}_{1}(A)=\lambda \textbf{M}_{2}(A) \\
+  & \textbf{Torseur nul:} \qquad
+    && \textbf{S}=0 \textnormal{ et } \textbf{M}(A)=0 \\
+  & \textbf{Produit scalaire:} \qquad
+    && si [F]={\textbf{F},\textbf{M}(A)} \textnormal{ et } [v]={\textbf{w},\textbf{V}(A)} && \implies && [F][v] = \textbf{F} \cdot \textbf{v}(A) + \textbf{M}(A) \cdot \textbf{w} \\
+  & \textbf{Invariants:} \qquad
+    && \textnormal{la projection de $\textbf{M}$ sur $\textbf{S}$} \\
+  & && \textnormal{la projection de $\textbf{M}$ sur $\textbf{AB}$} \\
+  & && \textnormal{Le produit scalaire $[F][v]$.} \\
+  & \textbf{Torseur lié à un ensemble de vecteurs liés:} \quad
+    && \textnormal{Le moment d'un ensemble de vecteurs liés ${(A_{i},\textbf{V}_{i})}$ a la forme d'un champ antisymétrique \cite{bib_champsVecteurs} (chapitre IV). On lui associe donc le torseur} \\ %reprendre ici
+  & && && \textbf{S}=\Sigma_{i}\textbf{V}_{i} (\emph{vecteur}) \textnormal{ et } \textbf{M}(O)=\Sigma_{i}\textbf{OA}_{i} \times \textbf{V}_{i} (\emph{moment}).
+\end{alignat*}
+
+
+\subsection{applications} \label{appx_torseursToalgSpa_torseurs_appl}
+
+\subparagraph{Torseur cinématique}
+
+Dans l'étude de la dynamique des systèmes matériels, le champ de vitesses d'un corps en mouvement \footnote{on se limite ici au cas des corps rigides} a la forme d'un champ antisymétrique (vecteurs non liés au corps), et son vecteur \emph{w} définit la vitesse angulaire de rotation du solide. On lui associe donc un torseur dont les éléments de réduction sont:
+\begin{description}
+\item[moment $M(O)$:] vitesse $\textbf{v}(O)$ du solide au point O
+\end{description}
+
+\subparagraph{Torseur dynamique}
+
+
 
 \chapter{Quelques démonstrations en algèbre spatiale} \label{appx_dem}
 

@@ -5,25 +5,37 @@
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
 \usepackage{lmodern}
+
 %Package pour la mise en forme (marges)
 \usepackage[a4paper]{geometry}
 \geometry{hscale=0.85,vscale=0.85,centering}
+\usepackage{layouts} %affichage des largeurs de zone texte
+
+%Packages pour les liens dynamiques
+%\usepackage{hyperref}
+
 %Packages pour les formules de Maths
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathrsfs}
+
 %Packages des images
 \usepackage{graphicx}
+
 %\usepackage{subfigure}
 \usepackage{subfig}
 \usepackage{wrapfig}
 \usepackage{caption}
+
 %\usepackage{subcaption}
 \usepackage{float}
+
 %Packages pour le glossaire
 \usepackage{glossaries}
+
 %\usepackage[xindy]{glossaries}
 \makeglossaries
+
 %Package pour colorier le code Matlab (copyright Jérémy Fauvel)
 \usepackage{listings}
 \usepackage[usenames,dvipsnames]{color}
@@ -32,10 +44,11 @@
 \definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
 \lstset{language=Matlab, frame=none, basicstyle=\small\ttfamily, keywordstyle=[1]\color{Blue}\bfseries, keywordstyle=[2]\color{Purple}, keywordstyle=[3]\color{Blue}\underbar, identifierstyle=, commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, stringstyle=\color{Purple}, showstringspaces=false, tabsize=5, morekeywords={xlim,ylim,var,alpha,factorial,poissrnd,normpdf,normcdf}, morekeywords=[2]{on, off, interp}, morekeywords=[3]{FindESS, homework_example}, morecomment=[l][\color{Blue}]{...}, numbers=left, firstnumber=1, numberstyle=\tiny\color{Red}, stepnumber=1}
 
-%Outils pour les string
+%Packages pour les string
 \usepackage{xstring}
 
-
+%Packages pour les listes
+%\usepackage{enumitem}
 
 \begin{document}
 \begin{titlepage}
@@ -55,11 +68,10 @@
 \listoffigures
 \listoftables
 
-%=============== Macros =================
+%%%%%%%%%%%%%%%%%% Macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{./tex/macros.tex}
 
-%========================================
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter*{Remerciements}
@@ -76,12 +88,9 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 \vspace{0.3cm} % retour à la ligne
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% glossaire %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newacronym{rneaLabel}{RNEA}{Recursive Newton-Euler Algorithm}
-\newacronym{crbaLabel}{CRBA}{Composite Rigid Body Algorithm}
-\newacronym{abaLabel}{ABA}{Articulated Body Algorithm}
-
+\input{./tex/glossaire.tex}
 \glsaddall
 \printglossary
 
@@ -102,7 +111,6 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 \section*{annonce du plan}
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Concepts généraux sur le contrôle dynamique des robots totalement actionnés}
 
@@ -121,7 +129,7 @@ dynamique hybride => contrôle en couple, avec articulations spéciales:
 
 	- articulation Freeflyer à la base du robot
 
-	- articulation flexible	ou contraintes de force sur la trajectoir de l'outil terminal
+	- articulation flexible	ou contraintes de force sur la trajectoire de l'outil terminal
 	
 	- usinage (force appliquée le long d'une trajectoire
 	
@@ -208,7 +216,7 @@ On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considè
 
 
 Soit $P'$ un point quelconque lié au corps solide $C$ (donc fixe dans n'importe quel repère lié au solide). La vitesse du point $P'$ dans $R$ est donnée par	$v_{P'}=v_{P}+\overrightarrow{P'P} \times w$ .\\
-On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. On notera sa vitesse $v_{O}$. Comme pour le point $P'$ évoqué précedemment, on a:
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Il est impératif de remarquer que ce vecteur vitesse n'est pas lié \gls{vecteurLie} au solide, mais plutôt au point fixe $O$ (voir l'annexe \ref{appx_torseursToalgSpa_torseurs_appl} sur les torseurs). Comme pour le point $P'$ évoqué précedemment, on a:
 $$
 v_{O} = v_{P} + w \times \overrightarrow{PO}\\
 \Leftrightarrow v_{P} = v_{O} - w \times \overrightarrow{PO} = v_{O} + w \times \overrightarrow{OP}
@@ -309,7 +317,8 @@ Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ da
   \subfloat[Visualisation de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.]{\includegraphics[width=5cm, page=5]{figs/figures}}\hspace{1cm}
   \subfloat[Expression des vecteurs de rotation dans $D_{O}$]%
   {
-  \begin{minipage}{5cm} \hfill
+  \begin{minipage}{5cm}
+    \centering
     \begin{align*}
       \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
       \textbf{d}_{Py} &= \textbf{d}_{Oy}+r \textbf{d}_{z} \\
@@ -327,16 +336,15 @@ Pour rapidement comprendre ces transformations, on peut visualiser un corps tour
 La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
 
 
-
 \subsection{Force}
 
-Nous nous intéressons à présent aux forces appliquées au corps rigide $\emph{C}$. Soit une force quelconque appliquée au solide. On la décompose en une somme:
+Nous nous intéressons à présent aux forces appliquées au corps rigide $\emph{C}$. Soit une force $\textbf{f}$ quelconque appliquée au solide. On le définit comme une somme:
 \begin{itemize}
 \item d'une force linéaire passant par un point donné $P$ de $\emph{C}$
 \item d'un couple $\textbf{n}_{P}$ autour d'un axe passant par $P$
 \end{itemize}
 
-
+Comme précédemment, nous considérons le champ de positions du corps $C$ étendu à tout l'espace. nous choisissons un point $O$ fixe dans l'espace. Nous définissons la force 
 
 \subsection{Coordonnées de Plücker et transformation de bases}
 
@@ -471,11 +479,14 @@ TBD
 
 
 % Annexes
+\appendix
 \input{./tex/appendix.tex}
 
 
 
 % Bibliography:
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
 \input{./tex/bib.tex}
 
 
