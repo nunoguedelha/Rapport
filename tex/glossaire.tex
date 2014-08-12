@@ -1,25 +1,28 @@
 
 % acronymes
 
-\newacronym{rneaLabel}{RNEA}{Recursive Newton-Euler Algorithm}
-\newacronym{crbaLabel}{CRBA}{Composite Rigid Body Algorithm}
-\newacronym{abaLabel}{ABA}{Articulated Body Algorithm}
+\newacronym{acr_rneaLabel}{RNEA}{Recursive Newton-Euler Algorithm}
+\newacronym{acr_crbaLabel}{CRBA}{Composite Rigid Body Algorithm}
+\newacronym{acr_abaLabel}{ABA}{Articulated Body Algorithm}
 
 %% définitions
 
-\newglossdef{vecteurLie}
+\newglossdef{gls_vecteurLie}
 {vecteur lié}
 {Un vecteur lié $(A,\textbf{V})$ est l'ensemble d'un point $A$ et d'un vecteur $\textbf{V}$ associé à $A$. Par exemple une force ou une vitesse appliquées à un point fixe d'un solide.}
 
-\newglossdef{champVecteurs}
+\newglossdef{gls_champVecteurs}
 {champ de vecteurs}
 {On appelle champ de vecteurs l'application qui fait correspondre, à tout point $A$ de \varepsilon, un vecteur $U$ d'un espace vectoriel $F$ de même dimension que \varepsilon. Par exemple les champs électrique $E$ et magnétique $B$ liés à une charge électrique \cite{bib_champVecteurs}.}
 
-\newglossdef{champAntiSym}
+\newglossdef{gls_champAntiSym}
 {champ antisymétrique}
 {Un champ de vecteurs est \emph{antisymétrique} s'il existe un vecteur $S$ tel que, quels que soient les points $A$ et $B$, on ait: $M(A)=M(B)+AB \times S$. Le vecteur $S$ est \emph{le vecteur} du champ antisymétrique \cite{bib_champVecteurs}.}
 
-\newglossdef{torseur}
+\newglossdef{gls_torseur}
 {torseur}
 {un outil mathématique utilisé principalement en mécanique du solide, pour décrire leurs mouvements et les actions mécaniques qu'ils subissent. Un \emph{torseur} $[T]$ est l'ensemble d'un champ antisymétrique $M(A)$ et de son vecteur $S$. $M(A)$ et $S$ sont appelés respectivement \emph{moment} et \emph{vecteur} du torseur $[T]$.}
 
+\newglossdef{gls_metaprog}{Meta-programmation}{blabla}
+
+\newglossdef{gls_bias}{Bias}{Précontrainte. En mécanique, désigne une force de précontrainte, souvent extérieure au système, comme les forces de Coriolis ou le champ de gravitation terrestre.}

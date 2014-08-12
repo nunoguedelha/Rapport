@@ -10,6 +10,7 @@
 \usepackage[a4paper]{geometry}
 \geometry{hscale=0.85,vscale=0.85,centering}
 \usepackage{layouts} %affichage des largeurs de zone texte
+\usepackage{parallel}
 
 %Packages pour les liens dynamiques
 %\usepackage{hyperref}
@@ -134,6 +135,8 @@ dynamique hybride => contrôle en couple, avec articulations spéciales:
 	- usinage (force appliquée le long d'une trajectoire
 	
 	- manipulation de pièces
+	
+	- simplification d'une simulation de système en supprimant les articulations au contrôle parfait (couple adaptatif permettant d'asservir la position/vitesse/accélération)
 
 
 \section{contrôle d'un robot humanoïde: modèle du double pendule inversé}
@@ -163,11 +166,14 @@ Application à la stabilisation du robot (Shuuji Kajita)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{algèbre spatiale de Roy Featherstone}
+\chapter{algèbre spatiale selon Roy Featherstone}
 %Formalisme compacte et plus adapté :\vspace{0.3cm}
 %- au calcul numérique et récursif\vspace{0.3cm}
 %- au parcours en profondeur d'abord d'arbres cinématiques\vspace{0.3cm}
-L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{rneaLabel}}), l'algorithme "corps rigide composite" (\emph{\gls{crbaLabel}}) et l'algorithme de corps articulés (\emph{\gls{abaLabel}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{rneaLabel} et le \gls{crbaLabel}.\\
+
+\setmyFiguresFile{figures}
+
+L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rneaLabel}}), l'algorithme "corps rigide composite" (\emph{\gls{acr_crbaLabel}}) et l'algorithme de corps articulés (\emph{\gls{acr_abaLabel}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{acr_rneaLabel} et le \gls{acr_crbaLabel}.\\
 
 
 \section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle de système}
@@ -212,11 +218,11 @@ On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considè
 {1}{Rotation autour d'un point du solide $P$}
 {2}{Rotation autour du centre du repère $O$}
 {Vitesse d'un objet en mouvement quelconque (translation et rotation simultanées). Un nouveau point de vue pour le vecteur spatial.}
-{vitessePointCoincidant}
+{fig_VitessePointCoincidant}
 
 
 Soit $P'$ un point quelconque lié au corps solide $C$ (donc fixe dans n'importe quel repère lié au solide). La vitesse du point $P'$ dans $R$ est donnée par	$v_{P'}=v_{P}+\overrightarrow{P'P} \times w$ .\\
-On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Il est impératif de remarquer que ce vecteur vitesse n'est pas lié \gls{vecteurLie} au solide, mais plutôt au point fixe $O$ (voir l'annexe \ref{appx_torseursToalgSpa_torseurs_appl} sur les torseurs). Comme pour le point $P'$ évoqué précedemment, on a:
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Il est impératif de remarquer que ce vecteur vitesse n'est pas lié au solide, mais plutôt au point fixe $O$ (voir l'annexe \ref{appx_torseursToalgSpa_torseurs_appl} sur les torseurs). Comme pour le point $P'$ évoqué précedemment, on a:
 $$
 v_{O} = v_{P} + w \times \overrightarrow{PO}\\
 \Leftrightarrow v_{P} = v_{O} - w \times \overrightarrow{PO} = v_{O} + w \times \overrightarrow{OP}
@@ -232,7 +238,7 @@ v_{P} = v_{O} + w \times \overrightarrow{OP}
 On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des tenseurs de mouvement $M^{6}$:\\
 
 \begin{figure}[H]
-\minipages[3]{.3}{.3}{.4}
+\minipages[3]{t}{.3}{.3}{.4}
 {%
   \dispFig[H]{3}{4cm}{}{}
 }{%
@@ -256,7 +262,7 @@ On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $
 
 Voici les coordonnées cartésiennes de $w$ et $v_{O}$, ainsi que leur concaténation constituant les coordonnées du vecteur spatial $\widehat{v}$ dans la base de \emph{Plücker}:\\
 
-\begin{minipage}{.55\textwidth}
+\begin{minipage}[c]{.55\textwidth}
 $$
 \underline{w}=
 \begin{bmatrix}
@@ -288,7 +294,7 @@ v_{Oz}
 \end{bmatrix}
 $$
 \end{minipage}
-\begin{minipage}{.45\textwidth}
+\begin{minipage}[c]{.45\textwidth}
 \begin{align*}
 \quad \texttt{représentant} \quad
 \widehat{v} = 
@@ -313,17 +319,18 @@ Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ da
 
 \begin{figure}[H]
 \begin{center}
-  \subfloat[Equivalence des vecteurs de translation.]{\includegraphics[width=5cm, page=4]{figs/figures}}\hspace{1cm}
-  \subfloat[Visualisation de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.]{\includegraphics[width=5cm, page=5]{figs/figures}}\hspace{1cm}
-  \subfloat[Expression des vecteurs de rotation dans $D_{O}$]%
-  {
-  \begin{minipage}{5cm}
-    \centering
-    \begin{align*}
+  \subfloat[Equivalence des vecteurs de translation.]{\includegraphics[width=.3\textwidth, page=4]{figs/figures}}\hspace{.05\textwidth}
+  \subfloat[Visualisation de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.]{\includegraphics[width=.3\textwidth, page=5]{figs/figures}}\hspace{.05\textwidth}
+  \subfloat[Expression des vecteurs de rotation dans $D_{O}$]
+  {%
+  \begin{minipage}[t]{.2\textwidth}
+  \begin{center}
+    \(\begin{aligned}
       \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
       \textbf{d}_{Py} &= \textbf{d}_{Oy}+r \textbf{d}_{z} \\
       \textbf{d}_{Pz} &= \textbf{d}_{Px}-r \textbf{d}_{y}
-    \end{align*}
+    \end{aligned}\)
+  \end{center}
   \end{minipage}
   } \hfill
   \caption{Transformation des vecteurs unitaires de mouvement entre deux bases de \emph{Plücker} de même orientation}  % legende
@@ -351,18 +358,46 @@ Comme précédemment, nous considérons le champ de positions du corps $C$ éten
 
 \section{construction de l'équation de mouvement du système complet}
 
-\section{Dynamique inverse et \gls{rneaLabel}}
+\section{Dynamique inverse et \gls{acr_rneaLabel}}
 
-\section{Dynamique durecte et \gls{crbaLabel}}
+\section{Dynamique directe et \gls{acr_crbaLabel}}
 
 
 
 \chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
 
-Ce dernier est décomposé en cinq étapes incluant le déroulement complet d'un \gls{rneaLabel}, ainsi que d'un \gls{crbaLabel} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal. Pour cette raison, il seront également décrits dans cette section. Les notations spécifiques à cette algèbre permettent une formulation très simplifiée des relations cinématiques et dynamiques.\\
+L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rneaLabel}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
+Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rneaLabel}, ainsi que d'un \gls{acr_crbaLabel} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
+Dans les sections précédentes, nous avons posé les bases de l'algèbre spatiale des torseurs cinématiques et dynamiques, ainsi que la modélisation généralisée d'un arbre cinématique (\emph{modèle de sytème} du robot). Nous allons décrire dans cette section, la définition et l'implémentation de l'\emph{algorithme hybride}, qui se repose sur deux phases:
+\begin{itemize}
+\item Les modifications apportées aux algorithmes \gls{acr_rneaLabel} et \gls{acr_crbaLabel} et leur intégration dans la construction de l'algorithme principal
+\item L'optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes (\emph{Meta-programmation})
+\end{itemize}
 
 
 \section{l'algorithme hybride en quatre étapes}
+
+Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle comme suit:
+
+\begin{equation}
+\tau = 
+\end{equation}
+
+\medskip
+
+\begin{Parallel}[c]{.5\textwidth}{.5\textwidth}
+\ParallelLText{%
+qui regroupe les éléments dynamiques décrits ci-contre: vecteurs de position / vitesse / accélération des articulations, les couples moteurs (internes) appliqués aux articulations, les forces extérieures au système éventuelles appliquées aux corps et ramenés aux articulations, la matrice inertielle dans l'espace de configuration et le vecteur de forces de précontrainte ou "bias" (force de Coriolis, la pesanteur, etc).
+}
+\ParallelRText{%
+\begin{description}
+\item[$q, \dot{q}, \ddot{q}$ :] vecteurs de position, vitesse, accélération
+\item[$\tau$ :] forces/couples moteurs (internes)
+\item[$H$ :] matrice des termes inertiels
+\item[$C$ :] forces de précontrainte extérieures
+\end{description}
+}
+\end{Parallel}
 
 \subsection{mise en place de l'équation de mouvement et séparation des variable connues/inconnues}
 
