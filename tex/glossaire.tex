@@ -4,6 +4,8 @@
 \newacronym{acr_rneaLabel}{RNEA}{Recursive Newton-Euler Algorithm}
 \newacronym{acr_crbaLabel}{CRBA}{Composite Rigid Body Algorithm}
 \newacronym{acr_abaLabel}{ABA}{Articulated Body Algorithm}
+\newacronym{acr_ros}{ROS}{Robotics Operating System \cite{bib_ros}}
+\newacronym{acr_urdf}{URDF}{Universal Robotic Description Format \cite{bib_urdf}}
 
 %% définitions
 
@@ -23,6 +25,17 @@
 {torseur}
 {un outil mathématique utilisé principalement en mécanique du solide, pour décrire leurs mouvements et les actions mécaniques qu'ils subissent. Un \emph{torseur} $[T]$ est l'ensemble d'un champ antisymétrique $M(A)$ et de son vecteur $S$. $M(A)$ et $S$ sont appelés respectivement \emph{moment} et \emph{vecteur} du torseur $[T]$.}
 
-\newglossdef{gls_metaprog}{Meta-programmation}{blabla}
+\newglossdef{gls_metaprog}{Meta-programmation}{}
 
 \newglossdef{gls_bias}{Bias}{Précontrainte. En mécanique, désigne une force de précontrainte, souvent extérieure au système, comme les forces de Coriolis ou le champ de gravitation terrestre.}
+
+\newglossdef{gls_jcalc}{jcalc}{"Joint calculation" désigne un algorithme élémentaire qui met à jour la matrice de passage entre deux corps successifs de l'arbre cinétique d'un système robotique, et ce pour tous les corps du sytème, en parcourant l'arbre en profondeur d'abord.}
+
+\newglossdef{gls_metapod}{metapod}{librairie dynamique implémentant les algorithmes de dynamique inverse et directe génériques et donc applicables à tout modèle d'arbre cinétique. Cette librairie est écrite en langage C++ templaté suivant des techniques de meta-programmation. Cela lui permet d'assurer des performances optimales en vitesse d'exécution tout en gardant son aspect générique.}
+
+\newglossdef{gls_eigen}{Eigen}{Librairie dynamique d'outils pour la manipulation optimale de matrices et pour la résolution de sytèmes linéaires de grande taille. Cette librairie est templatée, permettant la prise en compte de plusieurs type de données dans les matrices.}
+
+\newglossdef{gls_ros}{ROS}{}
+
+\newglossdef{gls_urdf}{URDF}{}
+
