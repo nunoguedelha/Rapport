@@ -20,6 +20,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathrsfs}
+\usepackage{mathtools}
 
 %Packages des images
 \usepackage{graphicx}
@@ -158,7 +159,7 @@ Application à la stabilisation du robot (Shuuji Kajita)
 
 => algorithme dynamique hybride nécessaire.
 
-\section{implémentation et contraintes}
+\section{implémentation et contraintes} \label{ch_concepts_implEtContr}
 - performances: précision, vitesse d'exécution , taille du code\vspace{0.3cm}
 - interface (vecteurs d'entrée / sortie)\vspace{0.3cm}
 - langage de programmation\vspace{0.3cm}
@@ -174,7 +175,7 @@ Application à la stabilisation du robot (Shuuji Kajita)
 
 \setmyFiguresFile{figures}
 
-L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rneaLabel}}), l'algorithme "corps rigide composite" (\emph{\gls{acr_crbaLabel}}) et l'algorithme de corps articulés (\emph{\gls{acr_abaLabel}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{acr_rneaLabel} et le \gls{acr_crbaLabel}.\\
+L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rnea}}), l'algorithme "corps rigide composite" (\emph{\gls{acr_crba}}) et l'algorithme de corps articulés (\emph{\gls{acr_aba}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{acr_rnea} et le \gls{acr_crba}.\\
 
 
 \section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle de système}
@@ -359,28 +360,28 @@ Comme précédemment, nous considérons le champ de positions du corps $C$ éten
 
 \section{construction de l'équation de mouvement du système complet}\label{ch_algSpa_equationMouvement}
 
-\section{Dynamique inverse et \gls{acr_rneaLabel}}
+\section{Dynamique inverse et \gls{acr_rnea}}
 
-\section{Dynamique directe et \gls{acr_crbaLabel}}
+\section{Dynamique directe et \gls{acr_crba}}
 
 
 
 \chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
 
-L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rneaLabel}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
-Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rneaLabel}, ainsi que d'un \gls{acr_crbaLabel} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
+L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
+Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rnea}, ainsi que d'un \gls{acr_crba} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
 Dans les sections précédentes, nous avons posé les bases de l'algèbre spatiale des torseurs cinématiques et dynamiques, ainsi que la modélisation généralisée d'un arbre cinématique (\emph{modèle de sytème} du robot). Nous allons décrire dans cette section la définition de l'\emph{algorithme hybride}, et son implémentation qui s'est déroulée sur plusieurs phases:\\
 \begin{itemize}
-  \item[•]] Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_Featherstone} chap.9). Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
+  \item[•]] Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_featherstone} chap.9). Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
   \item[•] Analyse des dépendances:
   \begin{itemize}
     \item méthodes (\gls{gls_jcalc}, méthodes de résolution des systèmes linéaires)
-    \item algorithmes (\gls{acr_rneaLabel} et \gls{acr_crbaLabel}) réutilisés par l'\emph{hybride dynamics}
+    \item algorithmes (\gls{acr_rnea} et \gls{acr_crba}) réutilisés par l'\emph{hybride dynamics}
     \item impacts sur la définition du modèle du système dynamique (modèle \gls{acr_urdf}) et sur le parseur de modèle URDF pour la prise en compte des spécificités de l'algorithme hybride
   \end{itemize}
   \item[•] Identification des algorithmes déjà implémentés, à modifier ou à implémenter entièrement dans la librairie dynamique \gls{gls_metapod}
   \item[•] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen})
-  \item[•] Implémentation d'une version modifiée des algorithmes \gls{acr_rneaLabel} et \gls{acr_crbaLabel} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}
+  \item[•] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}
   \item[•] Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
 \end{itemize}
 
@@ -389,7 +390,7 @@ Dans les sections précédentes, nous avons posé les bases de l'algèbre spatia
 
 \subsection{mise en place de l'équation de mouvement et séparation des variable connues/inconnues}
 
-Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle (\cite{bib_Featherstone} chap.6) comme suit:
+Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle (\cite{bib_featherstone} chap.6) comme suit:
 
 \begin{equation} \label{equ_equationMouvt}
 H(q)\ddot{q} + C(q,\dot{q},f^x) = \tau
@@ -426,7 +427,7 @@ Pour chaque articulation $i$, on connaît soit le couple appliqué soit l'accél
   \end{center}
 \end{wrapfigure}
 
-Soit le sous-ensemble d'articulations pour lesquelles on connaît le couple $\tau$ de forces appliquées. On désigne cet ensemble celui des articulations en mode "forward-dynamics" ou "articulations \emph{fd}" ou encore \emph{fd}. L'ensemble complémentaire regroupe les "articulations en mode "inverse-dynamics" ou "id". l'ensemble \emph{fd} est supposé connu et fournit par le modèle du système, et qu'on note $[\ddot{q}_{\emph{fd}}]$. Il s'agit là d'un impact sur la définition du modèle standard \gls{acr_urdf} et du "parseur" respectif, tous deux définis à la base dans le standard \gls{acr_ros}.\\
+Soit le sous-ensemble d'articulations pour lesquelles on connaît le couple $\tau$ de forces appliquées. On désigne cet ensemble celui des articulations en mode "forward-dynamics" ou "articulations \emph{fd}" ou encore \emph{fd}. L'ensemble complémentaire regroupe les "articulations en mode "inverse-dynamics" ou "id". l'ensemble \emph{fd} est supposé connu et fournit par le modèle du système. Nous noterons $n_{\emph{fd}}=\vert fd \vert$, $n_{\emph{id}}=\vert id \vert$ et $n_{dof}=n_{\emph{fd}}+n_{\emph{id}}=\vert \ddot{q} \vert$. Il s'agit là d'un impact sur la définition du modèle standard \gls{acr_urdf} et du "parseur" respectif, tous deux définis à la base dans le standard \gls{acr_ros}.\\
 Avant de pouvoir déplacer toutes les variables inconnues du même côté de l'égalité, nous devons les regrouper. Pour cela, nous appliquons une permutation à tous les éléments de l'équation de mouvement. Commençons par les vecteurs de variables et de coefficients. Nous définissons ainsi la matrice de permutation $\mathbf{Q}$ qui réordonne les vecteurs $q$, $\dot{q}$, $\ddot{q}$ en plaçant les variables inconnues en premier. Considérons l'exemple simple ci-contre. Comme vu dans l'établissement de l'équation de mouvement au chapitre \ref{ch_algSpa_equationMouvement}, l'ordre des variables $q_i$, $\dot{q}_i$, $\ddot{q}_i$, dans les vecteurs respectifs, est donné suivant le parcours de l'arbre cinétique en profondeur d'abord:
 
 \begin{Parallel}[v]{.4\textwidth}{.5\textwidth}
@@ -434,9 +435,9 @@ Avant de pouvoir déplacer toutes les variables inconnues du même côté de l'�
 \begin{align*}
 \ddot{q} &= 
 \begin{bmatrix}
-  \ddot{q}_1 & \ddot{q}_2 & \mathbf{\ddot{q}_4} & \ddot{q}_5 & \mathbf{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
+  \ddot{q}_1 & \ddot{q}_2 & \textcolor{blue}{\ddot{q}_4} & \ddot{q}_5 & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
 \end{bmatrix}^T \\
-\\
+\medskip
 Q &= 
 \begin{bmatrix}
   0 & 0 & 1 & 0 & 0 & 0 & 0 \\
@@ -451,33 +452,33 @@ Q &=
 }
 \ParallelRText{%
 \begin{align*}
-\implies \quad
+n_{dof}&=7, n_{\emph{fd}}=2, n_{\emph{id}}=5 \\
 Q \ddot{q} &= 
 \begin{bmatrix}
-  \mathbf{\ddot{q}_4} & \mathbf{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
+  \textcolor{blue}{\ddot{q}_4} & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
 \end{bmatrix}
 =
 \begin{bmatrix}
-  \ddot{q}_{\underline{1}} \\
-  \ddot{q}_{\underline{2}}
+  \underline{\ddot{q}_1} \\
+  \underline{\ddot{q}_2}
 \end{bmatrix} \\
 \textnormal{ et de même } \\
 Q \tau &= 
 \begin{bmatrix}
-  \tau_{\underline{1}} \\
-  \tau_{\underline{2}}
+  \underline{\tau_1} \\
+  \underline{\tau_2}
 \end{bmatrix}
 \qquad \textnormal{et} \qquad
 Q C = 
 \begin{bmatrix}
-  C_{\underline{1}} \\
-  C_{\underline{2}}
+  C_1 \\
+  C_2
 \end{bmatrix}
 \end{align*}
 }
 \end{Parallel}
 \medskip
-Avec $\ddot{q}_{\underline{1}}$ et $\tau_{\underline{1}}$ les sous-vecteurs des variables (\emph{fd}), et $\ddot{q}_{\underline{2}}$ et $\tau_{\underline{2}}$ les sous-vecteurs des variables (\emph{id}).
+Avec $\underline{\ddot{q}_1}$ et $\underline{\tau_1}$ les sous-vecteurs des variables (\emph{fd}), de dimensions $(n_{\emph{fd}} \times 1)$, et $\underline{\ddot{q}_2}$ et $\underline{\tau_2}$ les sous-vecteurs des variables (\emph{id}), de dimensions $(n_{\emph{id}} \times 1)$. Pour alléger la notation, on notera ces vecteurs tout simplement $\ddot{q}_1$, $\ddot{q}_2$, $\tau_1$ et $\tau_2$.
 
 \subsubsection{Quelques propriétés de $Q$}
 
@@ -489,11 +490,11 @@ Avec $\ddot{q}_{\underline{1}}$ et $\tau_{\underline{1}}$ les sous-vecteurs des 
 \begin{center}
 \(
 \begin{aligned}
-&Q : m \mapsto Q m \textnormal{permutation de lignes} \\
+&Q : m \mapsto Q m \qquad \textnormal{est une permutation de lignes.} \\
 &\textnormal{... on transpose les matrices en relation. Les lignes deviennent des colonnes,} \\
 &\textnormal{qui héritent donc du même ordonnancement ...} \\
 &Q': m^T \mapsto (Q m)^T = m^T Q^T \quad \implies Q'=Q^T \\
-&Q^T: m \mapsto m Q^T \textnormal{permutation de colonnes}
+&Q^T: m \mapsto m Q^T \qquad \textnormal{est donc une permutation de colonnes.} \\
 \end{aligned}
 \)
 \end{center}
@@ -506,44 +507,257 @@ Ces propriétés sont décrites plus en détail en annexe \ref{appx_algLineaire}
 
 \subsubsection{permutation de la matrice d'inertie et reformulation de l'équation de mouvement}
 
-On applique la permutation $Q$ à tous les élément de l'équation de mouvement \eqref{equ_equationMouvt}:
-
+On applique la permutation $Q$ à tous les éléments de l'équation de mouvement \eqref{equ_equationMouvt}:
 \begin{spacing}{1.5}
 \begin{align}
 &H \ddot{q} + C = \tau \notag \\
 \iff &H \ddot{q} = \tau - C \notag \\
-\iff &Q H \ddot{q} = Q \tau - Q C \label{equ_local_eqMvt} \\
+\iff &Q H \ddot{q} = Q \tau - Q C \label{equ_local_eqMvt_1} \\
 \textnormal{or} \qquad &Q^T Q = I \iff \ddot{q} = Q^T Q \ddot{q} \qquad \textnormal{donc} \notag \\
-\eqref{equ_local_eqMvt} \iff &(Q H Q^T) (Q \ddot{q}) = Q \tau - Q C \notag \\
+\eqref{equ_local_eqMvt_1} \iff &(Q H Q^T) (Q \ddot{q}) = Q \tau - Q C \notag \\
 \iff 
 &\begin{bmatrix}
-  H_{\underline{1} \, \underline{1}} & H_{\underline{1} \, \underline{2}} \\
-  H_{\underline{2} \, \underline{1}} & H_{\underline{2} \, \underline{2}}
+  H_{11} & H_{12} \\
+  H_{21} & H_{22}
 \end{bmatrix} 
 \cdot
 \begin{bmatrix}
-  \ddot{q}_{\underline{1}} \\
-  \ddot{q}_{\underline{2}}
+  \ddot{q}_{1} \\
+  \ddot{q}_{2}
 \end{bmatrix} 
 = 
 \begin{bmatrix}
-  \tau_{\underline{1}} \\
-  \tau_{\underline{2}}
+  \tau_{1} \\
+  \tau_{2}
 \end{bmatrix} 
 -
 \begin{bmatrix}
-  C_{\underline{1}} \\
-  C_{\underline{2}}
-\end{bmatrix} 
+  C_{1} \\
+  C_{2}
+\end{bmatrix} \label{equ_local_eqMvt_2}
 \end{align}
 \end{spacing}
 
+où $H_{11}$ est de dimensions ($n_{fd} \times n_{fd}$), $H_{12}$ de dimensions ($n_{fd} \times n_{id}$), $H_{21}$ est de dimensions ($n_{id} \times n_{fd}$) et $H_{22}$ de dimensions ($n_{id} \times n_{id}$).
+\subsubsection{regroupement des inconnues à gauche de l'équation}
+
+Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équation:
+
+\begin{alignat}{2}
+\eqref{equ_local_eqMvt_2} \iff
+&\begin{bmatrix}
+  H_{11} \\
+  H_{21}
+\end{bmatrix} 
+\cdot \ddot{q}_1
++
+\begin{bmatrix}
+  H_{21} \\
+  H_{22}
+\end{bmatrix}
+\cdot \ddot{q}_2
+&&=
+\begin{bmatrix}
+  \tau_1 \\
+  0
+\end{bmatrix} 
++
+\begin{bmatrix}
+  0 \\
+  I
+\end{bmatrix} 
+\cdot \tau_2
+-
+\begin{bmatrix}
+  C_{1} \\
+  C_{2}
+\end{bmatrix} \notag \\
+\\ \iff
+&\begin{bmatrix}
+  H_{11} \\
+  H_{21}
+\end{bmatrix} 
+\cdot \ddot{q}_1
++
+\begin{bmatrix}
+  0 \\
+  -I
+\end{bmatrix} 
+\cdot \tau_2
+&&=
+\begin{bmatrix}
+  \tau_1 \\
+  0
+\end{bmatrix} 
+-
+\begin{bmatrix}
+  H_{21} \\
+  H_{22}
+\end{bmatrix}
+\cdot \ddot{q}_2
+-
+\begin{bmatrix}
+  C_{1} \\
+  C_{2}
+\end{bmatrix} \notag \\
+\\ \iff
+&\begin{bmatrix}
+  H_{11} & 0 \\
+  H_{21} &  -I
+\end{bmatrix} 
+\cdot
+\begin{bmatrix}
+  \ddot{q}_1 \\
+  \tau_2
+\end{bmatrix} 
+&&=
+\begin{bmatrix}
+  \tau_1 \\
+  0
+\end{bmatrix} 
+-
+\begin{bmatrix}
+  C'_{1} \\
+  C'_{2}
+\end{bmatrix} \label{equ_local_eqMvt_3}
+\end{alignat}
+\begin{align*}
+&\textnormal{Avec} \qquad
+\begin{bmatrix}
+  C'_{1} \\
+  C'_{2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+  C_{1} \\
+  C_{2}
+\end{bmatrix}
++
+\begin{bmatrix}
+  H_{21} \ddot{q}_2 \\
+  H_{22} \ddot{q}_2
+\end{bmatrix}
+\end{align*}
+\\
+Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
+
+\subsubsection{implémentation}
+
+Voici un schéma fonctionnel de du parseur URDF.
+
+%include figure
+
+\begin{itemize}
+  \item[représentation de la classification \emph{fd} / \emph{id}] Définition d'un attribut désignant le type d'articulation \emph{fd} ou \emph{id} dans le modèle \gls{acr_urdf} source et dans le modèle du système dérivé dans l'environnement de \emph{metapod} (fichier "header" destinataire).
+  \item[interprétation du modèle URDF dans \emph{metapod}] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
+\end{itemize}
+
 
 \subsection{calcul de C'}
-description de l'algorithme RNEA modifié
+%description de l'algorithme RNEA modifié
+
+$C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une accélération nulle pour les articulations \emph{fd} ($\ddot{q}_1=0$) et l'accélération donnée $\ddot{q}_2$ pour les articulations \emph{id}. en effet on obtient:
+
+\begin{equation}
+\textnormal{Pour} \quad \ddot{q}=
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix}
+: \quad
+\eqref{equ_local_eqMvt_3} \iff
+\begin{bmatrix}
+  0 \\
+  -I
+\end{bmatrix} 
+\cdot \tau_2
+=
+\begin{bmatrix}
+  \tau_1 \\
+  0
+\end{bmatrix} 
+-
+\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+\iff
+\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \tau_1 \\
+  \tau_2
+\end{bmatrix} 
+\end{equation}
+\medskip
+Nous calculons donc les couples moteurs $\tau_1$ et $\tau_2$ grâce à la fonction de dynamique inverse (\gls{gls_rnea}) suivante:
+
+\begin{equation}
+C'=ID \left( q,\dot{q},Q^T
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix} \right)
+\end{equation}
+
+Parmi les paramètres classiques de la fonction $ID$ de dynamique inverse, nous avons remplacé $\ddot{q}$ par 
+\(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\), 
+ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes les variables regroupées dans le vecteur réordonné $\ddot{q}_1$.
+
+\subsubsection{implémentation}
+
+\begin{itemize}
+  \item[•] choix de la méthode de permutation de la librairie Eigen: construction d'un objet "permutation de matrices" à partir des classes Eigen (vecteur de permutation \emph{PermutationBase} incluant des méthodes optimisées de permutation de lignes et colonnes, forme matricielle \emph{PermutationMatrix} pour la multiplication directe $Qm$ ou $mQ^T$.)
+  \item[•] remplissage du vecteur de permutation: Choix de l'emplacement du calcul de ce vecteur dans l'une des phases successives:
+  \begin{itemize}
+    \item de génération du fichier de modèle du système dans l'architecture \emph{metapod}
+    \item phase de compilation du fichier de modèle et de \emph{metapod}
+    \item exécution de l'algorithme de dynamique hybride
+  \end{itemize}
+\end{itemize}
+\medskip
+Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'entrée $\ddot{q}$ pour obtenir la forme désirée \(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\):
+\begin{equation*}
+\ddot{q} \xmapsto[\textnormal{permutation $Q$}]{} 
+\begin{bmatrix}
+  \ddot{q}_1 \\
+  \ddot{q}_2
+\end{bmatrix}
+\xmapsto[\textnormal{mettre les $n_{\emph{fd}}$ premiers termes à 0}]{} 
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix}
+\xmapsto[\textnormal{permutation inverse $Q^T$}]{} 
+\left. \ddot{q} \right\vert_{\ddot{q}_1=0} = Q^T
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix}
+\end{equation*}
+\medskip
+Et ci-dessous le calcul de $C'_1$ et $C'_2$:
+\begin{equation*}
+\left. \ddot{q} \right\vert_{\ddot{q}_1=0} \xmapsto[ID(q,\dot{q},\left. \ddot{q} \right\vert_{\ddot{q}_1=0})]{} C'=\tau
+\xmapsto[\textnormal{permutation $Q$}]{} 
+\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+\end{equation*}
+
 
 \subsection{calcul de H11 (sous-matrice d'inertie)}
-description de la construction de H et optimisation par défaut "branch sparsity"
+%description de la construction de H et optimisation par défaut "branch sparsity"
+
+Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs méthodes (\cite{bib_featherstone} section 9.1) sont proposées pour calculer $H_{11}$. La plus simple, moins performante, consiste à calculer la matrice $H$ complète, puis d'extraire la sous-matrice $H_{11}$ à l'aide de la permutation $Q$: $H_{11}=Q H Q^T$.
+La deuxième méthode, beaucoup plus performante dans le cas où $n_{\emph{fd}}$ est signicativement plus petit que $n_{dof}$, consiste à modifier l'algorithme \gls{acr_crba}, de sorte à le réduire aux seuls calculs produisant les termes de $H_{11}$. Cette méthode sera abordée en détail dans la section sur les optimisations \ref{ch_impl_optimisation}.\\
+Nous avons choisi la première solution pour une première implémentation et validation de l'algorithme hybride, dans le but de répartir la complexité de la tâche à entreprendre.
+
+\textbf{Remarque:} le \gls{acr_crba} original inclut déjà une première optimisation qui consiste à exploiter la sparsité de la matrice $H$, \cad à ne pas calculer les termes de $H$ qui sont systématiquement nuls ($\forall q$) à cause de la topologie de l'arbre cinétique du robot. Plus précisément, cette sparsité est dûe à la nature des liaisons entre les corps du robot. Typiquement, deux corps du système $c_i$ et $c_j$, pour lequels aucun n'est parent de l'autre, sont liés dans la matrice d'inertie par le coefficient $H_{ij}$=0.
 
 \subsection{résolution du système linéaire}
 => Eigen solver, ddq1
@@ -553,7 +767,22 @@ description de la construction de H et optimisation par défaut "branch sparsity
 \subsection{reconstruction des vecteurs de sortie: ddq et Tau}
 
 
-\section{optimisations de l'algorithme et de code}
+\section{tests unitaires, validation et mesures de performances}
+
+- tests unitaires des fonctions et sous-fonctions implémentées
+
+- mesure du temps d'exécution de chacune des étapes
+
+- évolution de ces mesures en fonction du nombre d'articulations FD
+
+- temps d'exécution global
+
+- précision obtenue
+
+- utilisation de vecteurs aléatoires pour les tests unitaires
+
+
+\section{optimisations de l'algorithme et de code} \label{ch_impl_optimisation}
 
 \subsection{jcalc et le calcul des matrices de passage jXi}
 correction d'une erreur de code dans le repo officiel concernant les opérations sur matrices à axes fixes x, y ou z.
@@ -571,20 +800,6 @@ branch sparsity => SparseMatrix, SimplicialLLT ou SimplicialLDLT
 - H11 (+ H21, H12) à partir de CRBA complété.
 
 
-
-\section{tests unitaires, validation et mesures de performances}
-
-- tests unitaires des fonctions et sous-fonctions implémentées
-
-- mesure du temps d'exécution de chacune des étapes
-
-- évolution de ces mesures en fonction du nombre d'articulations FD
-
-- temps d'exécution global
-
-- précision obtenue
-
-- utilisation de vecteurs aléatoires pour les tests unitaires
 
 \section{future intégration dans le système de tâches "stack of tasks" de HRP2}
 
