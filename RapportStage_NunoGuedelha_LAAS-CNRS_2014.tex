@@ -21,9 +21,16 @@
 \usepackage{amssymb}
 \usepackage{mathrsfs}
 \usepackage{mathtools}
+\usepackage{pseudocode}
+\usepackage{fancybox}
 
 %Packages des images
 \usepackage{graphicx}
+%\usepackage{pdftricks}
+%\begin{psinputs}
+%   \usepackage{pstricks}
+%   \usepackage{multido}
+%\end{psinputs}
 
 %\usepackage{subfigure}
 \usepackage{subfig}
@@ -164,6 +171,14 @@ Application à la stabilisation du robot (Shuuji Kajita)
 - interface (vecteurs d'entrée / sortie)\vspace{0.3cm}
 - langage de programmation\vspace{0.3cm}
 - Algorithme générique pour tous les modèles URDF de robots (arbre cinématique), mais optimisé pour chaque modèle spécifique (template et meta-programing)\vspace{0.3cm}
+
+Un des désavantages des algorithmes basés sur un modèle générique est qu'ils sont susceptibles de dérouler des calculs inutiles, trop génériques dans le cas de certains modèles spécifiques plus simples, ayant par exemple un nombre réduit de degrés de liberté ou bien que des axes de rotation parallèles. Une des solutions est de générer automatiquement des algorithmes spécialisés, dont les traitements ont été réduits au minimum pour réaliser uniquement les calculs nécessaires à un modèle spécifique. La définition et l'application de tels algorithmes suivraient donc le schéma suivant:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/principeAlgoGenerique.pdf}
+\caption{Génération automatique d'algorithmes optimisés et spécialisés}
+\end{figure}
 
 
 
@@ -358,7 +373,7 @@ Comme précédemment, nous considérons le champ de positions du corps $C$ éten
 \subsection{Coordonnées de Plücker et transformation de bases}
 
 
-\section{construction de l'équation de mouvement du système complet}\label{ch_algSpa_equationMouvement}
+\section{construction du modèle du système et de l'équation de mouvement} \label{ch_algSpa_equationMouvement}
 
 \section{Dynamique inverse et \gls{acr_rnea}}
 
@@ -392,7 +407,7 @@ Dans les sections précédentes, nous avons posé les bases de l'algèbre spatia
 
 Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle (\cite{bib_featherstone} chap.6) comme suit:
 
-\begin{equation} \label{equ_equationMouvt}
+\begin{equation} \label{equ_equationMvt}
 H(q)\ddot{q} + C(q,\dot{q},f^x) = \tau
 \end{equation}
 
@@ -507,7 +522,7 @@ Ces propriétés sont décrites plus en détail en annexe \ref{appx_algLineaire}
 
 \subsubsection{permutation de la matrice d'inertie et reformulation de l'équation de mouvement}
 
-On applique la permutation $Q$ à tous les éléments de l'équation de mouvement \eqref{equ_equationMouvt}:
+On applique la permutation $Q$ à tous les éléments de l'équation de mouvement \eqref{equ_equationMvt}:
 \begin{spacing}{1.5}
 \begin{align}
 &H \ddot{q} + C = \tau \notag \\
@@ -552,7 +567,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \cdot \ddot{q}_1
 +
 \begin{bmatrix}
-  H_{21} \\
+  H_{12} \\
   H_{22}
 \end{bmatrix}
 \cdot \ddot{q}_2
@@ -572,7 +587,8 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
   C_{1} \\
   C_{2}
 \end{bmatrix} \notag \\
-\\ \iff
+\notag \\
+\iff
 &\begin{bmatrix}
   H_{11} \\
   H_{21}
@@ -591,7 +607,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \end{bmatrix} 
 -
 \begin{bmatrix}
-  H_{21} \\
+  H_{12} \\
   H_{22}
 \end{bmatrix}
 \cdot \ddot{q}_2
@@ -599,8 +615,9 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \begin{bmatrix}
   C_{1} \\
   C_{2}
-\end{bmatrix} \notag \\
-\\ \iff
+\end{bmatrix} \label{equ_equationMvt_dynHyb1} \\
+\notag \\
+\iff
 &\begin{bmatrix}
   H_{11} & 0 \\
   H_{21} &  -I
@@ -619,9 +636,9 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \begin{bmatrix}
   C'_{1} \\
   C'_{2}
-\end{bmatrix} \label{equ_local_eqMvt_3}
+\end{bmatrix} \label{equ_equationMvt_dynHyb2}
 \end{alignat}
-\begin{align*}
+\begin{align}
 &\textnormal{Avec} \qquad
 \begin{bmatrix}
   C'_{1} \\
@@ -634,10 +651,10 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \end{bmatrix}
 +
 \begin{bmatrix}
-  H_{21} \ddot{q}_2 \\
+  H_{12} \ddot{q}_2 \\
   H_{22} \ddot{q}_2
-\end{bmatrix}
-\end{align*}
+\end{bmatrix} \label{equ_cPrime}
+\end{align}
 \\
 Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
@@ -651,6 +668,17 @@ Voici un schéma fonctionnel de du parseur URDF.
   \item[représentation de la classification \emph{fd} / \emph{id}] Définition d'un attribut désignant le type d'articulation \emph{fd} ou \emph{id} dans le modèle \gls{acr_urdf} source et dans le modèle du système dérivé dans l'environnement de \emph{metapod} (fichier "header" destinataire).
   \item[interprétation du modèle URDF dans \emph{metapod}] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
 \end{itemize}
+\bigskip
+La résolution de l'équation de mouvement de la dynamique hybride se fait en quatre étapes, données dans l'algorithme de dynamique hybride (\ref{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
+\begin{enumerate}
+\item calculer $C'$ d'après l'équation \eqref{   equ_equationMvt_dynHyb2}
+\item calculer $H_{11}$
+\item résoudre $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
+\item calculer $\tau_2$ d'après $\tau = C' + ID_{\delta} \left( Q^T \begin{bmatrix} 
+                                                                      \ddot{q}_1 \\
+                                                                      0 
+                                                                    \end{bmatrix} \right)$.
+\end{enumerate}
 
 
 \subsection{calcul de C'}
@@ -665,7 +693,7 @@ $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une
   \ddot{q}_2
 \end{bmatrix}
 : \quad
-\eqref{equ_local_eqMvt_3} \iff
+\eqref{   equ_equationMvt_dynHyb2} \iff
 \begin{bmatrix}
   0 \\
   -I
@@ -693,7 +721,9 @@ $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une
 \end{bmatrix} 
 \end{equation}
 \medskip
-Nous calculons donc les couples moteurs $\tau_1$ et $\tau_2$ grâce à la fonction de dynamique inverse (\gls{gls_rnea}) suivante:
+Les composantes $C'_1$ et $C'_2$ s'obtiennent donc en calculant les couples moteurs $\tau_1$ et $\tau_2$\footnote{%
+Dans l'équation \eqref{equ_equationMvt_dynHyb1}, les matrices ou vecteurs $H_{11}$, $H_{21}$, $H_{22}$, $C_1$ et $C_2$ sont constants par rapport aux variables $\ddot{q}$ et $\tau$. Sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\), la valeur de $C'$ est directement fixée par la relation \eqref{equ_cPrime}, et reste valable pour la suite de la résolution du problème. Par contre, $\tau_1$ et $\tau_2$ sont des variables déterminées par la fonction $ID$, et valables uniquement sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\). Leurs valeurs intermédiaires servent uniquement à calculer $C'$.%
+} grâce à la fonction de dynamique inverse (\gls{gls_rnea}) suivante:
 
 \begin{equation}
 C'=ID \left( q,\dot{q},Q^T
@@ -703,9 +733,10 @@ C'=ID \left( q,\dot{q},Q^T
 \end{bmatrix} \right)
 \end{equation}
 
-Parmi les paramètres classiques de la fonction $ID$ de dynamique inverse, nous avons remplacé $\ddot{q}$ par 
+Parmi les paramètres classiques de la fonction $ID$, nous avons remplacé $\ddot{q}$ par 
 \(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\), 
-ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes les variables regroupées dans le vecteur réordonné $\ddot{q}_1$.
+ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes les variables qui étaient regroupées dans le vecteur réordonné $\ddot{q}_1$.\\
+
 
 \subsubsection{implémentation}
 
@@ -741,7 +772,7 @@ Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'
 \medskip
 Et ci-dessous le calcul de $C'_1$ et $C'_2$:
 \begin{equation*}
-\left. \ddot{q} \right\vert_{\ddot{q}_1=0} \xmapsto[ID(q,\dot{q},\left. \ddot{q} \right\vert_{\ddot{q}_1=0})]{} C'=\tau
+\left. \ddot{q} \right\vert_{\ddot{q}_1=0} \xmapsto[C'=ID(q,\dot{q},\left. \ddot{q} \right\vert_{\ddot{q}_1=0})]{} C'
 \xmapsto[\textnormal{permutation $Q$}]{} 
 \begin{bmatrix}
   C'_1 \\
@@ -753,21 +784,220 @@ Et ci-dessous le calcul de $C'_1$ et $C'_2$:
 \subsection{calcul de H11 (sous-matrice d'inertie)}
 %description de la construction de H et optimisation par défaut "branch sparsity"
 
-Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs méthodes (\cite{bib_featherstone} section 9.1) sont proposées pour calculer $H_{11}$. La plus simple, moins performante, consiste à calculer la matrice $H$ complète, puis d'extraire la sous-matrice $H_{11}$ à l'aide de la permutation $Q$: $H_{11}=Q H Q^T$.
-La deuxième méthode, beaucoup plus performante dans le cas où $n_{\emph{fd}}$ est signicativement plus petit que $n_{dof}$, consiste à modifier l'algorithme \gls{acr_crba}, de sorte à le réduire aux seuls calculs produisant les termes de $H_{11}$. Cette méthode sera abordée en détail dans la section sur les optimisations \ref{ch_impl_optimisation}.\\
-Nous avons choisi la première solution pour une première implémentation et validation de l'algorithme hybride, dans le but de répartir la complexité de la tâche à entreprendre.
+Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs méthodes sont proposées dans l'algèbre spatiale selon Featherstone (\cite{bib_featherstone} section 9.1) . La plus simple, moins performante, consiste à:
+\begin{itemize}
+\item[•] calculer la matrice $H$ complète
+\item[•] la réordonner suivant la permutation $Q$: $H'=Q H Q^T$
+\item[•] Et finalement extraire la sous-matrice $H_{11}$ = $(h_{ij})_{1 \leqslant i \leqslant n_{fd},1 \leqslant j \leqslant n_{fd}}$
+\end{itemize}
+\bigskip
+La deuxième méthode, beaucoup plus performante dans le cas où $n_{\emph{fd}}$ est signicativement plus petit que $n_{dof}$, consiste à modifier l'algorithme \gls{acr_crba}, de sorte à le réduire aux seuls calculs produisant les termes de $H_{11}$. Cette méthode sera abordée en détail dans la section sur les optimisations \ref{ch_impl_optimisation}.
 
-\textbf{Remarque:} le \gls{acr_crba} original inclut déjà une première optimisation qui consiste à exploiter la sparsité de la matrice $H$, \cad à ne pas calculer les termes de $H$ qui sont systématiquement nuls ($\forall q$) à cause de la topologie de l'arbre cinétique du robot. Plus précisément, cette sparsité est dûe à la nature des liaisons entre les corps du robot. Typiquement, deux corps du système $c_i$ et $c_j$, pour lequels aucun n'est parent de l'autre, sont liés dans la matrice d'inertie par le coefficient $H_{ij}$=0.
+Nous avons choisi la première solution pour une première implémentation, dans le but de répartir la complexité de la tâche à entreprendre, et de se focaliser sur la validation des résultats numériques ainsi que de leurs précision.\\
+\textbf{Remarque:} le \gls{acr_crba} original inclut déjà une première optimisation qui consiste à exploiter la sparsité de la matrice $H$, \cad à ne pas recalculer les termes nuls ($\forall q$) de $H$ induits par la topologie de l'arbre cinématique du robot. Plus précisément, cette sparsité est dûe à la nature des liaisons entre les corps du robot. Typiquement, pour deux corps $c_i$ et $c_j$ du système n'ayant aucun lien \emph{parent} - \emph{enfant} (voir chap. \ref{ch_algSpa_equationMouvement}), les coefficients respectifs dans la matrice d'inertie, $H_{ij}$ et $H_{ji}$, sont nuls.
+
+\subsubsection{Implementation}
+
+Cette étape ne présente aucune difficulté particulière. Nous enchaînons les opérations suivantes pour générer la matrice $H_{11}$:
+
+\begin{equation*}
+q \xmapsto[CRBA(modèle,q)]{} 
+H 
+\xmapsto[\textnormal{permutation $Q$ de matrice carrée}]{} 
+Q H Q^T = 
+\begin{bmatrix}
+  H_{11} & H_{12} \\
+  H_{21} & H_{22}
+\end{bmatrix}
+\xmapsto[\textnormal{extraire la matrice $H_{11}$ de $H$}]{} H_{11}
+\end{equation*}
+
+COMPLETER: décrire les fonctions Eigen et outils metapod utilisés
+
 
 \subsection{résolution du système linéaire}
-=> Eigen solver, ddq1
+%=> Eigen solver, ddq1
 
-\subsection{résolution de Tau2}
+La relation matricielle \eqref{   equ_equationMvt_dynHyb2} se décline en deux équations. La première nous permet de calculer ici $\ddot{q}_1$, et la deuxième nous permettra de calculer $\tau_2$ dans l'étape 5 de l'algorithme global. Calculons $\ddot{q}_1$:
 
-\subsection{reconstruction des vecteurs de sortie: ddq et Tau}
+\begin{equation}
+H_{11} \ddot{q}_1 = \tau_1 - C'_1 \\
+\iff \ddot{q}_1 = H_{11}^{-1} (\tau_1 - C'_1)
+\end{equation}
+
+Si $H_{11}$ est inversible. Justement, il est important de noter ici que \textbf{$H$ et $H_{11}$ sont définies positives et symétriques}, et toute matrice définie positive est inversible \cite{bib_matriceDefiniePositive_1} \cite{bib_matriceDefiniePositive_2}. On connaît ces propriétés à la base pour $H$. Intéressons-nous alors aux propriétés de $H_{11}$ qui en découlent:
+\begin{flushleft}
+\begin{itemize}
+\item[•] Symétrique:
+\begin{equation*}
+\textnormal{H est symétrique}  \iff   H = H^T \iff (Q H Q^T)^T = Q (Q H)^T = Q (H^T Q^T) = Q H Q^T
+\end{equation*}
+Donc la matrice permutée $Q H Q^T$ est également symétrique.\medskip
+\item[•] Définie positive: une matrice réelle M carrée de dimension $n \times n$ est définie positive si $x^T H x > 0$ pour tout vecteur colonne $x$, réel et non nul \cite{bib_matriceDefiniePositive_2}:
+\begin{align*}
+\textnormal{H définie positive} \iff  &\forall x: x^T H x > 0 \\
+\textnormal{or} \quad &x^T (Q H Q^T) x = (x^T Q) H ((Q^T x)^T)^T = (x^T Q) H (x^T Q)^T = y H y^T > 0 \quad \forall y \\
+\implies &x^T (Q H Q^T) x > 0 \\
+\textnormal{où} \quad &y = x^T Q \quad \textnormal{est un vecteur colonne réel quelconque.}
+\end{align*}
+Donc la matrice permutée $Q H Q^T$ est également définie positive.\medskip
+\item[•] Par construction, la matrice carrée $H_{11}$ hérite de ces propriétés.
+\end{itemize}
+\end{flushleft}
+\medskip
+Ainsi, le calcul de $\ddot{q}_1$ peut passer par l'inversion directe de $H_{11}$ pour des systèmes de petite taille (quelques degrés de libertés). Mais pour des systèmes de grande taille, comme par exemple un robot humanoïde à 35 degrés de liberté,  il faudra résoudre le système linéaire définit comme suit:
+
+\begin{align}
+&A x = b \notag \\
+&\textnormal{Avec:   $A = H_{11}$ ,  $b = \tau_1 - C'_1$  et  $x=\ddot{q}_1$}
+\end{align}
+
+Pour résoudre ce système d'équations linéaires, il faudra utiliser une méthode dite de décomposition de la matrice $A$. Il existe de nombreuses méthodes de décomposition en analyse numérique, souvent aussi appelées factorisations, dont le choix dépend d'une série de critères comme:
+\begin{itemize}
+\item[•] les conditions sur la nature de la matrice $A$ (carrée, inversible, définie positive, semi-définie positive, définie négative)
+\item[•] un compromis entre la performance d'exécution, la précision et la stabilité ou robustesse. La robustesse mesure la fiabilité des résultats et à quel point la précision de ces résultats peut diverger en fonction des valeurs de la matrice $A$. Certaines décompositions nécessitent un pré-conditionnement de cette matrice qui peut changer sa nature (permutation de lignes, factorisation, etc)
+\item[•] opérations supplémentaires sur la matrice $A$ en plus de la résolution du système linéaire
+\item[•] des optimisations intrinsèques à l'algorithme comme le traitement de la matrice par blocs
+\item[•] l'exploitation de la parallélisation dans les processeurs multi-cœur via l'OpenMP (\gls{gls_openMP} \cite{bib_openMpWikipedia} \cite{bib_openMPspecs}). Parallélisation implicite: l'algorithme exploite certaines routines parallélisées des processeurs (ex: produits de matrices). Parallélisation explicite: l'algorithme lui-même est parallélisé
+\item[•] la disponibilité de l'algorithme dans les librairies de calcul qui seront utilisées dans ce projet (Eigen, Lapack).
+\end{itemize}
+\medskip
+Une description un peu plus détaillée de ces algorithmes sera donnée par  la suite.
+
+\subsubsection{Implémentation}
+
+\`{A} ce stade, les coefficients $A$ et $b$ du système d'équations linéaire $Ax=b$ sont connus. Il faut à présent choisir l'\textbf{algorithme de décomposition approprié} pour le résoudre. L'ensemble des composants logiciels liés à la plateforme robotique de \textbf{HRP2} utilisent majoritairement la librairie dynamique d'outils matriciels \emph{Eigen}. Parmi ces composant on distingue:
+\begin{itemize}
+\item la librairie \emph{metapod} d'algorithmes de dynamique directe et inverse
+\item la \emph{\gls{acr_sot}}, intégrée dans \textbf{HRP2}
+\item les composants dédiés à la génération de mouvements et à la simulation (\emph{HPP})
+\end{itemize}
+
+En accord avec l'état de ces composants, et avec la stratégie de leur développement et maintenance menée par l'équipe \emph{Gepetto}, l'emploi des méthodes d'\emph{Eigen} était prioritaire dans la mesure de leur disponibilité et compatibilité avec la nature des algorithmes clients. J'ai dressé dans un premier temps la liste complète des algorithmes de décomposition fournis dans \emph{Eigen}, suivant les critères mentionnés plus haut. En voici la description résumée:
+
+\begin{description}
+\item[La décomposition $LU$:] il s"agit d'une méthode de décomposition d'une matrice comme produit d'une matrice triangulaire inférieure $L$ (comme "lower", inférieure) et une matrice triangulaire supérieure $U$ (comme "upper", supérieure): $A=LU$ \cite{bib_decompositionLUwikipedia} \cite{bib_decompositionLU_2}
+\item[La décomposition Pivot $LU$ ou $PivLU$] dans les cas où $A$ n'admet pas de décomposition $LU$, sauf si on applique une certaine permutation aux lignes de $A$. On obtient alors la forme: $A=PLU$, où $P$ est une matrice de permutation. Cette décomposition a deux versions, la partielle et la complète. La version complète a une approche générique, et entre autres, calcule le rang de la matrice $A$ et vérifie si celle-ci est inversible. La version partielle n'effectue pas cette vérification, et minimise les calculs nécessaires pour atteindre le résultat final. La version partielle est donc plus rapide, mais plus sensible aux erreurs d'arrondi \cite{bib_decompositionLU_1} section 1.3.1, pages 25-26.
+\item[•]
+\end{description}
+
+Et un tableau regroupant les caractéristiques et contraintes spécifiques à chacun de ces algorithmes \cite{bib_eigen_tutorial_catalogue}:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/decompositionCatalogueEigen1.png}
+\includegraphics[width=\textwidth]{figs/decompositionCatalogueEigen2.png}
+\end{figure}
+
+Tous ces algorithmes ont atteint une très bonne maturité d'implémentation dans la librairie \emph{Eigen}, à part FullPivHouseholderQR, qui est pourtant le plus robuste mais aussi plus lent. Parmi les plus rapides, on trouve les algorithmes de Cholesky, le LLT et le LDLT. Ils intègrent l'optimisation du traitement par blocs et bénéficient quand même d'une bonne fiabilité et précision. Leurs performances bénéficient des conditions les plus restrictives sur la matrice $A$:
+\begin{itemize}
+\item[\textbf{• LLT:}] $A$ doit être définie positive et symétrique
+\item[\textbf{• LDLT:}] $A$ doit être semi-définie positive ou négative
+\end{itemize}
+
+%VERIFIER: Comment montrer que H est définie positive
+Nous choisissons dans un premier temps l'algorithme le plus restrictif, \emph{LLT}, puisque comme vu précédemment, $H$ et $H_{11}$ sont définies positives. Cette décomposition est particulièrement efficace dans le cas de problèmes symétriques de la forme: $D^* D x = b$ \cite{bib_eigen_LLT_desc} où $D$ est une matrice diagonale. Le problème posé ici ne vérifie pas cette condition.
+%VERIFIER: vérifier avec Olivier.
+De plus, la décomposition \emph{LLT} devient instable si la matrice est semi-définie positive, or l'algorithme n'intègre pas la vérification de cette condition. Aussi, le calcul des termes de la matrice triangulaire $L$ utilise la division par des racines carrées, ce qui est une source potentielle d'instabilité. La décomposition \emph{LDLT} est plus robuste, évitant l'emploi de racines carrées, comme on peut voir dans comparaison des deux algorithmes ci-dessous:
+
+COMPLETER: comparer les complexités O()
+
+
+Il faut tester les deux algorithmes sur notre système linéaire et vérifier dans chaque cas la stabilité et précision des résultats, ainsi que la vitesse d'exécution.
+
+voici les étapes réalisées pour la résolution du système linéaire:
+
+COMPLETER: fonctions Eigen et outils metapod utilisés
+
+Il ne nous reste plus que le calcul du vecteur $\tau_2$.
+
+
+\subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau}
+
+Nous reprenons maintenant la deuxième équation du système linéaire \eqref{   equ_equationMvt_dynHyb2}:
+
+\begin{align}
+&H_{21} \ddot{q}_1 - \tau_2 = -C'_2 \notag \\
+\iff
+&\tau_2 = C'_2 + H_{21} \ddot{q}_1 
+\end{align} \label{equ_tau2}
+
+Cette équation représente la deuxième ligne de la relation matricielle proposée par Featherstone \cite{bib_featherstone} section 9.1 page 173:
+
+\begin{align}
+\eqref{equ_equationMvt_dynHyb1}
+&\iff
+\begin{bmatrix}
+\tau_1 \\ 
+\tau_2
+\end{bmatrix} 
+=
+\begin{bmatrix}
+C'_1 \\ 
+C'_2
+\end{bmatrix} 
++
+\begin{bmatrix}
+H_{11} \ddot{q}_1 \\ 
+H_{21} \ddot{q}_1
+\end{bmatrix} \notag \\
+&\iff
+Q^T
+\begin{bmatrix}
+\tau_1 \\ 
+\tau_2
+\end{bmatrix} 
+=
+Q^T
+\begin{bmatrix}
+C'_1 \\ 
+C'_2
+\end{bmatrix} 
++
+Q^T
+\begin{bmatrix}
+H_{11} \ddot{q}_1 \\ 
+H_{21} \ddot{q}_1
+\end{bmatrix} \notag \\
+&\iff \tau = C'
++
+Q^T
+\begin{bmatrix}
+H_{11} \ddot{q}_1 \\ 
+H_{21} \ddot{q}_1
+\end{bmatrix}
+\end{align}
+
+
+\subsubsection{Implémentation}
+
+Nous implémentons le calcul de $\tau_2$ donné par l'équation \eqref{equ_tau2}. $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$ connue. On calcule $\tau_2$, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
+
+\begin{pseudocode}{Reconstruction de $\ddot{q}$ et $\tau$}{ }
+   H_{21} \GETS (QHQ^T)_{n_{\emph{fd}+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{\emph{fd}}} \\
+  \tau_2 = C'_2 + H_{21} \ddot{q}_1 \\
+  \tau = Q^T
+  \begin{bmatrix}
+  \tau_1 \\ 
+  \tau_2
+  \end{bmatrix} \\
+  \ddot{q} = Q^T 
+  \begin{bmatrix}
+  \ddot{q}_1 \\ 
+  \ddot{q}_2
+  \end{bmatrix} 
+\end{pseudocode}
+
+\begin{pseudocode}{CelsiusToFahrenheit}{c}
+f \GETS {9c/5} + 32\\
+\RETURN{f}
+\end{pseudocode}
 
 
 \section{tests unitaires, validation et mesures de performances}
+
+
+
 
 - tests unitaires des fonctions et sous-fonctions implémentées
 
