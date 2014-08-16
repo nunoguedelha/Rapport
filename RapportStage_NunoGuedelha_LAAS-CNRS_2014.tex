@@ -67,7 +67,7 @@
 \author{Auteur: \bsc{Guedelha} Nuno \\ Tuteur: \bsc{Stasse} Olivier}
 \end{titlepage}
 
-
+\setcounter{secnumdepth}{3}
 
 \graphicspath{{illustrations/}}
 \maketitle
@@ -96,7 +96,6 @@ Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’
 Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.\\
 
 \vspace{0.3cm} % retour à la ligne
-
 
 %%%%%%%%%%%%%%%%%% glossaire %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -916,11 +915,13 @@ Il ne nous reste plus que le calcul du vecteur $\tau_2$.
 
 Nous reprenons maintenant la deuxième équation du système linéaire \eqref{   equ_equationMvt_dynHyb2}:
 
+\begin{spacing}{1.5}
 \begin{align}
 &H_{21} \ddot{q}_1 - \tau_2 = -C'_2 \notag \\
 \iff
-&\tau_2 = C'_2 + H_{21} \ddot{q}_1 
-\end{align} \label{equ_tau2}
+&\tau_2 = C'_2 + H_{21} \ddot{q}_1 \label{equ_tau2}
+\end{align}
+\end{spacing}
 
 Cette équation représente la deuxième ligne de la relation matricielle proposée par Featherstone \cite{bib_featherstone} section 9.1 page 173:
 
@@ -940,8 +941,7 @@ C'_2
 \begin{bmatrix}
 H_{11} \ddot{q}_1 \\ 
 H_{21} \ddot{q}_1
-\end{bmatrix} \notag \\
-&\iff
+\end{bmatrix} \iff
 Q^T
 \begin{bmatrix}
 \tau_1 \\ 
@@ -958,8 +958,7 @@ Q^T
 \begin{bmatrix}
 H_{11} \ddot{q}_1 \\ 
 H_{21} \ddot{q}_1
-\end{bmatrix} \notag \\
-&\iff \tau = C'
+\end{bmatrix} \iff \tau = C'
 +
 Q^T
 \begin{bmatrix}
@@ -971,30 +970,60 @@ H_{21} \ddot{q}_1
 
 \subsubsection{Implémentation}
 
-Nous implémentons le calcul de $\tau_2$ donné par l'équation \eqref{equ_tau2}. $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$ connue. On calcule $\tau_2$, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
+Les éléments $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$. On calcule $\tau_2$ suivant \eqref{equ_tau2}, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
 
-\begin{pseudocode}{Reconstruction de $\ddot{q}$ et $\tau$}{ }
+COMPLETER: fonctions Eigen et outils metapod utilisés
+
+
+On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme:
+
+\begin{spacing}{1.5}
+\begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
+(1)
+\BEGIN
+  \COMMENT{\textbf{Calul de $C'$, $C'_1$ et $C'_2$}} \\
+  \ddot{q}_{perm} \GETS Q \ddot{q} \\
+  (\ddot{q}_{perm})_{i \in [1,\emph{fd}]} \GETS 0 \\
+  \ddot{q}_2 \GETS (\ddot{q}_{perm})_{i \in [\emph{fd}+1,n_{dof}]} \\
+  \ddot{q} \GETS Q^T \ddot{q}_{perm} \\
+  model.torques \GETS rnea(model,q,\dot{q},\ddot{q}) \\
+  C' \GETS getTorques(model) \\
+  C'_{perm} \GETS Q C'\\
+  C'_1 \GETS (C'_{perm})_{i \in [1,\emph{fd}]} \\
+  C'_2 \GETS (C'_{perm})_{i \in [\emph{fd}+1,n_{dof}]}
+\END \\
+(2)
+\BEGIN
+  \COMMENT{\textbf{Calcul de $H_{11}$}} \\
+  model.H \GETS crba(model,q) \\
+  H_{perm} \GETS Q model.H Q^T \\
+  H_{11} \GETS (H_{perm})_{i,j \in [1,\emph{fd}]} \\
+\END \\
+(3)
+\BEGIN
+  \COMMENT{\textbf{Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$}} \\
+  \tau_{perm} \GETS Q \tau \\
+  \tau_1 \GETS (\tau_{perm})_{i \in [1,\emph{fd}]} \\
+  \tau_2 \GETS {i \in [\emph{fd}+1,n_{dof}]} \\
+  b \GETS \tau_1 - C'_1
+  A \GETS H_{11} \\
+  lltOfH11 \GETS LLT(A) \COMMENT{création du solveur LLT} \\
+  \ddot{q}_1 \GETS compute(b) \COMMENT{résolution du système} \\
+\END \\
+(4)
+\BEGIN
+  \COMMENT{\textbf{Calcul de $\tau_2$ et reconstruction des vecteurs de sortie $\ddot{q}$ et $\tau$}} \\
    H_{21} \GETS (QHQ^T)_{n_{\emph{fd}+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{\emph{fd}}} \\
-  \tau_2 = C'_2 + H_{21} \ddot{q}_1 \\
-  \tau = Q^T
-  \begin{bmatrix}
-  \tau_1 \\ 
-  \tau_2
-  \end{bmatrix} \\
-  \ddot{q} = Q^T 
-  \begin{bmatrix}
-  \ddot{q}_1 \\ 
-  \ddot{q}_2
-  \end{bmatrix} 
+  \tau_2 \GETS C'_2 + H_{21} \ddot{q}_1 \\
+  \tau \GETS Q^T \begin{bmatrix} \tau_1 & \tau_2 \end{bmatrix}^T \\
+  \ddot{q} \GETS Q^T \begin{bmatrix} \ddot{q}_1 & \ddot{q}_2 \end{bmatrix}^T
+\END
 \end{pseudocode}
-
-\begin{pseudocode}{CelsiusToFahrenheit}{c}
-f \GETS {9c/5} + 32\\
-\RETURN{f}
-\end{pseudocode}
+\end{spacing}
 
 
-\section{tests unitaires, validation et mesures de performances}
+
+\section{tests unitaires et validation}
 
 
 
@@ -1012,7 +1041,7 @@ f \GETS {9c/5} + 32\\
 - utilisation de vecteurs aléatoires pour les tests unitaires
 
 
-\section{optimisations de l'algorithme et de code} \label{ch_impl_optimisation}
+\section{mesure de performances et optimisations de l'algorithme} \label{ch_impl_optimisation}
 
 \subsection{jcalc et le calcul des matrices de passage jXi}
 correction d'une erreur de code dans le repo officiel concernant les opérations sur matrices à axes fixes x, y ou z.
