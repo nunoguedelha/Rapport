@@ -1,0 +1,3 @@
+ipetoipe -pdf  ./figures.ipe
+ipetoipe -pdf  ./torseurs.ipe
+ipetoipe -pdf  ./hybridDynamics4etapes.ipe
