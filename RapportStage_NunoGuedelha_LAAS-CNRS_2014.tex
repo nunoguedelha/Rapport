@@ -91,7 +91,7 @@ Je voudrais remercier, avant tout, tous ceux qui ont rendu cette expérience pos
 Je tiens à remercier dans un premier temps, toute l’équipe pédagogique du Master I.R.R. et les intervenants professionnels responsables de la formation, pour avoir assuré la partie académique de celle-ci. Je remercie Mme. Viviane Cadenat et M. Michel Taix pour leurs conseils sur les critères de choix d'une formation de 2ème cycle en Robotique, qui ont facilité mon orientation à l'origine de mon inscription en Master I.R.R.\\
 Je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.\\
 Je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’elles m’ont permis de vivre durant ces six mois au sein du LAAS :\\
-Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’elle m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport.\\
+Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’il m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport.\\
 Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.\\
 Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.\\
 
@@ -358,6 +358,19 @@ Pour rapidement comprendre ces transformations, on peut visualiser un corps tour
 
 La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
 
+\subsubsection*{Composition de vitesses}
+On rappelle  la définition de la matrice de sélection $S_k$ d'une articulation $k$ donnée, liant la vitesse spatiale du corps $k$ à la variable articulaire $\dot{q}_k$ (section \ref{ch_algSpa_transformations}). Soit $v_J$ la "vitesse à travers l'articulation $i$", \cad la vitesse du corps $k$ par rapport au corp parent $\lambda(k)$, et soit $\dot{q}_i$ la variable vitesse articulaire associée. On a alors:
+\begin{align}
+\textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère $R_k$ lié au corps $k$} : {^kv_J} &= {^kS_k} \: \dot{q}_k \\
+\textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère base $R_0$ lié au corps $0$} : {^0v_J} &= {^0X_k} {^kS_k} \: \dot{q}_k = {^0S_k} \: \dot{q}_k \\
+\textnormal{Vitesse du corps $k$ par rapport à $0$ dans le repère $R_0$} : {^0v_k} &= {^0v_{\lambda(k)}} + {^0v_{J}} \\
+&= {^0v_{\lambda(k)}} + {^0S_k} \: \dot{q}_k \\
+\textnormal{Par récursivité} : v_k &= \sum_{i \in \kappa(k)} {^0S_i} \: \dot{q}_i
+\end{align}
+Ceci exprime la composition des vitesses des corps supportant le corps $k$.
+
+\paragraph*{Différence entre la notion de vitesse relative à un corps et vitesse exprimée dans le repère dans le repère de \emph{Plücker} de ce même corps:} La différence entre $v_{i:j} = {^0v_{i:j}}$ (vitesse du corps $i$ par rapport à $j$ exprimée en un repère fixe quelconque $R_0$), et $^iv_j = {^iv_{0:j}}$ (vitesse du corps $j$ par rapport à un repère fixe quelconque $R_0$, exprimée dans le repère lié à $i$).
+En algèbre spatiale, lorsqu'on note une vitesse spatiale ${^iv_{0:j}}$ exprimée dans le repère lié à un corps $i$ donné, on considère une "photo" instantanée de ce repère, on le considère donc fixe. La composition (somme) des vitesses des différents corps se fait à travers la somme des vecteurs spatiaux, et non pas à travers les matrices de passage $^BX_A$ entre repères de \emph{Plücker}. C'est à dire que si un corps $j$ est immobile par rapport à un autre corps $j$, mais tous les deux sont mobiles par rapport à un repère fixe $R_0$, on a ${^iv_j } = {^iv_{0:j}} \neq 0$.
 
 \subsection{Force}
 
@@ -386,17 +399,17 @@ L'algorithme Dynamique Hybride est une généralisation de la dynamique directe 
 Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rnea}, ainsi que d'un \gls{acr_crba} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
 Dans les sections précédentes, nous avons posé les bases de l'algèbre spatiale des torseurs cinématiques et dynamiques, ainsi que la modélisation généralisée d'un arbre cinématique (\emph{modèle de sytème} du robot). Nous allons décrire dans cette section la définition de l'\emph{algorithme hybride}, et son implémentation qui s'est déroulée sur plusieurs phases:\\
 \begin{itemize}
-  \item[•]] Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_featherstone} chap.9). Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
-  \item[•] Analyse des dépendances:
+  \item[$\centerdot$] Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_featherstone} chap.9). Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
+  \item[$\centerdot$] Analyse des dépendances:
   \begin{itemize}
-    \item méthodes (\gls{gls_jcalc}, méthodes de résolution des systèmes linéaires)
-    \item algorithmes (\gls{acr_rnea} et \gls{acr_crba}) réutilisés par l'\emph{hybride dynamics}
-    \item impacts sur la définition du modèle du système dynamique (modèle \gls{acr_urdf}) et sur le parseur de modèle URDF pour la prise en compte des spécificités de l'algorithme hybride
+    \item[-] méthodes (\gls{gls_jcalc}, méthodes de résolution des systèmes linéaires)
+    \item[-] algorithmes (\gls{acr_rnea} et \gls{acr_crba}) réutilisés par l'\emph{hybride dynamics}
+    \item[-] impacts sur la définition du modèle du système dynamique (modèle \gls{acr_urdf}) et sur le parseur de modèle URDF pour la prise en compte des spécificités de l'algorithme hybride
   \end{itemize}
-  \item[•] Identification des algorithmes déjà implémentés, à modifier ou à implémenter entièrement dans la librairie dynamique \gls{gls_metapod}
-  \item[•] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen})
-  \item[•] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}
-  \item[•] Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
+  \item[$\centerdot$] Identification des algorithmes déjà implémentés, à modifier ou à implémenter entièrement dans la librairie dynamique \gls{gls_metapod}
+  \item[$\centerdot$] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen})
+  \item[$\centerdot$] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}
+  \item[$\centerdot$] Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
 \end{itemize}
 
 
@@ -1048,16 +1061,18 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme:
 \subsection{jcalc et le calcul des matrices de passage jXi}
 correction d'une erreur de code dans le repo officiel concernant les opérations sur matrices à axes fixes x, y ou z.
 
-\subsection{"branch sparsity" et "$\nu(\emph{fd})$ sparsity" dans l'algorithme CRBA (calcul de H optimisé)}
+\subsection{Permutation optimale sous Eigen des variables et coefficients de l'équation de mouvement}
 
-Nous allons à présent optimiser le calcul des éléments d'inertie du système. Au lieu de calculer la totalité des termes de $H$, pour en extraire les sous-matrices $H_{11}$ et $H_{21}$ nécessaires à l'algorithme, nous calculons uniquement les termes de ces sous-matrices. Regardons de près l'algorithme de départ à optimiser: \gls{acr_crba}.\\
-Celui-ci calcule tous les termes de $H$ est déjà optimisé par rapport à la "sparsité" de la matrice. Il parcours l'arbre cinématique du robot en profondeur d'abord, ce qu'on désigne par \gls{acr_algoDFS} \cite{bib_deepFirstSearch}. L'inertie de chaque corps est initialisée dans le sens descendant de la base (corps 0) vers les feuilles, l'inertie composite de chaque corps assimilé au sous-arbre qu'il supporte est calculée par récursivité dans le sens ascendant des feuilles vers le corps 0. Dans le cas d'un robot humanoïde, le corps 0 serait par exemple au niveau du torse, et les feuilles au niveau des mains et pieds. S'il n'existe pas de chemin toujours ascendant reliant deux corps $c_i$, $c_j$ et la base $c_0$, alors les termes associés $H_{ij}$ et $H_{ji}$ sont nuls.\\
+
+\subsection{"branch sparsity" et "$\nu(\emph{fd})$ sparsity" dans l'algorithme CRBA (calcul de optimisé $H$)}
+
+Nous allons à présent optimiser le calcul des éléments d'inertie du système. Au lieu de calculer la totalité des termes de $H$, pour en extraire les sous-matrices $H_{11}$ et $H_{21}$ nécessaires à l'algorithme, nous calculons uniquement les termes de ces sous-matrices. Regardons de près l'algorithme \gls{acr_crba} original.\\
+Celui-ci calcule tous les termes de $H$ et est déjà optimisé par rapport à la \gls{gls_sparsite} de la matrice induite par la structure ramifiée de l'arbre cinématique du robot. Le CRBA parcours cet arbre en profondeur d'abord, ce qu'on désigne par un parcours \gls{acr_algoDFS} \cite{bib_deepFirstSearch}. L'inertie de chaque corps est initialisée dans le sens descendant de la base (corps 0) vers les feuilles. L'inertie composite de chaque corps assimilé au sous-arbre qu'il supporte est calculée par récursivité dans le sens ascendant des feuilles vers le corps 0. Dans le cas d'un robot humanoïde, le corps 0 pourrait être assimilé au torse, et les feuilles aux mains et aux pieds. S'il n'existe pas de chemin toujours ascendant reliant deux corps $c_i$, $c_j$ à la base $c_0$, alors les termes associés $H_{ij}$ et $H_{ji}$ sont nuls.\\
 Avant de continuer, il est indispensable de tenir compte des concepts fondamentaux sur la représentation des arbres cinématiques \cite{ch_algSpa_equationMouvement}:
 
 \begin{itemize}
-\item noeud \emph{prédécesseur} $p(i)$ ou \emph{successeur} $s(i)$ de l'articulation $i$
-\item noeud \emph{parent} ou \emph{enfant}
-%\item tableau de parents $\emph{\lambda}$ identifiant tous les parents de chaque noeud dans l'arbre
+\item $p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$
+\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
 \item $\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$)
 \item $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$
 \item $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$
@@ -1091,44 +1106,103 @@ Considérons l'arbre cinématique suivant, à l'aide duquel on illustre les ense
 \label{fig_chdaArbreK_p_s_k_mu_nu}
 \end{figure}
 
-\begin{wrapfigure}{r}{0.5\textwidth}
-  \begin{center}
-    \incFig[2]{0.3\textwidth}
-    \caption{$k$, $\mu$ et $\nu$ dans l'arbre cinétique}
-    \label{fig_chdaArbreK1}
-  \end{center}
-\end{wrapfigure}
+%\begin{wrapfigure}{r}{0.5\textwidth}
+%  \begin{center}
+%    \incFig[2]{0.3\textwidth}
+%    \caption{$k$, $\mu$ et $\nu$ dans l'arbre cinématique.}
+%    \label{fig_chdaArbreK1}
+%  \end{center}
+%\end{wrapfigure}
 
-Voici les équations fondamentales à la base de l'algorithme \gls{acr_crba}, obtenues dans le chapitre 6.2 de \ref{ch_algSpa_equationMouvement}:
+Voici les équations fondamentales à la base de l'algorithme \gls{acr_crba}, telles que présentées par Featherstone (\cite{bib_featherstone} chap. 6.2):
 
-\begin{align}
-I_i^c &= I_i + \sum_{j \in \mu(i)}I_j^c \label{equ_inertieComposite} \\
-H_{ij} &= 
-\begin{cases}
-\mathbf{S_i^T \: I_i^c \: S_j} \quad \textnormal{if} i \in \nu(j) \\
-\mathbf{S_i^T \: I_j^c \: S_j} \quad \textnormal{if} j \in \nu(i) \\
-\mathbf{0} \quad \textnormal{otherwise}
-\end{cases} \label{equ_momentInertieComposite}
-\end{align}
+\minipages[2]{c}{.3}{.7}{}
+{%
+  \dispFig[H]{3}{0.8\textwidth}{Exemples de $H_{ij}$ dans l'arbre cinématique.}{fig_chdaArbreK2}
+}
+{%
+  \fbox{
+  \begin{minipage}[c]{0.9\textwidth}
+	\begin{align}
+	I_i^c &= \sum_{j \in \nu(i)}I_j \label{equ_inertieComposite} \\
+	H_{ij} &= \sum_{k \in \nu(i) \cap \nu(j)}\mathbf{{S_i^T} I_k S_j}
+	\implies
+	H_{ij} = 
+	\begin{cases}
+	\mathbf{S_i^T \: I_i^c \: S_j} \quad \textnormal{if} i \in \nu(j) \\
+	\mathbf{S_i^T \: I_j^c \: S_j} \quad \textnormal{if} j \in \nu(i) \\
+	\mathbf{0} \quad \textnormal{otherwise}
+	\end{cases} \label{equ_momentInertieComposite}
+	\end{align}
+  \end{minipage}
+  }
+}{}
 
-Où tous les éléments sont exprimés dans le repère base $R_0$ lié au corps $0$. $I_i^c$ est l'inertie composite du corps $i$. Elle représente l'inertie équivalente du sous-arbre supporté par le corps $i$, \cad l'ensemble des noeuds $\nu(i)$. C'est cette grandeur d'inertie composite donne le nom à l'algorithme. $I_i^c$ est initialement définie comme la somme des inerties de l'ensemble $\nu(i)$:
-
+Où tous les éléments sont exprimés dans le repère base $R_0$ lié au corps $0$. $I_i^c$ est l'inertie composite du corps $i$. Elle représente l'inertie équivalente du sous-arbre $\nu(i)$ supporté par le corps $i$. C'est cette grandeur d'inertie composite qui donne le nom à l'algorithme. Les éléments d'inertie $H_{ij}$ sont calculés à partir des inerties composites et des matrices $S$ dites de "sous-espace de mouvement" ou encore matrices de sélection des articulations. On rappelle  la définition de la matrice de sélection $S$ d'une articulation (section \ref{ch_algSpa_transformations}). Si $v_J$ est la vitesse du corps $k$ par rapport au corp parent $\lambda(k)$ (dite aussi "vitesse à travers l'articulation $k$"), exprimée dans le repère $R_k$ lié au corps $k$, et si $\dot{q}_i$ est la vitesse articulaire, on a alors:
 \begin{equation}
-I_i^c = \sum_{j \in \nu(i)}I_j \quad \implies \quad I_i^c = I_i + \sum_{j \in \mu(i)}I_j^c
+{^kv_J} = {^kS_k} \: \dot{q}_k
 \end{equation}
+On montre assez simplement que $H$ est symétrique. En effet, la relation \eqref{equ_momentInertieComposite} nous donne:
+\begin{equation}
+{H_{ij}^T} = \left( \sum_{k \in \nu(i) \cap \nu(j)}\mathbf{{S_i^T} I_k S_j} \right)^T 
+= \sum_{k \in \nu(i) \cap \nu(j)}\left( \mathbf{{S_i^T} I_k S_j} \right)^T 
+= \sum_{k \in \nu(i) \cap \nu(j)}\mathbf{{S_j^T} I_k S_i}
+\end{equation}
+Or, en échangeant les valeurs $i$ et $j$, on obtient:
+\begin{equation}
+H_{ji} = \sum_{k \in \nu(j) \cap \nu(i)}\mathbf{{S_j^T} I_k S_i} = \sum_{k \in \nu(i) \cap \nu(j)}\mathbf{{S_j^T} I_k S_i} = {H_{ij}^T}
+\end{equation}
+\textbf{La matrice d'inertie $H$ est donc symétrique}, ce qui nous permet de ne calculer que la moitié de ses éléments.
 
-Mais elle est calculée résursivement en remontant l'arbre des feuilles jusqu'au noeud $i$ compris. Chaque fois qu'un corps $j$ est visité, son inertie est rajoutée au noeud parent $\lambda(j)$, qui cumule ainsi toute l'inertie du sous-arbre qu'il supporte.\\
+Regardons de près comment le CRBA les calcule de façon optimale. Dans les relations \eqref{equ_inertieComposite} et \eqref{equ_momentInertieComposite}, tous les éléments sont exprimés dans le repère base $R_0$. Mais l'algorithme \gls{acr_crba} a été écrit de sorte à exploiter le calcul récursif. En effet, pour chaque itération de calcul sur le corps $i$, l'algorithme utilise l'expression des torseurs dans la base liée à ce même corps. \textbf{Cela permet d'éviter le calcul des matrices de passage $^0X_i$ pour chaque corps $i$ ainsi que le calcul des termes $I$ et $S$ dans le repère $R_0$}.
 
-$H_{ij}$ est le moment d'inertie mutuel entre les corps $i$ et $j$, calculé à partir des inerties composites et des matrices dites de "sous-espace de mouvement" $S$ ou encore matrices de sélection des articulations ($S_k$ exprimée dans le repère lié au corps $k$). On rappelle (\ref{ch_algSpa_transformations} et \cite{bib_featherstone} chap.4 exemple 4.4 et chap.)  que la matrice de sélection $S_k$ d'une articulation $k$ donnée lie la vitesse spatiale du corps $k$ à la variable articulaire $\dot{q}_k$ par la relation suivante:\\
-(Soit $J$ est l'articulation du corps parent $\lambda(k)$ au corps enfant $k$, $\dot{q}_i$ la variable vitesse articulaire $i$)
-\begin{align}
-\textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère $R_k$ lié au corps $k$} : {^kv_{Jk}} &= {^{\lambda(k)}v_k} = {^kS_k} \: \dot{q}_k \\
-\textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère base $R_0$ lié au corps $0$} : {^0v_{Jk}} &= {^0X_k} {^kS_k} \: \dot{q}_k = {^0S_k} \: \dot{q}_k \\
-\textnormal{Vitesse du corps $k$ par rapport à $0$ dans le repère $R_0$} : {^0v_k} &= {^0v_{\lambda(k)}} + {^0v_{Jk}} \\
-&= {^0v_{\lambda(k)}} + {^0S_k} \: \dot{q}_k \\
-\textnormal{Par récursivité} : v_k &= \sum_{i \in \kappa(k)} {^0S_i} \: \dot{q}_i
-\end{align}
-Ceci exprime la composition des vitesses des corps supportant le corps $k$. Dans les relations \eqref{equ_inertieComposite} et \eqref{equ_momentInertieComposite}, touts les éléments sont exprimés dans le repère base $R_0$. L'algorithme \gls{acr_crba} original exploite le calcul récursif. En effet, pour chaque itération de calcul sur le corps $i$, l'algorithme utilise l'expression des torseurs dans la base liée à ce même corps. \textbf{Cela permet d'éviter le calcul des matrices de passage $^0X_i$ pour chaque corps $i$ ainsi que le calcul des termes $I$ et $S$ dans le repère $R_0$}.\\
+\subsubsection{calcul récursif de $I_i^c$}
+
+$I_i^c$ est initialement définie comme la somme des inerties de l'ensemble $\nu(i)$. Mais elle est calculée résursivement en remontant l'arbre des feuilles jusqu'au noeud $i$ compris. Chaque fois qu'un corps $j$ est visité, son inertie est rajoutée au noeud parent $\lambda(j)$, qui cumule ainsi toute l'inertie du sous-arbre qu'il supporte. On exprime chacune des inerties $I_j^c$ dans le repère du corps $j$. \\
+\begin{alignat}{2}
+&\textnormal{(dans le repère $R_0$)} \quad &&{I_i^c} = \sum_{j \in \nu(i)}I_j = I_i + \sum_{j \in \mu(i)}I_j^c \label{equ_inertieCompositeRecurs} \\
+&\textnormal{(dans le repère $R_i$)} \quad \iff &&{I_i^c} = I_i + \sum_{j \in \mu(i)} {^iX_j^*} \: {I_j^c} \: {^jX_i} \label{equ_inertieCompositeLocale}
+\end{alignat}
+
+On présente ci-dessous deux versions (a) et (b) de l'algorithme de calcul récursif, tels que proposées par Featherstone (\cite{bib_featherstone} chap.6.2 p.108):
+
+\begin{Parallel}[v]{}{}
+  \ParallelLText
+  {%
+    (a) Mise à jour des noeuds enfants du noeud visité...
+    	\begin{spacing}{1.5}
+		\begin{pseudocode}{CRBA - calcul de $I_i^c$ - }{ }
+		\FOR i \GETS N_B \DOWNTO 1 \DO
+		\BEGIN
+		  I_i^c = I_i \\
+		  \FOREACH j \in \mu(i) \DO
+		    I_i^c \GETS I_i^c + {^iX_j^*} \: {I_j^c} \: {^jX_i}
+		\END
+	  \end{pseudocode}
+	  \end{spacing}
+  }
+  \ParallelRText
+  {%
+    (b) Mise à jour du noeud parent du noeud visité.
+    	\begin{spacing}{1.5}
+		\begin{pseudocode}{CRBA - calcul de $I_i^c$ - }{ }
+		\FOR i \GETS 1 \TO N_B \DO
+		  I_i^c = I_i \\
+		\FOR i \GETS N_B \DOWNTO 1 \DO
+		\BEGIN
+		  \IF \lambda(i) \neq 0
+		  \THEN
+		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}}
+		\END
+	  \end{pseudocode}
+	  \end{spacing}
+  }
+\end{Parallel}
+\bigskip
+Dans les deux algorithmes, on met à jour les inerties composites en remontant l'arbre des feuilles à la racine. Dans l'algorithme (a), chaque noeud visité est traité en une seule fois. L'inconvénient est que ce n'est pas adapté à un parcours en profondeur de l'arbre cinématique. Or la librairie \emph{metapod} a la majorité de ces outils et algorithmes dynamiques basés sur le parcours \gls{acr_algoDFS}.\\
+Justement, l'algorithme (b) est lui, plus proche du parcours en profondeur. Par un changement de variable, on se place du point de vue d'un noeud enfant. Chaque noeud enfant visité met à jour son noeud parent. La condition nécessaire pour que ces deux versions (a) et (b) soient valables est qu'un noeud $i$ donné n'est jamais visité avant un de ces noeuds parents. C'est justement le cas d'après la méthode de représentation et numérotation présentée par Featherstone (\cite{bib_featherstone} chap.4, section 4.1.2), et le cas du parcours \gls{acr_algoDFS}.
+
+\subsubsection{calcul récursif de $H_{ij}$ et algorithme global du CRBA}
 
 Ainsi, dans les relations \eqref{equ_inertieComposite} et \eqref{equ_momentInertieComposite}, nous remplaçons ${^0I_j^c}$ par ${^iX_j^*} \: {I_j^c} \: {^jX_i}$ où ${I_j^c}$ est exprimée dans son repère propre (repère lié au corps $j$). Aussi, on obtient, pour les composantes du calcul de $H_{ij}$:\\
 
@@ -1151,59 +1225,18 @@ H_{ij} &=
 \mathbf{{S_i^T} \: {I_i^c} \: {^iX_j} S_j} & \textnormal{if } i \in \nu(j) \\
 \mathbf{{S_i^T} \: {^iX_j^*} \: {I_j^c} \: S_j} & \textnormal{if } j \in \nu(i) \\
 \mathbf{0} & \textnormal{otherwise}
-\end{cases} \label{equ_momentInertieComposite}
+\end{cases} \label{equ_momentInertieCompositeLocal}
 \end{align}
 
-
-\subsubsection{calcul récursif de $I_i^c$}
-
-On présente ci-dessous l'algorithme de calcul récursif (à gauche) et son optimisation (à droite), tels que proposés par Featherstone (\cite{bib_featherstone} chap.6.2 p.108):
-
-\begin{Parallel}[v]{}{}
-  \ParallelLText
-  {%
-    Mise à jour en parcourant les noeuds enfants du noeud visité...
-    	\begin{spacing}{1.5}
-		\begin{pseudocode}{CRBA - calcul de $I_i^c$ - }{a }
-		\FOR i \GETS N_B \DOWNTO 1 \DO
-		\BEGIN
-		  I_i^c = I_i \\
-		  \FOREACH j \in \mu(i) \DO
-		    I_i^c \GETS I_i^c + {^iX_j^*} \: {I_j^c} \: {^jX_i}
-		\END
-	  \end{pseudocode}
-	  \end{spacing}
-  }
-  \ParallelRText
-  {%
-    Mise à jour du noeud parent du noeud visité.
-    	\begin{spacing}{1.5}
-		\begin{pseudocode}{CRBA - calcul de $I_i^c$ - }{b }
-		\FOR i \GETS 1 \TO N_B \DO
-		  I_i^c = I_i \\
-		\FOR i \GETS N_B \DOWNTO 1 \DO
-		\BEGIN
-		  \IF \lambda(i) \neq 0
-		  \THEN
-		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}}
-		\END
-	  \end{pseudocode}
-	  \end{spacing}
-  }
-\end{Parallel}
-\bigskip
-Dans les deux algorithmes, on met à jour les inerties composites en remontant l'arbre des feuilles à la racine. Dans l'algorithme (a), chaque noeud visité est traité en une seule fois. L'inconvénient est que ce n'est pas adapté à un parcours en profondeur de l'arbre cinématique. Or la librairie \emph{metapod} a la majorité de ces outils et algorithmes dynamiques basés sur le parcours \gls{acr_algoDFS}.\\
-Justement, l'algorithme (b) est lui, plus proche du parcours en profondeur. Par un changement de variable, on se place du point de vue d'un noeud enfant. Chaque noeud enfant visité met à jour son noeud parent. La condition nécessaire pour que ce traitement soit valable est qu'un noeud $i$ donné n'est jamais visité avant un de ces noeuds parents. C'est justement le cas d'après la méthode de représentation et numérotation présentée par Featherstone (\cite{bib_featherstone} chap.4, section 4.1.2).
-
-\subsubsection{calcul récursif de $H_{ij}$ et algorithme global du CRBA}
+%ICI
 
 Regardons comment le calcul de $H_{ij}$ est optimisé dans l'algorithme CRBA. On commence par exploiter la symétrie de la matrice $H$\footnote{On peut d'ailleurs facilement vérifier que $H$ est symétrique comme suit:
 \(
-H_{ij} = {S_i^T} \: {I_i^c} \: {^iX_j} S_j \xrightarrow[(i \rightleftharpoons j)]{} H_{ji} = {S_j^T} \: {I_j^c} \: {^jX_i} S_i et (H_{ji})^T = ({S_j^T} \: {I_j^c} \: {^jX_i} S_i)^T = {S_i^T} \: {^iX_j} \: {I_j^c} S_j = {S_i^T} \: {I_i^c} \: {^iX_j} S_j = H_{ij}, \textnormal{sachant que $I_j^c$ est symétrique également.}
+H_{ij} = {S_i^T} \: {I_i^c} \: {^iX_j} S_j \xrightarrow[(i \rightleftharpoons j)]{} H_{ji} = {S_j^T} \: {I_j^c} \: {^jX_i} S_i \textnormal{ et } (H_{ji})^T = ({S_j^T} \: {I_j^c} \: {^jX_i} S_i)^T = {S_i^T} \: {^iX_j} \: {I_j^c} \: S_j = {S_i^T} \: {I_i^c} \: {^iX_j} S_j = H_{ij}, \textnormal{sachant que $I_j^c$ est symétrique également.}
 \) }
 
 \paragraph{symétrie de $H$:}
-À la base, nous voulons calculer les termes $H_{ij}$ pour tous les arangements possibles de couples $(i,j)$ de noeuds tels que $1 \leqslant i,j \leqslant N_B$. Pour un couple donné $(i,j)$, si $i \in \nu(j)$, alors $H_{ij}$ est calculé via la première équation. Si $j \in \nu(i)$, alors $H_{ij}$ est calculé via la deuxième équation, mais $H_{ji}$ via la première (après un simple changement de variable $i \leftrightarrow j$):
+À la base, nous voulons calculer les termes $H_{ij}$ pour tous les arangements possibles de couples $(i,j)$ de noeuds tels que $1 \leqslant i,j \leqslant N_B$. Pour un couple donné $(i,j)$, si $i \in \nu(j)$, alors $H_{ij}$ est calculé via la première équation. Si $j \in \nu(i)$, alors $H_{ij}$ est calculé via la deuxième équation, mais $H_{ji}$ est alors calculé via la première (après un simple changement de variable $i \leftrightarrow j$):
 \begin{equation}
 \forall (i,j)
 \begin{cases}
@@ -1311,15 +1344,14 @@ Nous allons aborder maintenant l'optimisation proposée par Featherstone qui ré
 
 
 
-\subsection{solveur Eigen}
+\subsection{impact of branch sparsity on motion equation solving}
+\textbf{impact on Eigen solver}
 branch sparsity => SparseMatrix, SimplicialLLT ou SimplicialLDLT
 
-\subsection{Forward Dynamics (FD) sparsity}
-- parseur URDF
+\textbf{Use Featherstone's LDLT factorization}  (overview of the concept)
+impact of $\nu(fd)$ sparsity in parent array of section 6.5 (réduction de l'arbre cinématique $\Rightarrow \lambda'$)
 
-- réduction de l'arbre cinématique et RNEA sur cet arbre
-
-- H11 (+ H21, H12) à partir de CRBA complété.
+\subsection{Dynamique inverse differentielle pour le calcul optimal de $\tau_2$}
 
 
 
