@@ -78,7 +78,6 @@
 \renewcommand{\contentsname}{Sommaire}
 \tableofcontents
 \listoffigures
-\listoftables
 
 %%%%%%%%%%%%%%%%%% Macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -880,14 +879,14 @@ COMPLETER: décrire les fonctions Eigen et outils metapod utilisés
 \subsection{résolution du système linéaire}
 %=> Eigen solver, ddq1
 
-La relation matricielle \eqref{   equ_equationMvt_dynHyb2} se décline en deux équations. La première nous permet de calculer ici $\ddot{q}_1$, et la deuxième nous permettra de calculer $\tau_2$ dans l'étape 5 de l'algorithme global. Calculons $\ddot{q}_1$:
+La relation matricielle \eqref{equ_equationMvt_dynHyb2} se décline en deux équations. La première nous permet de calculer ici $\ddot{q}_1$, et la deuxième nous permettra de calculer $\tau_2$ dans l'étape 5 de l'algorithme global. Calculons $\ddot{q}_1$:
 
 \begin{equation}
 H_{11} \ddot{q}_1 = \tau_1 - C'_1 \\
 \iff \ddot{q}_1 = H_{11}^{-1} (\tau_1 - C'_1)
 \end{equation}
 
-Si $H_{11}$ est inversible. Justement, il est important de noter ici que \textbf{$H$ et $H_{11}$ sont définies positives et symétriques}, et toute matrice définie positive est inversible \cite{bib_matriceDefiniePositive_1} \cite{bib_matriceDefiniePositive_2}. On connaît ces propriétés à la base pour $H$. Intéressons-nous alors aux propriétés de $H_{11}$ qui en découlent:
+Si $H_{11}$ est inversible. Justement, il est important de noter ici que \textbf{$H$ et $H_{11}$ sont définies positives et symétriques\footnotemark[1]}, et toute matrice définie positive est inversible \cite{bib_matriceDefiniePositive_1} \cite{bib_matriceDefiniePositive_2}. On connaît ces propriétés à la base pour $H$. Intéressons-nous alors aux propriétés de $H_{11}$ qui en découlent:
 \begin{flushleft}
 \begin{itemize}
 \item[•] Symétrique:
@@ -916,12 +915,12 @@ Ainsi, le calcul de $\ddot{q}_1$ peut passer par l'inversion directe de $H_{11}$
 
 Pour résoudre ce système d'équations linéaires, il faudra utiliser une méthode dite de décomposition de la matrice $A$. Il existe de nombreuses méthodes de décomposition en analyse numérique, souvent aussi appelées factorisations, dont le choix dépend d'une série de critères comme:
 \begin{itemize}
-\item[•] les conditions sur la nature de la matrice $A$ (carrée, inversible, définie positive, semi-définie positive, définie négative)
-\item[•] un compromis entre la performance d'exécution, la précision et la stabilité ou robustesse. La robustesse mesure la fiabilité des résultats et à quel point la précision de ces résultats peut diverger en fonction des valeurs de la matrice $A$. Certaines décompositions nécessitent un pré-conditionnement de cette matrice qui peut changer sa nature (permutation de lignes, factorisation, etc)
-\item[•] opérations supplémentaires sur la matrice $A$ en plus de la résolution du système linéaire
-\item[•] des optimisations intrinsèques à l'algorithme comme le traitement de la matrice par blocs
-\item[•] l'exploitation de la parallélisation dans les processeurs multi-cœur via l'OpenMP (\gls{gls_openMP} \cite{bib_openMpWikipedia} \cite{bib_openMPspecs}). Parallélisation implicite: l'algorithme exploite certaines routines parallélisées des processeurs (ex: produits de matrices). Parallélisation explicite: l'algorithme lui-même est parallélisé
-\item[•] la disponibilité de l'algorithme dans les librairies de calcul qui seront utilisées dans ce projet (Eigen, Lapack).
+\item[$\centerdot$] les conditions sur la nature de la matrice $A$ (carrée, inversible, définie positive, semi-définie positive, définie négative)
+\item[$\centerdot$] un compromis entre la performance d'exécution, la précision et la stabilité ou robustesse. La robustesse mesure la fiabilité des résultats et à quel point la précision de ces résultats peut diverger en fonction des valeurs de la matrice $A$. Certaines décompositions nécessitent un pré-conditionnement de cette matrice qui peut changer sa nature (permutation de lignes, factorisation, etc)
+\item[$\centerdot$] opérations supplémentaires sur la matrice $A$ en plus de la résolution du système linéaire
+\item[$\centerdot$] des optimisations intrinsèques à l'algorithme comme le traitement de la matrice par blocs
+\item[$\centerdot$] l'exploitation de la parallélisation dans les processeurs multi-cœur via l'OpenMP (\gls{gls_openMP} \cite{bib_openMpWikipedia} \cite{bib_openMPspecs}). Parallélisation implicite: l'algorithme exploite certaines routines parallélisées des processeurs (ex: produits de matrices). Parallélisation explicite: l'algorithme lui-même est parallélisé
+\item[$\centerdot$] la disponibilité de l'algorithme dans les librairies de calcul qui seront utilisées dans ce projet (Eigen, Lapack).
 \end{itemize}
 \medskip
 Une description un peu plus détaillée de ces algorithmes sera donnée par  la suite.
@@ -930,17 +929,21 @@ Une description un peu plus détaillée de ces algorithmes sera donnée par  la 
 
 \`{A} ce stade, les coefficients $A$ et $b$ du système d'équations linéaire $Ax=b$ sont connus. Il faut à présent choisir l'\textbf{algorithme de décomposition approprié} pour le résoudre. L'ensemble des composants logiciels liés à la plateforme robotique de \textbf{HRP2} utilisent majoritairement la librairie dynamique d'outils matriciels \emph{Eigen}. Parmi ces composant on distingue:
 \begin{itemize}
-\item la librairie \emph{metapod} d'algorithmes de dynamique directe et inverse
 \item la \emph{\gls{acr_sot}}, intégrée dans \textbf{HRP2}
-\item les composants dédiés à la génération de mouvements et à la simulation (\emph{HPP})
+\item la librairie \emph{metapod} d'algorithmes de dynamique directe et inverse (module actuellement indépendant, intégration dans la SOT à venir)
+\item le composant dédié à la génération de mouvements (\emph{HPP})
+\item le composant dédié à l'interface et la simulation dynamique du robot
 \end{itemize}
 
 En accord avec l'état de ces composants, et avec la stratégie de leur développement et maintenance menée par l'équipe \emph{Gepetto}, l'emploi des méthodes d'\emph{Eigen} était prioritaire dans la mesure de leur disponibilité et compatibilité avec la nature des algorithmes clients. J'ai dressé dans un premier temps la liste complète des algorithmes de décomposition fournis dans \emph{Eigen}, suivant les critères mentionnés plus haut. En voici la description résumée:
 
 \begin{description}
-\item[La décomposition $LU$:] il s"agit d'une méthode de décomposition d'une matrice comme produit d'une matrice triangulaire inférieure $L$ (comme "lower", inférieure) et une matrice triangulaire supérieure $U$ (comme "upper", supérieure): $A=LU$ \cite{bib_decompositionLUwikipedia} \cite{bib_decompositionLU_2}
-\item[La décomposition Pivot $LU$ ou $PivLU$] dans les cas où $A$ n'admet pas de décomposition $LU$, sauf si on applique une certaine permutation aux lignes de $A$. On obtient alors la forme: $A=PLU$, où $P$ est une matrice de permutation. Cette décomposition a deux versions, la partielle et la complète. La version complète a une approche générique, et entre autres, calcule le rang de la matrice $A$ et vérifie si celle-ci est inversible. La version partielle n'effectue pas cette vérification, et minimise les calculs nécessaires pour atteindre le résultat final. La version partielle est donc plus rapide, mais plus sensible aux erreurs d'arrondi \cite{bib_decompositionLU_1} section 1.3.1, pages 25-26.
-\item[•]
+\item[La décomposition $LU$:] il s"agit d'une méthode de décomposition d'une matrice comme produit d'une matrice triangulaire inférieure $L$ (comme "lower", inférieure) et d'une matrice triangulaire supérieure $U$ (comme "upper", supérieure): $A=LU$ \cite{bib_decompositionLUwikipedia} \cite{bib_decompositionLU_2}
+\item[La décomposition Pivot $LU$ ou $PivLU$] dans les cas où $A$ n'admet pas de décomposition $LU$. On applique alors une permutation aux lignes de $A$, et on obtient la forme: $A=PLU$, où $P$ est une matrice de permutation. Cette décomposition a deux versions, la partielle et la complète. La version complète a une approche générique, et entre autres, calcule le rang de la matrice $A$ et vérifie si celle-ci est inversible. La version partielle n'effectue pas cette vérification, et minimise les calculs nécessaires pour atteindre le résultat final. La version partielle est donc plus rapide, mais plus sensible aux erreurs d'arrondi \cite{bib_decompositionLU_1} section 1.3.1, pages 25-26.
+\item[La décomposition $QR$:] est de la forme: $A=Q R$, où $Q$ est une matrice orthogonale et $R$ une matrice triangulaire \cite{bib_decompositionQRwikipedia}. Cette décomposition est souvent utilisée sur des systèmes linéaires non carrés, et permet, dans ces cas là, de calculer la pseudo-inverse de la matrice $A$.
+\item[La factorisation de Cholesky($:LLT$)] n'est applicable qu'aux matrice symétriques définies positives. Elle décompose $A$ suivant la forme: $A = L L^T$, où $L$ est une matrice triangulaire inférieure. La $LLT$ permet de calculer l'inverse de $A$ ainsi que son déterminant.
+\item[$LDLT$] est une variante de $LLT$. En évitant d'utiliser des résultats de calculs complexes de racine au sein de fractions, la $LDLT$ est plus robuste et potentiellement moins rapide.
+\item[Jacobienne $SVD$ (Singular Value Decomposition):] permet également le calcul de pseudo-inverse d'une matrice non carrée, le calcul du rang, etc. Elle est très utilisée dans des applications de traitement du signal. 
 \end{description}
 
 Et un tableau regroupant les caractéristiques et contraintes spécifiques à chacun de ces algorithmes \cite{bib_eigen_tutorial_catalogue}:
@@ -1502,7 +1505,7 @@ Et ci-dessous la version \emph{metapod}:\\
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
-		\begin{pseudocode}{CRBA - metapod}{model,q}
+		\begin{pseudocode}{CRBA H11 - metapod}{model,q}
 		\PROCEDURE{crbaDfsVisitor.discover}{model,i}
 		  \IF \textcolor{blue}{i \in \nu(fd)} \THEN I_i^c \GETS I_i
 		\ENDPROCEDURE \\
@@ -1549,7 +1552,7 @@ Et ci-dessous la version \emph{metapod}:\\
 \paragraph{Calcul de $i_{end}$ dans \textsc{rootNodeOfNuFD}:}
 Dans l'appel de \textsc{BackwardTraversalPrev}, On veut remonter l'arbre tant que le noeud visité $\in \nu(fd)$, donc jusqu'à la racine de l'arbre $\{\nu(fd) \cap \kappa(i)\}$ (dans l'exemple de la figure \ref{fig_optimH}, ce serait le noeud $3$ si $i=11$). Le paramètre $i_{end}$ doit être le parent de cette racine.
 
-\dispFig[H]{6}{0.8\textwidth}{Exemple d'un arbre simple: termes $H_{ij}$ non nuls tels que $i,j \in fd$ (On n'a pas représenté les transposées). $fd={3,4,11}$ et $\nu(fd)={4,8,3,6,7,10,11}$.}{fig_optimH}
+\dispFig[H]{4}{0.8\textwidth}{Exemple d'un arbre simple: termes $H_{ij}$ non nuls tels que $i,j \in fd$ (On n'a pas représenté les transposées). $fd={3,4,11}$ et $\nu(fd)={4,8,3,6,7,10,11}$.}{fig_optimH11}
 
 \paragraph{Optimisation de \textsc{rootNodeOfNuFD}:}
 La méta-programmation m'a permis d'optimiser cette procédure à l'extrême en l'implémentant sous forme de \emph{Metafonction numérique} (section \ref{ch_concepts_implEtContr}).
@@ -1557,24 +1560,43 @@ La méta-programmation m'a permis d'optimiser cette procédure à l'extrême en 
 
 \subsubsection{Suppléments pour le calcul de H21}
 
-\begin{wrapfigure}{r}{0.2\textwidth}
-%  \raggedright{%
-  \begin{minipage}[t]{0.2\textwidth}
+\setlength{\intextsep}{2pt}
+\begin{wrapfigure}[5]{r}{0.35\textwidth}
+  \begin{minipage}[t]{0.35\textwidth}
+  \begin{spacing}{1.5}
   \begin{equation*}
-  H=
   \begin{bmatrix}
-    H_{11} & \ldots \\
-    H_{21} & \ldots
+    \left[H_{11}\right]_{fd \times fd} & \left[H_{12}\right]_{fd \times id} \\
+    \mathbf{\left[H_{21}\right]_{id \times fd}} & \ldots \\
   \end{bmatrix}
   \end{equation*}
+  \end{spacing}
   \end{minipage}
-%  }
 \end{wrapfigure}
 
 Dans sa présentation de l'algorithme Hybride, Featherstone propose de réaliser l'étape 4 (calcul de $\tau_2$) soit à l'aide de la dynamique inverse différentielle (détaillée plus loin), soit à l'aide de l'équation \eqref{equ_tau}. Nous avons choisi, dans un premier temps, la deuxième solution, qui ne nécessite une quelconque compréhension de la dynamique inverse. Par contre, \eqref{equ_tau} requiert la connaissance de $H_{21}$.
 
-On modifie ainsi le dernier algorithme CRBA obtenu, pour étendre le calcul des éléments $H_{ij}$ à tous les éléments inclus dans $H_{11}$ et $H_{21}$, \cad calculer $H_{ij}$ tel que $\forall i,j: i \in fd \cup id, j \in fd$. En appliquant le parcours suivi dans l'algorithme CRBA original \ref{algo_crbaFeatherstone}, la première hypothèse serait de parcourir tous les noeuds $i$, et ne calculer $H_{ij}$ que pour $j \in fd$. Mais on aurait alors un élément $H_{ij}$ pour lequel $i \in id$, $j \in fd$ et $j \in \nu(i)$. Cette dernière condition implique que $H_{ij}$ ne peut être calculé qu'à partir de $H_{ji}^T$, avec $j \in fd$ et $i \in id$, cet élément n'est jamais calculé, d'après l'hypothèse initiale. Pour éviter ce problème, il faut parcourir tous les couples $(i,j)$ et calculer $H_{ij}$ et sa transposée si et seulement si $i \in fd$ ou $j \in fd$. Nous déclinons l'algorithme suivant:
+On modifie ainsi le dernier algorithme CRBA obtenu, pour étendre le calcul des éléments $H_{ij}$ à tous les éléments inclus dans $H_{11}$ et $H_{21}$, \cad calculer $H_{ij}$ tel que $\forall i,j: i \in fd \cup id, j \in fd$. En appliquant le parcours suivi dans l'algorithme CRBA original \ref{algo_crbaFeatherstone}, la première hypothèse serait de calculer pour chaque noeud $i$, tous les $H_{ij}$ pour $j \in fd$ (parcours en arrière). Mais on aurait alors au moins un élément $H_{ij}$ pour lequel $i \in id$, $j \in fd$ et $j \in \nu(i)$. Cette dernière condition implique que $H_{ij}$ ne pourrait être calculé qu'à partir de $H_{ji}^T$, avec $j \in fd$ et $i \in id$. Or cette condition ne respecte pas l'hypothèse initiale. L'élément $H_{ji}^T$ ne serait jamais calculé. Pour éviter ce problème, il faut à priori explorer tous les noeuds $i$ dans le parcours descendant, tous les noeuds $j$ dans les parcours arrière (ascendants), et pour chaque paire $(i,j)$ calculer $H_{ij}$ et sa transposée si et seulement si $i \in fd$ \textbf{ou} $j \in fd$.
+On décline les alculs nécessaires faits sur les termes en dépendance de $H_{ij}$: \\
+\begin{itemize}
+\item[$\centerdot$] $^jF_i$ doit être calculé chaque fois qu'on calcule $H_{ij}$
+\item[$\centerdot$] $I_i^c$ doit être calculé chaque fois qu'on calcule $H_{ii}$
+\item[$\centerdot$] $H_{ii}$ et $^iF_i$ ne se calculent naturellement que si $i \in fd$
+\item[$\centerdot$] Dans le parcours en profondeur, si le noeud visité $i \in fd$ alors on peut calculer les termes $H_{ij} \forall j \in \kappa(i)$. Le parcours arrière se fait donc jusqu'à la racine. Si le noeud visité $i \notin fd$ alors on ne calcule que les $H_{ij}$ tels que $j \in fd$.
+\end{itemize}
 
+Comme pour chaque terme $H_{ij}$ calculé, on calcule sa transposée, on obtient les trois matrices $H_{11}$, $H_{21}$ et $H_{12}$. On illustre dans la figure \ref{fig_optimH11H12H21}  un exemple pour chacune des méthodes de résolution évoquées plus haut. \\
+
+\dispFig[H]{7}{\textwidth}{Deux méthodes de traitement sur un arbre simple: à gauche, le parcours en arrière calcule toujours les termes $H_{ij}$ tels que $j \in fd$; à droite, le calcul de ces termes dépend de la nature du noeud $i$}{fig_optimH11H12H21}
+
+
+\begin{flushleft}
+ On applique les changements à l'algorithme CRBA précédent: \\
+ \end{flushleft}
+
+\begin{minipage}[t]{\textwidth}
+\setlength{\columnseprule}{0.5pt}
+\begin{multicols}{2}\raggedcolumns\small
     	\begin{spacing}{1.5}
 		\begin{pseudocode}{CRBA - Featherstone}{model,q} \label{algo_crbaFeatherstoneH11H21}
     H \GETS 0 \\
@@ -1585,35 +1607,105 @@ On modifie ainsi le dernier algorithme CRBA obtenu, pour étendre le calcul des 
 		  \IF \lambda(i) \in \nu(fd)
 		  \THEN
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
-		  \IF i \in fd \THEN
+		  \IF \textcolor{blue}{i \in \nu(fd)} \THEN
 		  \BEGIN
 			  F \GETS {I_i^c} \: S_i \\
-			  H_{ii} \GETS {S_i^T} F \\
+			  \IF \textcolor{blue}{i \in fd} \THEN H_{ii} \GETS {S_i^T} F \\
 			  j \GETS i \\
-			  \WHILE \lambda(j) \in \nu(fd) \DO
+			  \IF \textcolor{blue}{i \in fd}
+			  \THEN arbre \GETS \{fd \cup id\}
+			  \ELSE arbre \GETS \nu(fd) \\
+			  \ldots
+			\END \\
+			\ldots
+		\END
+	  \end{pseudocode}
+	  
+	  \begin{pseudocode}[display]{}{}
+	  \DO
+	  \BEGIN
+	  \ldots \\
+	    \THEN
+		  \BEGIN
+		    \ldots \\
+			  \WHILE \lambda(j) \in arbre \DO
 			  \BEGIN
 			    F \GETS {^{\lambda(j)}X_j^*} F \\
 			    j \GETS \lambda(j) \\
-			    \IF j \in fd \THEN
+			    \IF \textcolor{blue}{(i \in fd) \OR (j \in fd)} \THEN
 			    \BEGIN
 				    H_{ij} \GETS F^T S_j \\
 				    H_{ji} \GETS H_{ij}^T
 			    \END
 			  \END
 			\END
-		\END
+	  \END
 	  \end{pseudocode}
 	  \end{spacing}
+\end{multicols}
+\end{minipage} \\
+
+L'algorithme adapté à \emph{metapod} donne: \\
+
+\shadowbox{\small%
+\begin{minipage}[t]{\textwidth}
+\setlength{\columnseprule}{0.5pt}
+\begin{multicols}{2}\raggedcolumns
+    	\begin{spacing}{1.5}
+		\begin{pseudocode}{CRBA H11 H21 - metapod}{model,q}
+		\PROCEDURE{crbaDfsVisitor.discover}{model,i}
+		  \IF \textcolor{blue}{i \in \nu(fd)} \THEN I_i^c \GETS I_i
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaDfsVisitor.finish}{model,i}
+		  \IF \textcolor{blue}{\lambda(i) \in \nu(fd)}
+		  \THEN
+		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
+		  \IF \textcolor{blue}{i \in \nu(fd)} \THEN
+			\BEGIN
+				  F_i \GETS {I_i^c} \: S_i \\
+				  \IF \textcolor{blue}{i \in fd}
+				  \THEN
+				  \BEGIN
+				      H_{ii} \GETS {S_i^T} F_i \\
+				      \textcolor{blue}{i_{end}} \GETS 0
+				  \END
+				  \ELSE
+				      \textcolor{blue}{i_{end} \GETS \CALL{rootNodeOfNuFD}{model,i}} \\
+				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,\textcolor{blue}{i_{end}}}
+		  \END
+		\ENDPROCEDURE \\
+		\PROCEDURE{rootNodeOfNuFD}{model,i_{start}}
+		    \RETURN{\textnormal{racine de l'arbre  } \{\nu(fd) \cap \kappa(i)\}}
+		\ENDPROCEDURE
+	  \end{pseudocode}
+    
+		\begin{pseudocode}[display]{}{}
+		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
+		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
+		    \IF \textcolor{blue}{(i \in fd) \OR (j \in fd)} \THEN
+		    \BEGIN
+				    H_{ij} \GETS {F_i^T} S_j \\
+				    H_{ji} \GETS H_{ij}^T
+		    \END
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaBckwrdVisitor.finish}{model,j,j_{prev}}
+		    \textnormal{Do nothing}
+		\ENDPROCEDURE \\
+		\MAIN
+    H \GETS 0 \\
+    jcalc(model,q,\dot{q} \GETS 0) \\
+    \CALL{DepthFirstTraversal}{crbaDfsVisitor,model,0}
+    \ENDMAIN
+	  \end{pseudocode}
+	  \end{spacing}
+\end{multicols}
+\end{minipage}}
 
 
 
-Par conséquent, dans l'algorithme CRBA \ref{algo_crbaFeatherstoneH11}: \\
-\begin{itemize}
-\item[$\centerdot$] on doit à présent effectuer les lignes de calcul $H_{ij} = F S_j$ et $H_{ji} = H_{ij}^T$ que si $i,j \in \mathit{fd}]$
-\item[$\centerdot$] dû au calcul récursif du paramètre $^jF_i$, celui-ci doit être calculé sur le parcours ascendant (boucle "\textbf{while}") tant que $\exists j$ tel que $j \in \kappa(i)$ et $j \in \mathit{fd}$, autrement dit, jusqu'au noeud \emph{fd} le plus proche de la racine\footnotemark[1]
-\item[$\centerdot$] $H_{ii}$ et $^iF_i$ ne se calculent naturellement que si $i \in \mathit{fd}$
-\item[$\centerdot$] $I_i^c$ étant calculé récursivement, subit la même contrainte que $^jF_i$, il doit être calculé tant que $\exists j$ tel que $j \in \kappa(i)$ et $j \in \mathit{fd}$\footnotemark[1]
-\end{itemize}
+
+
 
 \subsection{impact of branch sparsity on motion equation solving}
 \textbf{impact on Eigen solver}
