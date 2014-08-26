@@ -16,6 +16,7 @@
 %Packages pour les liens dynamiques
 \usepackage{hyperref}
 \usepackage{multicol}
+%\usepackage{underscore}
 
 %Packages pour les formules de Maths
 \usepackage{amsmath}
@@ -166,7 +167,7 @@ Application à la stabilisation du robot (Shuuji Kajita)
 
 => algorithme dynamique hybride nécessaire.
 
-\section{implémentation et contraintes} \label{ch_concepts_implEtContr}
+\section{implémentation, méthodes et contraintes} \label{ch_concepts_implEtContr}
 - performances: précision, vitesse d'exécution , taille du code\vspace{0.3cm}
 - interface (vecteurs d'entrée / sortie)\vspace{0.3cm}
 - langage de programmation\vspace{0.3cm}
@@ -180,6 +181,57 @@ Un des désavantages des algorithmes basés sur un modèle générique est qu'il
 \caption{Génération automatique d'algorithmes optimisés et spécialisés}
 \end{figure}
 
+
+
+\subsection{Le mécanisme de parcours récursif à l'aide de visiteurs} \label{ch_concepts_visiteurs}
+
+On définit, pour le parcours récursif d'un arbre cinématique, deux procédures suivant la méthode d'exploration:
+\begin{itemize}
+\item[$\centerdot$] \textsc{DepthFirstTraversal} pour un parcours en profondeur d'abord, implémenté sous \emph{métapod} dans la fonction $\mathit{template<visitor, model, node_{id}> \quad struct \quad depth\_first\_traversal()}$
+\item[$\centerdot$] \textsc{BackwardTraversal} pour un parcours arrière en remontant l'arbre vers la racine, implémenté sous \emph{metapo} dans la fonction $\mathit{template<visitor, model, node_{id}, end\_node\_{id}> struct backward\_traversal()}$.
+ \end{itemize}
+\bigskip
+
+\setlength{\columnseprule}{0.5pt}
+\begin{multicols}{2}\raggedcolumns\small
+    	\begin{spacing}{1.5}
+		\begin{pseudocode}[display]{}{}
+		\PROCEDURE{DepthFirstTraversal}{visitor,model,i_{start}}
+		    \FOREACH i \in \mu(i_{start}) \DO
+		        \CALL{DepthFirstTraversalRec}{visitor,model,i_{start}}
+		\ENDPROCEDURE \\
+		\PROCEDURE{DepthFirstTraversalRec}{visitor,model,i}
+        \CALL{visitor.discover}{model,i} \\
+        \FOREACH i \in \mu(i) \DO
+            \CALL{DepthFirstTraversal}{visitor,model,i} \\
+        \CALL{visitor.finish}{model,i}
+		\ENDPROCEDURE
+	  \end{pseudocode}
+	 
+		\begin{pseudocode}[display]{}{}
+		\PROCEDURE{BackwardTraversalPrev}{visitor,model,i_{start}[,i_{end}]}
+		    \COMMENT{$i_{end}$ est optionnel. Par défaut, $i_{end} \GETS 0$.} \\
+		    \CALL{BackwardTraversalPrevRec}{visitor,model,\lambda(i_{start}),i_{start},i_{end}}
+		\ENDPROCEDURE \\
+		\PROCEDURE{BackwardTraversalPrevRec}{visitor,model,i,i_{prev},i_{end}}
+		    \COMMENT{$i=\lambda(i_{prev})$.} \\
+        \CALL{visitor.discover}{model,i,i_{prev}} \\
+        \IF i \neq i_{end}
+        \THEN \CALL{BackwardTraversalPrevRec}{visitor,model,\lambda(i),i,i_{end}} \\
+        \CALL{visitor.finish}{model,i,i_{prev}}
+		\ENDPROCEDURE
+	  \end{pseudocode}
+	  \end{spacing}
+\end{multicols}
+
+\paragraph{Parcours en profondeur et visiteur:}
+La procédure \textsc{DepthFirstTraversal} parcours l'arbre cinématique du \emph{model} en profondeur d'abord, par appels récursifs des noeuds enfants, et en partant du noeud $i_{start}$. Chaque noeud visité, sauf le noeud $i_{start}$, est traité par le "visiteur" défini par deux procédures \textsc{visitor.discover} et \textsc{visitor.finish}. Pour chaque noeud visité $i$, \textsc{Discover} définit le traitement à appliquer avant l'exploration des enfants $\mu(i)$. \textsc{Finish} réalise le traitement dans la phase ascendante, \cad après l'exploration de tous les enfants de $i$.
+
+\paragraph{Parcours en arrière:}
+La procédure \textsc{BackwardTraversalPrev} parcours l'arbre en partant du noeud $i_start$, et en remontant vers la racine par l'appel récursif du parent du noeud visité, jusqu'au noeud $end\_node$. Comme pour \textsc{DepthFirstTraversal}, pour chaque noeud visité, sauf pour le noeud $i_start$, les fonctions \textsc{visitor.discover} et \textsc{visitor.finish} sont appelées respectivement avant et après l'exploration du noeud parent.
+
+\paragraph{Meta-programmation en template C++:}
+La méta-programmation du template C++ nous permet d'obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Métafonction}, dans le deuxième cas en présence d'une \emph{Metafonction numérique} (\cite{bib_metaprogramming} chap.2 section 2.9).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -682,15 +734,12 @@ Voici un schéma fonctionnel de du parseur URDF.
   \item[interprétation du modèle URDF dans \emph{metapod}] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
 \end{itemize}
 \bigskip
-La résolution de l'équation de mouvement de la dynamique hybride se fait en quatre étapes, données dans l'algorithme de dynamique hybride (\ref{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
+La résolution de l'équation de mouvement de la dynamique hybride se fait en quatre étapes, données dans l'algorithme de dynamique hybride (\cite{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
 \begin{enumerate}
-\item calculer $C'$ d'après l'équation \eqref{   equ_equationMvt_dynHyb2}
+\item calculer $C'$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
 \item calculer $H_{11}$
 \item résoudre $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
-\item calculer $\tau_2$ d'après $\tau = C' + ID_{\delta} \left( Q^T \begin{bmatrix} 
-                                                                      \ddot{q}_1 \\
-                                                                      0 
-                                                                    \end{bmatrix} \right)$.
+\item calculer $\tau_2$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
 \end{enumerate}
 
 
@@ -706,7 +755,7 @@ $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une
   \ddot{q}_2
 \end{bmatrix}
 : \quad
-\eqref{   equ_equationMvt_dynHyb2} \iff
+\eqref{equ_equationMvt_dynHyb2} \iff
 \begin{bmatrix}
   0 \\
   -I
@@ -927,13 +976,12 @@ Il ne nous reste plus que le calcul du vecteur $\tau_2$.
 
 \subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau}
 
-Nous reprenons maintenant la deuxième équation du système linéaire \eqref{   equ_equationMvt_dynHyb2}:
-
+Nous reprenons maintenant la deuxième équation du système linéaire \eqref{equ_equationMvt_dynHyb2}:
 \begin{spacing}{1.5}
 \begin{align}
 &H_{21} \ddot{q}_1 - \tau_2 = -C'_2 \notag \\
 \iff
-&\tau_2 = C'_2 + H_{21} \ddot{q}_1 \label{equ_tau2}
+&\tau_2 = C'_2 + H_{21} \ddot{q}_1 \label{equ_tau}
 \end{align}
 \end{spacing}
 
@@ -984,13 +1032,17 @@ H_{21} \ddot{q}_1
 
 \subsubsection{Implémentation}
 
-Les éléments $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$. On calcule $\tau_2$ suivant \eqref{equ_tau2}, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
+Les éléments $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$. On calcule $\tau_2$ suivant \eqref{equ_tau}, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
 
 COMPLETER: fonctions Eigen et outils metapod utilisés
 
 
-On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme:
+On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 
+\shadowbox{\small%
+\begin{minipage}[t]{\textwidth}
+\setlength{\columnseprule}{0.5pt}
+\begin{multicols}{2}\raggedcolumns
 \begin{spacing}{1.5}
 \begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
 (1)
@@ -1013,6 +1065,8 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme:
   H_{perm} \GETS Q model.H Q^T \\
   H_{11} \GETS (H_{perm})_{i,j \in [1,\emph{fd}]} \\
 \END \\
+\end{pseudocode}
+\begin{pseudocode}[display]{}{}
 (3)
 \BEGIN
   \COMMENT{\textbf{Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$}} \\
@@ -1034,7 +1088,8 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme:
 \END
 \end{pseudocode}
 \end{spacing}
-
+\end{multicols}
+\end{minipage}}
 
 
 \section{tests unitaires et validation}
@@ -1068,6 +1123,8 @@ correction d'une erreur de code dans le repo officiel concernant les opérations
 \subsection{"branch sparsity" et "$\nu(\emph{fd})$ sparsity" dans l'algorithme CRBA (calcul de optimisé $H$)}
 
 Nous allons à présent optimiser le calcul des éléments d'inertie du système. Au lieu de calculer la totalité des termes de $H$, pour en extraire les sous-matrices $H_{11}$ et $H_{21}$ nécessaires à l'algorithme, nous calculons uniquement les termes de ces sous-matrices. Regardons de près l'algorithme \gls{acr_crba} original.\\
+
+\subsubsection{Principe du CRBA}
 Celui-ci calcule tous les termes de $H$ et est déjà optimisé par rapport à la \gls{gls_sparsite} de la matrice induite par la structure ramifiée de l'arbre cinématique du robot. Le CRBA parcours cet arbre en profondeur d'abord, ce qu'on désigne par un parcours \gls{acr_algoDFS} \cite{bib_deepFirstSearch}. L'inertie de chaque corps est initialisée dans le sens descendant de la base (corps 0) vers les feuilles. L'inertie composite de chaque corps assimilé au sous-arbre qu'il supporte est calculée par récursivité dans le sens ascendant des feuilles vers le corps 0. Dans le cas d'un robot humanoïde, le corps 0 pourrait être assimilé au torse, et les feuilles aux mains et aux pieds. S'il n'existe pas de chemin toujours ascendant reliant deux corps $c_i$, $c_j$ à la base $c_0$, alors les termes associés $H_{ij}$ et $H_{ji}$ sont nuls.\\
 Avant de continuer, il est indispensable de tenir compte des concepts fondamentaux sur la représentation des arbres cinématiques \cite{ch_algSpa_equationMouvement}:
 
@@ -1233,7 +1290,7 @@ H_{ij} =
 \mathbf{{S_i^T} \: {I_i^c} \: {^iX_j} S_j} & \textnormal{if } i \in \nu(j) \\
 \mathbf{H_{ji}^T} & \textnormal{if } j \in \nu(i) \\
 \mathbf{0} & \textnormal{otherwise}
-\end{cases} \label{equ_momentInertieCompositeLocal}
+\end{cases} \label{equ_momentInertieCompositeLocal2}
 \end{equation}
 \begin{flushleft}
 Donc si on calcule tous les termes $H_{ij}$ et leur transposée $H_{ij}^T$ tels que $i \in \nu(j)$, on couvre tous les termes de $H$, hormis les termes nuls ($3^0$ cas de figure). On aurait pu choisir de calculer tous les termes $H_{ij}$ tels que $j \in \nu(i)$ et leurs transposées, mais nous verrons par la suite que le premier choix est plus efficace.
@@ -1279,15 +1336,15 @@ On présente ci-dessous l'algorithme global \gls{acr_crba} tel que présenté pa
 		  \IF \lambda(i) \neq 0
 		  \THEN
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
-		  F = {I_i^c} \: S_i \\
-		  H_{ii} = {S_i^T} F \\
-		  j=i \\
+		  F \GETS {I_i^c} \: S_i \\
+		  H_{ii} \GETS {S_i^T} F \\
+		  j \GETS i \\
 		  \WHILE \lambda(j) \neq 0 \DO
 		  \BEGIN
-		    F = {^{\lambda(j)}X_j^*} F \\
-		    j = \lambda(j) \\
-		    H_{ij} = F^T S_j \\
-		    H_{ji} = H_{ij}^T
+		    F \GETS {^{\lambda(j)}X_j^*} F \\
+		    j \GETS \lambda(j) \\
+		    H_{ij} \GETS F^T S_j \\
+		    H_{ji} \GETS H_{ij}^T
 		  \END
 		\END
 	  \end{pseudocode}
@@ -1307,40 +1364,33 @@ Et ci-dessous la version de \emph{metapod}: \\
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
 		\begin{pseudocode}{CRBA - metapod}{model,q}
-		\PROCEDURE{discover}{model,q,i}
-		  I_i^c = I_i
-		\ENDPROCEDURE
-		\PROCEDURE{finish}{model,q}
+		\PROCEDURE{crbaDfsVisitor.discover}{model,i}
+		  I_i^c \GETS I_i
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaDfsVisitor.finish}{model,i}
 		  \IF \lambda(i) \neq 0
 		  \THEN
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
-		  F = {I_i^c} \: S_i \\
-		  H_{ii} = {S_i^T} F \\
-		  j=i \\
-		  \WHILE \lambda(j) \neq 0 \DO
-		  \BEGIN
-		    F = {^{\lambda(j)}X_j^*} F \\
-		    j = \lambda(j) \\
-		    H_{ij} = F^T S_j \\
-		    H_{ji} = H_{ij}^T
-		  \END
+		  F_i \GETS {I_i^c} \: S_i \\
+		  H_{ii} \GETS {S_i^T} F_i \\
+		  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,0}
 		\ENDPROCEDURE
 	  \end{pseudocode}
-	 
+    
 		\begin{pseudocode}[display]{}{}
-		\PROCEDURE{DepthFirstSearch}{model,q}
-      \FOREACH i \in \mu(i) \DO
-      \BEGIN
-        \CALL{discover}{model,q,i} \\
-        \FOREACH i \in \mu(i) \DO
-          \CALL{DepthFirstSearch}{model,q} \\
-        \CALL{finish}{model,q}
-      \END
-		\ENDPROCEDURE
+		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
+		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
+		    H_{ij} \GETS {F_i^T} S_j \\
+		    H_{ji} \GETS H_{ij}^T
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaBckwrdVisitor.finish}{model,j,j_{prev}}
+		    \textnormal{Do nothing}
+		\ENDPROCEDURE \\
 		\MAIN
-    H = 0 \\
-    jcalc(model,q,\dot{q}=0) \\
-    \CALL{DepthFirstSearch}{model,q}
+    H \GETS 0 \\
+    jcalc(model,q,\dot{q} \GETS 0) \\
+    \CALL{DepthFirstTraversal}{crbaDfsVisitor,model,0}
     \ENDMAIN
 	  \end{pseudocode}
 	  \end{spacing}
@@ -1348,12 +1398,25 @@ Et ci-dessous la version de \emph{metapod}: \\
 \end{minipage}}
 \bigskip
 
+\paragraph{\textsc{DepthFirstTraversal}, \textsc{BackwardTraversalPrev} et les visiteurs:}
+On a introduit le principe de ces fonctions dans la section \ref{ch_concepts_visiteurs}. On s'intéresse, dans la suite, aux traitements spécifiques au CRBA  effectués dans les visiteurs.
+
+\paragraph{\textsc{crbaDfsVisitor.discover}:}
+On initialise ici toutes les inerties individuelles des différents noeuds (corps).
+
+\paragraph{\textsc{crbaDfsVisitor.finish}:}
+Pour le noeud $i$ visité, tous ses enfants ont été explorés, par conséquent l'inertie composite $I_i^c$ est à jour. Elle peut donc être ajoutée à celle du noeud parent. On peut également calculer ici toutes les valeurs dépendantes de $I_i^c$: $F_i$ et l'ensemble des $H_{ij}$. Notez que $F_i$ est utilisé comme un buffer et contient la dernière valeur calculée de $^jF_i$. $F_i$ est alors un champ lié au corps $i$.
+
+\paragraph{\textsc{crbaBckwrdVisitor.discover} et \textsc{crbaBckwrdVisitor.finish}:}
+Le parcours remontant vers la racine pour calculer les termes $F_i$ et $H_{ij}$ (boucle \textbf{"while"} de l'algorithme \ref{algo_crbaFeatherstone}) se fait entièrement à "l'aller", donc dans la fonction \textsc{...discover}. La fonction \textsc{...finish} (le chemin de retour) est donc vide. \\
+
+
 Nous allons aborder maintenant l'optimisation proposée par Featherstone qui réduit le calcul de la matrice $H$ au seuls termes qui constituent la sous-matrice $H_{11}$. Et finalement, nous allons voir comment cette optimisation a été adaptée à l'algorithme CRBA de metapod, ainsi que les modifications supplémentaires pour le calcul de $H_{21}$.
 
 
 \subsubsection{Modifications de CRBA pour le calcul de H11 optimisé}
 
-Nous avions défini \emph{fd} comme l'ensemble des articulations en mode "dynamique directe", \cad pour lesquelles on connaît le couple ou les forces appliquées. Nous avions défini également l'ensemble complémentaire $\emph{id}$. Tous les termes $H_{ij}$ tels que $i,j \in \emph{fd}]$ sont inclus dans la matrice $H_{11}$. Par conséquent, dans l'algorithme CRBA \ref{algo_crbaFeatherstone}: \\
+Nous avions défini \emph{fd} comme l'ensemble des articulations en mode "dynamique directe", \cad pour lesquelles on connaît le couple ou les forces appliquées. Nous avions défini également l'ensemble complémentaire $\emph{id}$. \emph{fd} et \emph{id} désignent aussi chacun des corps directement supporté par chacune de ces articulations. Tous les termes $H_{ij}$ tels que $i,j \in \emph{fd}$ sont inclus dans la matrice $H_{11}$. Par conséquent, dans l'algorithme CRBA \ref{algo_crbaFeatherstone}: \\
 \begin{itemize}
 \item[$\centerdot$] on ne doit effectuer les lignes de calcul $H_{ij} = F S_j$ et $H_{ji} = H_{ij}^T$ que si $i,j \in \mathit{fd}]$
 \item[$\centerdot$] dû au calcul récursif du paramètre $^jF_i$, celui-ci doit être calculé sur le parcours ascendant (boucle "\textbf{while}") tant que $\exists j$ tel que $j \in \kappa(i)$ et $j \in \mathit{fd}$, autrement dit, jusqu'au noeud \emph{fd} le plus proche de la racine\footnotemark[1]
@@ -1400,10 +1463,10 @@ La conséquence de cette propriété est qu'il est inutile de calculer les terme
 Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé pour $H_{11}$, suivant Featherstone (\cite{bib_featherstone} table9.1):\\
 
     	\begin{spacing}{1.5}
-		\begin{pseudocode}{CRBA - Featherstone}{model,q} \label{algo_crbaFeatherstone}
-    H = 0 \\
+		\begin{pseudocode}{CRBA - Featherstone}{model,q} \label{algo_crbaFeatherstoneH11}
+    H \GETS 0 \\
 		\FOREACH i \in \nu(fd) \DO
-		  I_i^c = I_i \\
+		  I_i^c \GETS I_i \\
 		\FOR i \GETS N_B \DOWNTO 1 \DO
 		\BEGIN
 		  \IF \lambda(i) \in \nu(fd)
@@ -1411,17 +1474,17 @@ Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
 		  \IF i \in fd \THEN
 		  \BEGIN
-			  F = {I_i^c} \: S_i \\
-			  H_{ii} = {S_i^T} F \\
-			  j=i \\
+			  F \GETS {I_i^c} \: S_i \\
+			  H_{ii} \GETS {S_i^T} F \\
+			  j \GETS i \\
 			  \WHILE \lambda(j) \in \nu(fd) \DO
 			  \BEGIN
-			    F = {^{\lambda(j)}X_j^*} F \\
-			    j = \lambda(j) \\
+			    F \GETS {^{\lambda(j)}X_j^*} F \\
+			    j \GETS \lambda(j) \\
 			    \IF j \in fd \THEN
 			    \BEGIN
-				    H_{ij} = F^T S_j \\
-				    H_{ji} = H_{ij}^T
+				    H_{ij} \GETS F^T S_j \\
+				    H_{ji} \GETS H_{ij}^T
 			    \END
 			  \END
 			\END
@@ -1432,59 +1495,125 @@ Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé
 \end{multicols}
 
 
-Et ci-dessous la version \emph{metapo}:\\
-%================== ICI ============================
+Et ci-dessous la version \emph{metapod}:\\
+
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
 		\begin{pseudocode}{CRBA - metapod}{model,q}
-		\PROCEDURE{discover}{model,q,i}
-		  I_i^c = I_i
-		\ENDPROCEDURE
-		\PROCEDURE{finish}{model,q}
-		  \IF \lambda(i) \neq 0
+		\PROCEDURE{crbaDfsVisitor.discover}{model,i}
+		  \IF \textcolor{blue}{i \in \nu(fd)} \THEN I_i^c \GETS I_i
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaDfsVisitor.finish}{model,i}
+		  \IF \textcolor{blue}{\lambda(i) \in \nu(fd)}
 		  \THEN
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
-		  F = {I_i^c} \: S_i \\
-		  H_{ii} = {S_i^T} F \\
-		  j=i \\
-		  \WHILE \lambda(j) \neq 0 \DO
-		  \BEGIN
-		    F = {^{\lambda(j)}X_j^*} F \\
-		    j = \lambda(j) \\
-		    H_{ij} = F S_j \\
-		    H_{ji} = H_{ij}^T
+		  \IF \textcolor{blue}{i \in fd} \THEN
+			\BEGIN
+				  F_i \GETS {I_i^c} \: S_i \\
+				  H_{ii} \GETS {S_i^T} F_i \\
+				  \textcolor{blue}{i_{end} \GETS \CALL{rootNodeOfNuFD}{model,i}} \\
+				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,\textcolor{blue}{i_{end}}}
 		  \END
+		\ENDPROCEDURE \\
+		\PROCEDURE{rootNodeOfNuFD}{model,i_{start}}
+		    \RETURN{\textnormal{racine de l'arbre  } \{\nu(fd) \cap \kappa(i)\}}
 		\ENDPROCEDURE
 	  \end{pseudocode}
-	 
+    
 		\begin{pseudocode}[display]{}{}
-		\PROCEDURE{DepthFirstSearch}{model,q}
-      \FOREACH i \in \mu(i) \DO
-      \BEGIN
-        \CALL{discover}{model,q,i} \\
-        \FOREACH i \in \mu(i) \DO
-          \CALL{DepthFirstSearch}{model,q} \\
-        \CALL{finish}{model,q}
-      \END
-		\ENDPROCEDURE
+		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
+		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
+		    \IF \textcolor{blue}{j \in fd} \THEN
+		    \BEGIN
+				    H_{ij} \GETS {F_i^T} S_j \\
+				    H_{ji} \GETS H_{ij}^T
+		    \END
+		\ENDPROCEDURE \\
+		\PROCEDURE{crbaBckwrdVisitor.finish}{model,j,j_{prev}}
+		    \textnormal{Do nothing}
+		\ENDPROCEDURE \\
 		\MAIN
-    H = 0 \\
-    jcalc(model,q,\dot{q}=0) \\
-    \CALL{DepthFirstSearch}{model,q}
+    H \GETS 0 \\
+    jcalc(model,q,\dot{q} \GETS 0) \\
+    \CALL{DepthFirstTraversal}{crbaDfsVisitor,model,0}
     \ENDMAIN
 	  \end{pseudocode}
 	  \end{spacing}
 \end{multicols}
 \end{minipage}}
 
+\paragraph{Calcul de $i_{end}$ dans \textsc{rootNodeOfNuFD}:}
+Dans l'appel de \textsc{BackwardTraversalPrev}, On veut remonter l'arbre tant que le noeud visité $\in \nu(fd)$, donc jusqu'à la racine de l'arbre $\{\nu(fd) \cap \kappa(i)\}$ (dans l'exemple de la figure \ref{fig_optimH}, ce serait le noeud $3$ si $i=11$). Le paramètre $i_{end}$ doit être le parent de cette racine.
+
+\dispFig[H]{6}{0.8\textwidth}{Exemple d'un arbre simple: termes $H_{ij}$ non nuls tels que $i,j \in fd$ (On n'a pas représenté les transposées). $fd={3,4,11}$ et $\nu(fd)={4,8,3,6,7,10,11}$.}{fig_optimH}
+
+\paragraph{Optimisation de \textsc{rootNodeOfNuFD}:}
+La méta-programmation m'a permis d'optimiser cette procédure à l'extrême en l'implémentant sous forme de \emph{Metafonction numérique} (section \ref{ch_concepts_implEtContr}).
 
 
-\subsubsection{Suppléments pour le calcul de H12}
+\subsubsection{Suppléments pour le calcul de H21}
+
+\begin{wrapfigure}{r}{0.2\textwidth}
+%  \raggedright{%
+  \begin{minipage}[t]{0.2\textwidth}
+  \begin{equation*}
+  H=
+  \begin{bmatrix}
+    H_{11} & \ldots \\
+    H_{21} & \ldots
+  \end{bmatrix}
+  \end{equation*}
+  \end{minipage}
+%  }
+\end{wrapfigure}
+
+Dans sa présentation de l'algorithme Hybride, Featherstone propose de réaliser l'étape 4 (calcul de $\tau_2$) soit à l'aide de la dynamique inverse différentielle (détaillée plus loin), soit à l'aide de l'équation \eqref{equ_tau}. Nous avons choisi, dans un premier temps, la deuxième solution, qui ne nécessite une quelconque compréhension de la dynamique inverse. Par contre, \eqref{equ_tau} requiert la connaissance de $H_{21}$.
+
+On modifie ainsi le dernier algorithme CRBA obtenu, pour étendre le calcul des éléments $H_{ij}$ à tous les éléments inclus dans $H_{11}$ et $H_{21}$, \cad calculer $H_{ij}$ tel que $\forall i,j: i \in fd \cup id, j \in fd$. En appliquant le parcours suivi dans l'algorithme CRBA original \ref{algo_crbaFeatherstone}, la première hypothèse serait de parcourir tous les noeuds $i$, et ne calculer $H_{ij}$ que pour $j \in fd$. Mais on aurait alors un élément $H_{ij}$ pour lequel $i \in id$, $j \in fd$ et $j \in \nu(i)$. Cette dernière condition implique que $H_{ij}$ ne peut être calculé qu'à partir de $H_{ji}^T$, avec $j \in fd$ et $i \in id$, cet élément n'est jamais calculé, d'après l'hypothèse initiale. Pour éviter ce problème, il faut parcourir tous les couples $(i,j)$ et calculer $H_{ij}$ et sa transposée si et seulement si $i \in fd$ ou $j \in fd$. Nous déclinons l'algorithme suivant:
+
+    	\begin{spacing}{1.5}
+		\begin{pseudocode}{CRBA - Featherstone}{model,q} \label{algo_crbaFeatherstoneH11H21}
+    H \GETS 0 \\
+		\FOREACH i \in \nu(fd) \DO
+		  I_i^c \GETS I_i \\
+		\FOR i \GETS N_B \DOWNTO 1 \DO
+		\BEGIN
+		  \IF \lambda(i) \in \nu(fd)
+		  \THEN
+		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
+		  \IF i \in fd \THEN
+		  \BEGIN
+			  F \GETS {I_i^c} \: S_i \\
+			  H_{ii} \GETS {S_i^T} F \\
+			  j \GETS i \\
+			  \WHILE \lambda(j) \in \nu(fd) \DO
+			  \BEGIN
+			    F \GETS {^{\lambda(j)}X_j^*} F \\
+			    j \GETS \lambda(j) \\
+			    \IF j \in fd \THEN
+			    \BEGIN
+				    H_{ij} \GETS F^T S_j \\
+				    H_{ji} \GETS H_{ij}^T
+			    \END
+			  \END
+			\END
+		\END
+	  \end{pseudocode}
+	  \end{spacing}
 
 
+
+Par conséquent, dans l'algorithme CRBA \ref{algo_crbaFeatherstoneH11}: \\
+\begin{itemize}
+\item[$\centerdot$] on doit à présent effectuer les lignes de calcul $H_{ij} = F S_j$ et $H_{ji} = H_{ij}^T$ que si $i,j \in \mathit{fd}]$
+\item[$\centerdot$] dû au calcul récursif du paramètre $^jF_i$, celui-ci doit être calculé sur le parcours ascendant (boucle "\textbf{while}") tant que $\exists j$ tel que $j \in \kappa(i)$ et $j \in \mathit{fd}$, autrement dit, jusqu'au noeud \emph{fd} le plus proche de la racine\footnotemark[1]
+\item[$\centerdot$] $H_{ii}$ et $^iF_i$ ne se calculent naturellement que si $i \in \mathit{fd}$
+\item[$\centerdot$] $I_i^c$ étant calculé récursivement, subit la même contrainte que $^jF_i$, il doit être calculé tant que $\exists j$ tel que $j \in \kappa(i)$ et $j \in \mathit{fd}$\footnotemark[1]
+\end{itemize}
 
 \subsection{impact of branch sparsity on motion equation solving}
 \textbf{impact on Eigen solver}
@@ -1495,7 +1624,13 @@ impact of $\nu(fd)$ sparsity in parent array of section 6.5 (réduction de l'arb
 
 \subsection{Dynamique inverse differentielle pour le calcul optimal de $\tau_2$}
 
-
+Cette fois-ci, nous voulons calculer $\tau_2$ à l'aide  de l'équation:
+\begin{equation}
+\tau = C' + ID_{\delta} \left( Q^T \begin{bmatrix} 
+                                                       \ddot{q}_1 \\
+                                                       0 
+                                                   \end{bmatrix} \right)
+\end{equation}
 
 \section{future intégration dans le système de tâches "stack of tasks" de HRP2}
 
