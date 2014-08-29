@@ -63,16 +63,21 @@
 %\usepackage{enumitem}
 
 \begin{document}
-\begin{titlepage}
-\title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
-\date{3 Mars 2014 - 31 Août 2014}
-\author{Auteur: \bsc{Guedelha} Nuno \\ Tuteur: \bsc{Stasse} Olivier}
-\end{titlepage}
+
+%%%%%%%%%%%%%%%%%% page de couverture %%%%%%%%%%%%%%%%%%%
+
+\input{pageCouverture.tex}
+
+%\begin{titlepage}
+%\title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
+%\date{3 Mars 2014 - 31 Août 2014}
+%\author{Auteur: \bsc{Guedelha} Nuno \\ Tuteur: \bsc{Stasse} Olivier}
+%\end{titlepage}
 
 \setcounter{secnumdepth}{3}
 
 \graphicspath{{illustrations/}}
-\maketitle
+%\maketitle
 
 %Rennomer la table des matières en Sommaire
 \renewcommand{\contentsname}{Sommaire}
@@ -167,10 +172,10 @@ Application à la stabilisation du robot (Shuuji Kajita)
 => algorithme dynamique hybride nécessaire.
 
 \section{implémentation, méthodes et contraintes} \label{ch_concepts_implEtContr}
-- performances: précision, vitesse d'exécution , taille du code\vspace{0.3cm}
-- interface (vecteurs d'entrée / sortie)\vspace{0.3cm}
-- langage de programmation\vspace{0.3cm}
-- Algorithme générique pour tous les modèles URDF de robots (arbre cinématique), mais optimisé pour chaque modèle spécifique (template et meta-programing)\vspace{0.3cm}
+- performances: précision, vitesse d'exécution , taille du code\\
+- interface (vecteurs d'entrée / sortie)\\
+- langage de programmation\\
+- Algorithme générique pour tous les modèles URDF de robots (arbre cinématique), mais optimisé pour chaque modèle spécifique (template et meta-programing)\\
 
 Un des désavantages des algorithmes basés sur un modèle générique est qu'ils sont susceptibles de dérouler des calculs inutiles, trop génériques dans le cas de certains modèles spécifiques plus simples, ayant par exemple un nombre réduit de degrés de liberté ou bien que des axes de rotation parallèles. Une des solutions est de générer automatiquement des algorithmes spécialisés, dont les traitements ont été réduits au minimum pour réaliser uniquement les calculs nécessaires à un modèle spécifique. La définition et l'application de tels algorithmes suivraient donc le schéma suivant:
 
@@ -181,16 +186,39 @@ Un des désavantages des algorithmes basés sur un modèle générique est qu'il
 \end{figure}
 
 
+\subsection{L'architecture de \emph{metapod}}
 
-\subsection{Le mécanisme de parcours récursif à l'aide de visiteurs} \label{ch_concepts_visiteurs}
+\emph{Metapod} fournit une librairie d'algorithmes de calcul dynamique de robot, applicable à un modèle de robot au format \gls{acr_urdf}. Ce format est représenté dans l'outil sous forme de classes templatées. LA librairie est écrite en langage C++ templaté suivant des techniques de meta-programmation. Ainsi, chaque algorithme est indépendant des modèles de robot (le modèle est une variable de type et un paramètre d'entrée pour l'algorithme templaté), mais est optimisé et adapté, lors de la compilation, au modèle spécifique traité. La représentation des modèles cinématiques (arbres) et les algorithmes sont basés sur l'algèbre spatiale selon Featherstone, elle même basée sur les concepts de torseurs \cite{bib_featherstone}. On liste ci-dessous les composants principaux de la librairie (sous la racine de \emph{metapod}):
+\begin{description}
+\item[$\centerdot$ include/metapod:] algorithmes de dynamique de robot et outils
+\item[$\centerdot$ data:] fichiers XML donnant la définition URDF des modèles de référence "simple\_arm" (chaîne à 3 corps) et "simple\_humanoid" (modèle humanoïde à 29 corps/articulations et 35 degrés de liberté) pour les tests unitaires et les benchmarks
+\item[$\centerdot$ robotbuilder:] librairie d'aide pour la génération du code source 
+\item[$\centerdot$ metapodfromurdf:] génère, à l'aide du module "robotbuilder", le code source (fichier d'entête) définissant les classes du modèle de robot, à partir des structures URDF fournies par le parseur URDF
+\item[$\centerdot$ build/include/metapod/models:] code source généré par "metapodfromurdf".
+\end{description}
+
+Cette architecture a comme dépendance principale le parseur URDF. Celui-ci converti le fichier XML contenant le modèle URDF, en classes C++ envoyées à leur tour au module "metapodfromurdf".
+
+La compilation de metapod se déroule donc en deux étapes: dans un premier temps, le parseur URDF est appelé pour interpréter le fichier XML (\verb;data/<nom_modele>.hh;) et remplir ses classes URDF exportables. Ces données sont ensuite envoyées à "metapodfromurdf" qui génère le code source avec les classes du modèle de robot (fichier d'entête \emph{metapod} dans \verb;build/include/metapod/models;). En deuxième phase de compilation, les classes du modèle de robot sont compilées avec le code source des algorithmes (\verb;include/metapod;). Les algorithmes sont des structures templates. C'est à ce moment là que celles-ci sont instanciées avec le type [modèle de robot]. Nous allons voir justement dans la suite, quelques propriétés intéressantes qui font la particularité de la meta-programmation.
+
+\subsection{Quelques propriétés de la meta-programmation}
+
+\subsubsection*{Le traitement à la compilation ou à l'exécution}
+
+La méta-programmation du template C++ nous permet d'obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Métafonction}, dans le deuxième cas en présence d'une \emph{Metafonction numérique} (\cite{bib_metaprogramming} chap.2 section 2.9).
+
+\subsubsection*{Le mécanisme de parcours récursif à l'aide de visiteurs} \label{ch_concepts_visiteurs}
 
 On définit, pour le parcours récursif d'un arbre cinématique, deux procédures suivant la méthode d'exploration:
 \begin{itemize}
 \item[$\centerdot$] \textsc{DepthFirstTraversal} pour un parcours en profondeur d'abord, implémenté sous \emph{métapod} dans la fonction $\mathit{template<visitor, model, node_{id}> \quad struct \quad depth\_first\_traversal()}$
 \item[$\centerdot$] \textsc{BackwardTraversal} pour un parcours arrière en remontant l'arbre vers la racine, implémenté sous \emph{metapo} dans la fonction $\mathit{template<visitor, model, node_{id}, end\_node\_{id}> struct backward\_traversal()}$.
- \end{itemize}
+\end{itemize}
 \bigskip
 
+\begin{flushleft}
+\begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns\small
     	\begin{spacing}{1.5}
@@ -206,22 +234,29 @@ On définit, pour le parcours récursif d'un arbre cinématique, deux procédure
         \CALL{visitor.finish}{model,i}
 		\ENDPROCEDURE
 	  \end{pseudocode}
-	 
+	  \vfill
+	  \columnbreak
 		\begin{pseudocode}[display]{}{}
-		\PROCEDURE{BackwardTraversalPrev}{visitor,model,i_{start}[,i_{end}]}
-		    \COMMENT{$i_{end}$ est optionnel. Par défaut, $i_{end} \GETS 0$.} \\
-		    \CALL{BackwardTraversalPrevRec}{visitor,model,\lambda(i_{start}),i_{start},i_{end}}
+		\PROCEDURE{BackwardTraversalPrev}{visitor,model, \vspace{-0.2cm}\\
+		                                  i_{start}[,i_{end}]}
+		    \textnormal{\# $i_{end}$ est optionnel. Par défaut, $i_{end} \GETS 0$.} \\
+		    \CALL{BackwardTraversalPrevRec}{visitor,model, \vspace{-0.2cm}\\
+		                                    \lambda(i_{start}),i_{start},i_{end}}
 		\ENDPROCEDURE \\
-		\PROCEDURE{BackwardTraversalPrevRec}{visitor,model,i,i_{prev},i_{end}}
-		    \COMMENT{$i=\lambda(i_{prev})$.} \\
+		\PROCEDURE{BackwardTraversalPrevRec}{visitor,model, \vspace{-0.2cm}\\
+		                                     i,i_{prev},i_{end}}
+		    \textnormal{\# $i=\lambda(i_{prev})$.} \\
         \CALL{visitor.discover}{model,i,i_{prev}} \\
         \IF i \neq i_{end}
-        \THEN \CALL{BackwardTraversalPrevRec}{visitor,model,\lambda(i),i,i_{end}} \\
+        \THEN \CALL{BackwardTraversalPrevRec}{visitor,model, \vspace{-0.2cm}\\
+		                                          \lambda(i),i,i_{end}} \\
         \CALL{visitor.finish}{model,i,i_{prev}}
 		\ENDPROCEDURE
 	  \end{pseudocode}
 	  \end{spacing}
 \end{multicols}
+\end{minipage}
+\end{flushleft}
 
 \paragraph{Parcours en profondeur et visiteur:}
 La procédure \textsc{DepthFirstTraversal} parcours l'arbre cinématique du \emph{model} en profondeur d'abord, par appels récursifs des noeuds enfants, et en partant du noeud $i_{start}$. Chaque noeud visité, sauf le noeud $i_{start}$, est traité par le "visiteur" défini par deux procédures \textsc{visitor.discover} et \textsc{visitor.finish}. Pour chaque noeud visité $i$, \textsc{Discover} définit le traitement à appliquer avant l'exploration des enfants $\mu(i)$. \textsc{Finish} réalise le traitement dans la phase ascendante, \cad après l'exploration de tous les enfants de $i$.
@@ -229,8 +264,6 @@ La procédure \textsc{DepthFirstTraversal} parcours l'arbre cinématique du \emp
 \paragraph{Parcours en arrière:}
 La procédure \textsc{BackwardTraversalPrev} parcours l'arbre en partant du noeud $i_start$, et en remontant vers la racine par l'appel récursif du parent du noeud visité, jusqu'au noeud $end\_node$. Comme pour \textsc{DepthFirstTraversal}, pour chaque noeud visité, sauf pour le noeud $i_start$, les fonctions \textsc{visitor.discover} et \textsc{visitor.finish} sont appelées respectivement avant et après l'exploration du noeud parent.
 
-\paragraph{Meta-programmation en template C++:}
-La méta-programmation du template C++ nous permet d'obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Métafonction}, dans le deuxième cas en présence d'une \emph{Metafonction numérique} (\cite{bib_metaprogramming} chap.2 section 2.9).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -447,6 +480,8 @@ Comme précédemment, nous considérons le champ de positions du corps $C$ éten
 
 \chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
 
+\setmyFiguresFile{hybridDynamics4etapes}
+
 L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
 Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rnea}, ainsi que d'un \gls{acr_crba} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
 Dans les sections précédentes, nous avons posé les bases de l'algèbre spatiale des torseurs cinématiques et dynamiques, ainsi que la modélisation généralisée d'un arbre cinématique (\emph{modèle de sytème} du robot). Nous allons décrire dans cette section la définition de l'\emph{algorithme hybride}, et son implémentation qui s'est déroulée sur plusieurs phases:\\
@@ -472,7 +507,7 @@ Dans les sections précédentes, nous avons posé les bases de l'algèbre spatia
 Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle (\cite{bib_featherstone} chap.6) comme suit:
 
 \begin{equation} \label{equ_equationMvt}
-H(q)\ddot{q} + C(q,\dot{q},f^x) = \tau
+H(q)\ddot{q} + C(q,\dot{q},f^{ext}) = \tau
 \end{equation}
 
 \medskip
@@ -496,8 +531,6 @@ Pour chaque articulation $i$, on connaît soit le couple appliqué soit l'accél
 
 \subsubsection{Permutation des vecteurs de variables et de coefficients}
 
-\setmyFiguresFile{hybridDynamics4etapes}
-
 \begin{wrapfigure}{r}{0.5\textwidth}
   \begin{center}
     \incFig[1]{.3\textwidth}
@@ -506,7 +539,7 @@ Pour chaque articulation $i$, on connaît soit le couple appliqué soit l'accél
   \end{center}
 \end{wrapfigure}
 
-Soit le sous-ensemble d'articulations pour lesquelles on connaît le couple $\tau$ de forces appliquées. On désigne cet ensemble celui des articulations en mode "forward-dynamics" ou "articulations \emph{fd}" ou encore \emph{fd}. L'ensemble complémentaire regroupe les "articulations en mode "inverse-dynamics" ou "id". l'ensemble \emph{fd} est supposé connu et fournit par le modèle du système. Nous noterons $n_{\emph{fd}}=\vert fd \vert$, $n_{\emph{id}}=\vert id \vert$ et $n_{dof}=n_{\emph{fd}}+n_{\emph{id}}=\vert \ddot{q} \vert$. Il s'agit là d'un impact sur la définition du modèle standard \gls{acr_urdf} et du "parseur" respectif, tous deux définis à la base dans le standard \gls{acr_ros}.\\
+Soit le sous-ensemble d'articulations pour lesquelles on connaît le couple $\tau$ de forces appliquées. On désigne cet ensemble celui des articulations en mode "forward-dynamics" ou "articulations \emph{fd}" ou encore \emph{fd}. L'ensemble complémentaire regroupe les "articulations en mode "inverse-dynamics" ou "id". l'ensemble \emph{fd} est supposé connu et fournit par le modèle du système. Nous noterons $n_{\emph{fd}}=\vert fd \vert$, $n_{\emph{id}}=\vert id \vert$ et $n_{dof}=n_{\emph{fd}}+n_{\emph{id}}=\vert \ddot{q} \vert$. Il s'agit là d'un impact, qu'on détaille en fin de section, sur la définition du modèle standard \gls{acr_urdf} et du "parseur" respectif, tous deux définis à la base dans le standard \gls{acr_ros}.\\
 Avant de pouvoir déplacer toutes les variables inconnues du même côté de l'égalité, nous devons les regrouper. Pour cela, nous appliquons une permutation à tous les éléments de l'équation de mouvement. Commençons par les vecteurs de variables et de coefficients. Nous définissons ainsi la matrice de permutation $\mathbf{Q}$ qui réordonne les vecteurs $q$, $\dot{q}$, $\ddot{q}$ en plaçant les variables inconnues en premier. Considérons l'exemple simple ci-contre. Comme vu dans l'établissement de l'équation de mouvement au chapitre \ref{ch_algSpa_equationMouvement}, l'ordre des variables $q_i$, $\dot{q}_i$, $\ddot{q}_i$, dans les vecteurs respectifs, est donné suivant le parcours de l'arbre cinétique en profondeur d'abord:
 
 \begin{Parallel}[v]{.4\textwidth}{.5\textwidth}
@@ -563,8 +596,8 @@ Avec $\underline{\ddot{q}_1}$ et $\underline{\tau_1}$ les sous-vecteurs des vari
 
 \begin{flushleft}
 \begin{itemize}
-\item[•] Il y a un seul élément à 1 par ligne et un seul élément à 1 par colonne, tous les autres éléments étant à 0
-\item[•] D'après la forme de $Q$, on montre facilement que pour toute matrice carrée $m$, le produit à gauche $m'=Qm$ permute les lignes de $m$, et le produit à droite $m'=mQ$ permute les colonnes. En effet, dans le produit $m'=Qm$, chaque élément $Q_{ij}$ à 1 affecte la ligne $j$ de $m$ à la ligne $i$ de $m'$. Pour la permutation de colonnes, il suffit de passer par la transposée de $m$. Soit $Q'$ la transformation permutant les colonnes:
+\item[$\centerdot$] Il y a un seul élément à 1 par ligne et un seul élément à 1 par colonne, tous les autres éléments étant à 0
+\item[$\centerdot$] D'après la forme de $Q$, on montre facilement que pour toute matrice carrée $m$, le produit à gauche $m'=Qm$ permute les lignes de $m$, et le produit à droite $m'=mQ$ permute les colonnes. En effet, dans le produit $m'=Qm$, chaque élément $Q_{ij}$ à 1 affecte la ligne $j$ de $m$ à la ligne $i$ de $m'$. Pour la permutation de colonnes, il suffit de passer par la transposée de $m$. Soit $Q'$ la transformation permutant les colonnes:
 
 \begin{center}
 \(
@@ -582,7 +615,7 @@ Avec $\underline{\ddot{q}_1}$ et $\underline{\tau_1}$ les sous-vecteurs des vari
 \end{itemize}
 \end{flushleft}
 
-Ces propriétés sont décrites plus en détail en annexe \ref{appx_algLineaire}.
+%Ces propriétés sont décrites plus en détail en annexe \ref{appx_algLineaire}.
 
 \subsubsection{permutation de la matrice d'inertie et reformulation de l'équation de mouvement}
 
@@ -724,32 +757,43 @@ Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
 \subsubsection{implémentation}
 
-Si l'objectif est de réarranger l'équation de mouvement comme nous l'avons décrit ci-dessus, nous devons dans un premier temps ajouter la génération de la classification $fd$/$id$ des articulations dans le fichier de modèle généré par metapod lors de sa compilation (fichier header \verb;../metapod/build/include/models/<nom_modele>/<nom_modele>.hh;). Plus précisément, nous voulons faire apparaître dans chaque classe "Node" attribuée à un noeud, un champ statique et constant\footnotemark[1] (booléen) représentant l'attribut $fwdDyn$ ("Forward Dynamics") associé à l'articulation qui supporte la classe "Node":
+\paragraph{Modifications à apporter au modèle URDF (format XML) et au parseur URDF:}
+
+Afin de réaliser les permutations décrites ci-dessus, nous devons dans un premier temps ajouter la génération de la classification $fd$/$id$ des articulations dans le fichier de modèle généré par "metapodfromurdf": \verb;../metapod/build/include/models/<nom_modele>/<nom_modele>.hh; (voir section \ref{ch_concepts_implEtContr}). Plus précisément, nous voulons faire apparaître dans chaque classe "Node" attribuée à un noeud, un champ statique et constant\footnotemark[1] (booléen) représentant l'attribut \verb;fwdDyn; ("Forward Dynamics") associé à l'articulation qui supporte le corps de classe "Node":
 \begin{equation*}
 fwdDyn = 
 \begin{cases}
-  0 & \textnormal{l'articulation $\in id \quad$ (on connaît son accélération)} \\
-  1 & \textnormal{l'articulation $\in fd \quad$ (on connaît son couple)}
+  \verb;false; & \textnormal{l'articulation $\in id \quad$ (on connaît son accélération)} \\
+  \verb;true; & \textnormal{l'articulation $\in fd \quad$ (on connaît son couple)}
 \end{cases}
 \end{equation*}
 
-\footnotetext{Le caractère statique et constant de $fwdDyn$ est indispensable à certaines optimisations de meta-programmation.}
+\footnotetext[1]{Le caractère statique et constant de \verb;fwdDyn; est indispensable à certaines optimisations de meta-programmation.}
 
-
-
-Nous avons vu, dans la section \ref{ch_concepts_implEtContr}, l'architecture globale de \emph{metapod}. On rappelle que dans le fichier de modèle généré, on veut faire En effet, le module \emph{metapodfromurdf} de \emph{metapod} reç
-
-
-Voici un schéma fonctionnel de du parseur URDF.
-
-%include figure
-
+Nous avons vu, dans la section \ref{ch_concepts_implEtContr}, l'architecture globale de \emph{metapod}. La création d'un champ dans la classe du modèle interne à \emph{metapod} et dans le fichier URDF XML impacte toute la chaîne de conversion entre ces deux points:
 \begin{description}
-\item[représentation de la classification $fd$ / $id$:] Définition d'un attribut désignant le type d'articulation \emph{fd} ou \emph{id} dans le modèle \gls{acr_urdf} source et dans le modèle du système dérivé dans l'environnement de \emph{metapod} (fichier "header" destinataire).
-\item[interprétation du modèle URDF dans \emph{metapod}:] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
+\item[$\centerdot$ fichier XML URDF:] définition dans le fichier XML URDF, d'un attribut \verb;fwd_dyn; binaire désignant le type d'articulation, aligné avec la définition de \verb;fwdDyn; plus haut. Au moment de choisir un emplacement pour ce nouvel attribut, nous avons considéré l'application au traitement des articulations flexibles. Il s'agit de définir un champ à intégrer dans le standard URDF de ROS. Le choix doit être pertinent et justifiable pour pouvoir être approuvé par le(s) modérateur ou responsable du composant. Pour ces raisons, nous avons choisi de lier \verb;fwdDyn; à la spécification XML $\mathbf{model}  \longrightarrow \mathbf{joint}  \longrightarrow \mathbf{dynamics}$, qui décrit déjà les propriétés physiques de l'articulation: viscosité (\verb;damping;) et frottements (\verb;friction;). Notre proposition finale, une fois l'algorithme hybride validé, \emph{metapod}, pourrait être la création d'un champ raideur (\verb;stiffness;) du ressort. Un coefficient de raideur pourrait être utilisé dans des développements futurs, mais dans un premier temps, servirait à classer l'articulation: une raideur non nulle serait interprêtée comme \verb;fwdDyn=1;.
+\item[$\centerdot$ Parseur URDF:] conversion de ce nouvel attribut, du fichier URDF vers les structures URDF du parseur (composants \verb;/urdfdom et /urdfdom_headers; du parseur URDF)
+\item[$\centerdot$ metapodfromurdf:] Génération du nouveau champ dans le fichier d'entête $<nom\_modèle>.hh$ dans \emph{metapod}
+\item[$\centerdot$ Rétro-compatibilité:] création d'un drapeau de compilation pour assurer la rétro-compatibilité de \emph{metapod} pour dé-corréler l'intégration de \emph{metapod} et du parseur URDF dans leurs bases officielles respectives. Ce drapeau peut prendre trois valeurs possibles: \verb;ALL_ON; $\longrightarrow$ toutes les articulations $\in fd$; \verb;ALL_OFF; $\longrightarrow$ toutes les articulations $\in id$; \verb;FROM_URDF; $\longrightarrow$ les articulations sont classées en fonction du champ \verb;fwd_dyn; du modèle URDF XML. Les deux premières configurations permettent d'intégrer le développement de l'hybride dynamique dans la base officielle de \emph{metapod} sans les dépendances du parseur URDF.
 \end{description}
 \bigskip
-La résolution de l'équation de mouvement de la dynamique hybride se fait en quatre étapes, données dans l'algorithme de dynamique hybride (\cite{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
+
+\paragraph{méthodes matricielles de permutation de vecteurs et matrices}
+La permutation des vecteurs se fait à l'aide d'une classe de la librairie \emph{Eigen} dédiée à ce type d'opération, la classe: \verb;Eigen::PermutationMatrix;. Un objet de cette classe peut être utilisé sous forme de matrice orthogonale: \verb;Eigen::PermutationMatrix::toDenseMatrix(); ; mais aussi sous la forme d'une base de permutation. Dans le premier cas, le produit d'un objet $Q$ de cette classe par une matrice $A$ carrée est un vrai produit matriciel, qui a une complexité de calcul $O(n^3)$ (où $n$ est la taille de la matrice). Dans le deuxième cas, le produit est surchargé par une méthode de permutation de lignes ou de colonnes, de complexité $O(n)$. Il est donc impératif, pour toutes nos permutations, d'utiliser la deuxième forme (instance directe de la classe \verb;Eigen::PermutationMatrix;). On désignera l'objet de cette classe par "opérateur de permutation".
+
+Nous avons mesuré une différence de performance entre les deux méthodes, dans une configuration i7 quadcore, s'élevant à $20\mu s$ pour le produit $Q H Q^T$, sur un temps total d'exécution de l'hybride dynamics d'environ $36\mu s$, ce qui est considérable.
+
+La construction de l'opérateur de permutation pouvait se faire pendant l'une des phases suivantes:
+\begin{itemize}
+  \item la génération par le module \emph{metapodfromurdf} du modèle du robot (fichier .hh)
+  \item la phase de compilation du modèle dans \emph{metapod}
+  \item l'exécution de l'algorithme de dynamique hybride
+\end{itemize}
+l'opérateur de permutation se crée à partir d'un vecteur de permutation (classe \verb;Matrix; de Eigen) qu'on rempli suivant les permutations désirées. Le soin nous est réservé de vérifier que ces permutations équivalent à une matrice de permutation $Q$ orthogonale. Nous avons choisi d'éviter d'introduire dans le module \emph{metapodfromurdf} des dépendances avec les algorithmes de \emph{metapod}. De plus, remplir ces vecteurs en parcourant l'arbre cinématique en phase de compilation est assez complexe, faisant appel à des "metafonctions". On peut se permettre de faire le remplissage en phase d'exécution de \emph{metapod} puisque l'opérateur de permutation est calculé une bonne fois pour toutes. On choisit de le faire dans le constructeur de l'objet de la classe du modèle (classe \verb;<nom_modele>;), donc avant tout appel possible de la méthode de dynamique hybride \verb;chda();.
+
+\paragraph{résolution du système...}
+Pour la suite, la résolution de l'équation de mouvement de la dynamique hybride se fera donc en quatre étapes, données dans l'algorithme de dynamique hybride (\cite{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
 \begin{enumerate}
 \item calculer $C'$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
 \item calculer $H_{11}$
@@ -759,7 +803,6 @@ La résolution de l'équation de mouvement de la dynamique hybride se fait en qu
 
 
 \subsection{calcul de C'}
-%description de l'algorithme RNEA modifié
 
 $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une accélération nulle pour les articulations \emph{fd} ($\ddot{q}_1=0$) et l'accélération donnée $\ddot{q}_2$ pour les articulations \emph{id}. en effet on obtient:
 
@@ -798,9 +841,7 @@ $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une
 \end{bmatrix} 
 \end{equation}
 \medskip
-Les composantes $C'_1$ et $C'_2$ s'obtiennent donc en calculant les couples moteurs $\tau_1$ et $\tau_2$\footnote{%
-Dans l'équation \eqref{equ_equationMvt_dynHyb1}, les matrices ou vecteurs $H_{11}$, $H_{21}$, $H_{22}$, $C_1$ et $C_2$ sont constants par rapport aux variables $\ddot{q}$ et $\tau$. Sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\), la valeur de $C'$ est directement fixée par la relation \eqref{equ_cPrime}, et reste valable pour la suite de la résolution du problème. Par contre, $\tau_1$ et $\tau_2$ sont des variables déterminées par la fonction $ID$, et valables uniquement sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\). Leurs valeurs intermédiaires servent uniquement à calculer $C'$.%
-} grâce à la fonction de dynamique inverse (\gls{gls_rnea}) suivante:
+Les composantes $C'_1$ et $C'_2$ s'obtiennent donc en calculant les couples moteurs $\tau_1$ et $\tau_2$\footnotemark[2]grâce à la fonction de dynamique inverse (\gls{gls_rnea}) suivante:
 
 \begin{equation}
 C'=ID \left( q,\dot{q},Q^T
@@ -810,6 +851,9 @@ C'=ID \left( q,\dot{q},Q^T
 \end{bmatrix} \right)
 \end{equation}
 
+\footnotetext[2]
+{Dans l'équation \eqref{equ_equationMvt_dynHyb1}, les matrices ou vecteurs $H_{11}$, $H_{21}$, $H_{22}$, $C_1$ et $C_2$ sont constants par rapport aux variables $\ddot{q}$ et $\tau$. Sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\), la valeur de $C'$ est directement fixée par la relation \eqref{equ_cPrime}, et reste valable pour la suite de la résolution du problème. Par contre, $\tau_1$ et $\tau_2$ sont des variables déterminées par la fonction $ID$, et valables uniquement sous l'hypothèse \(\ddot{q}=\begin{bmatrix} 0 & \ddot{q}_2\end{bmatrix}^T\). Leurs valeurs intermédiaires servent uniquement à calculer $C'$.}
+
 Parmi les paramètres classiques de la fonction $ID$, nous avons remplacé $\ddot{q}$ par 
 \(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\), 
 ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes les variables qui étaient regroupées dans le vecteur réordonné $\ddot{q}_1$.\\
@@ -817,19 +861,9 @@ ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes le
 
 \subsubsection{implémentation}
 
-\begin{itemize}
-  \item[•] choix de la méthode de permutation de la librairie Eigen: construction d'un objet "permutation de matrices" à partir des classes Eigen (vecteur de permutation \emph{PermutationBase} incluant des méthodes optimisées de permutation de lignes et colonnes, forme matricielle \emph{PermutationMatrix} pour la multiplication directe $Qm$ ou $mQ^T$.)
-  \item[•] remplissage du vecteur de permutation: Choix de l'emplacement du calcul de ce vecteur dans l'une des phases successives:
-  \begin{itemize}
-    \item de génération du fichier de modèle du système dans l'architecture \emph{metapod}
-    \item phase de compilation du fichier de modèle et de \emph{metapod}
-    \item exécution de l'algorithme de dynamique hybride
-  \end{itemize}
-\end{itemize}
-\medskip
 Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'entrée $\ddot{q}$ pour obtenir la forme désirée \(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\):
-\begin{equation*}
-\ddot{q} \xmapsto[\textnormal{permutation $Q$}]{} 
+\begin{align*}
+&\ddot{q} \xmapsto[\textnormal{permutation $Q$}]{} 
 \begin{bmatrix}
   \ddot{q}_1 \\
   \ddot{q}_2
@@ -844,18 +878,16 @@ Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'
 \begin{bmatrix}
   0 \\
   \ddot{q}_2
-\end{bmatrix}
-\end{equation*}
+\end{bmatrix} \\
 \medskip
-Et ci-dessous le calcul de $C'_1$ et $C'_2$:
-\begin{equation*}
-\left. \ddot{q} \right\vert_{\ddot{q}_1=0} \xmapsto[C'=ID(q,\dot{q},\left. \ddot{q} \right\vert_{\ddot{q}_1=0})]{} C'
+&\textnormal{et ...} \\
+&\left. \ddot{q} \right\vert_{\ddot{q}_1=0} \xmapsto[C'=ID(q,\dot{q},\left. \ddot{q} \right\vert_{\ddot{q}_1=0})]{} C'
 \xmapsto[\textnormal{permutation $Q$}]{} 
 \begin{bmatrix}
   C'_1 \\
   C'_2
 \end{bmatrix}
-\end{equation*}
+\end{align*}
 
 
 \subsection{calcul de H11 (sous-matrice d'inertie)}
@@ -889,7 +921,7 @@ Q H Q^T =
 \xmapsto[\textnormal{extraire la matrice $H_{11}$ de $H$}]{} H_{11}
 \end{equation*}
 
-COMPLETER: décrire les fonctions Eigen et outils metapod utilisés
+L'extraction de la matrice $H_{11}$ se fait simplement à l'aide d'une fonction \emph{Eigen} templatée, de copie de sous blocs de matrice.
 
 
 \subsection{résolution du système linéaire}
@@ -1074,21 +1106,18 @@ H_{21} \ddot{q}_1
 \subsubsection{Implémentation}
 
 Les éléments $C'_2$, $QHQ^T$ et $\ddot{q}_1$ sont connus. On extrait $H_{21}$ de la matrice $QHQ^T$. On calcule $\tau_2$ suivant \eqref{equ_tau}, on le concatène à $\tau_1$ et on restitue l'ordre initial des variables. On fait de même pour $\ddot{q}_1$, $\ddot{q}_2$ et $\ddot{q}$.
-
-COMPLETER: fonctions Eigen et outils metapod utilisés
-
-
 On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
 \begin{spacing}{1.5}
 \begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
 (1)
 \BEGIN
-  \COMMENT{\textbf{Calul de $C'$, $C'_1$ et $C'_2$}} \\
+  \textnormal{\# Calul de $C'$, $C'_1$ et $C'_2$} \\
   \ddot{q}_{perm} \GETS Q \ddot{q} \\
   (\ddot{q}_{perm})_{i \in [1,\emph{fd}]} \GETS 0 \\
   \ddot{q}_2 \GETS (\ddot{q}_{perm})_{i \in [\emph{fd}+1,n_{dof}]} \\
@@ -1101,7 +1130,7 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 \END \\
 (2)
 \BEGIN
-  \COMMENT{\textbf{Calcul de $H_{11}$}} \\
+  \textnormal{\# Calcul de $H_{11}$} \\
   model.H \GETS crba(model,q) \\
   H_{perm} \GETS Q model.H Q^T \\
   H_{11} \GETS (H_{perm})_{i,j \in [1,\emph{fd}]} \\
@@ -1110,18 +1139,19 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 \begin{pseudocode}[display]{}{}
 (3)
 \BEGIN
-  \COMMENT{\textbf{Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$}} \\
+  \textnormal{\# Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$} \\
   \tau_{perm} \GETS Q \tau \\
   \tau_1 \GETS (\tau_{perm})_{i \in [1,\emph{fd}]} \\
   \tau_2 \GETS {i \in [\emph{fd}+1,n_{dof}]} \\
   b \GETS \tau_1 - C'_1
   A \GETS H_{11} \\
-  lltOfH11 \GETS LLT(A) \COMMENT{création du solveur LLT} \\
-  \ddot{q}_1 \GETS compute(b) \COMMENT{résolution du système} \\
+  lltOfH11 \GETS LLT(A) \hfill \textnormal{\# création du solveur} \\
+  \ddot{q}_1 \GETS lltOfH11.solve(b) \hfill \textnormal{\# résolution} \\
 \END \\
 (4)
 \BEGIN
-  \COMMENT{\textbf{Calcul de $\tau_2$ et reconstruction des vecteurs de sortie $\ddot{q}$ et $\tau$}} \\
+  \textnormal{\# Calcul de $\tau_2$ et reconstruction des vecteurs de} \vspace{-0.2cm} \\
+  \textnormal{\# sortie $\ddot{q}$ et $\tau$} \\
    H_{21} \GETS (QHQ^T)_{n_{\emph{fd}+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{\emph{fd}}} \\
   \tau_2 \GETS C'_2 + H_{21} \ddot{q}_1 \\
   \tau \GETS Q^T \begin{bmatrix} \tau_1 & \tau_2 \end{bmatrix}^T \\
@@ -1131,24 +1161,6 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 \end{spacing}
 \end{multicols}
 \end{minipage}}
-
-
-\section{tests unitaires et validation}
-
-
-
-
-- tests unitaires des fonctions et sous-fonctions implémentées
-
-- mesure du temps d'exécution de chacune des étapes
-
-- évolution de ces mesures en fonction du nombre d'articulations FD
-
-- temps d'exécution global
-
-- précision obtenue
-
-- utilisation de vecteurs aléatoires pour les tests unitaires
 
 
 \section{mesure de performances et optimisations de l'algorithme} \label{ch_impl_optimisation}
@@ -1395,12 +1407,12 @@ On présente ci-dessous l'algorithme global \gls{acr_crba} tel que présenté pa
 
 \vspace{0.5cm}
 
+\paragraph{Implémentation:}
+On implémente l'algorithme \ref{algo_crbaFeatherstone} sous \emph{metapod} comme suis:
 \begin{flushleft}
-Et ci-dessous la version de \emph{metapod}: \\
-\end{flushleft}
-
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
@@ -1414,13 +1426,14 @@ Et ci-dessous la version de \emph{metapod}: \\
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
 		  F_i \GETS {I_i^c} \: S_i \\
 		  H_{ii} \GETS {S_i^T} F_i \\
-		  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,0}
+		  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor, \vspace{-0.2cm}\\
+		                               model,i,0}
 		\ENDPROCEDURE
 	  \end{pseudocode}
     
 		\begin{pseudocode}[display]{}{}
 		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
-		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    \textnormal{\# $j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
 		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
 		    H_{ij} \GETS {F_i^T} S_j \\
 		    H_{ji} \GETS H_{ij}^T
@@ -1437,6 +1450,7 @@ Et ci-dessous la version de \emph{metapod}: \\
 	  \end{spacing}
 \end{multicols}
 \end{minipage}}
+\end{flushleft}
 \bigskip
 
 \paragraph{\textsc{DepthFirstTraversal}, \textsc{BackwardTraversalPrev} et les visiteurs:}
@@ -1536,10 +1550,19 @@ Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé
 \end{multicols}
 
 
-Et ci-dessous la version \emph{metapod}:\\
+\paragraph{Implémentation:}
+La génération de l'ensemble $\nu(fd)$ se fait via un paramètre de sélection \verb;jointNuOfFwdDyn; dans la classe \verb;Node<i>; du modèle du robot. Ce paramètre est un booléen statique et constant indiquant si l'articulation $\in fd$ (= \verb;true;) ou pas (= \verb;false;). Il est calculé à la compilation de la classe \verb;Robot; (modèle du robot). L'algorithme vu précédemment décrivant $\nu(fd)$ nous dit que:
+\begin{equation*}
+\lambda(i) \in \nu(fd) \implies i \in \nu(fd)
+\end{equation*}
+Cette relation est suffisante pour construire l'ensemble si on l'applique en parcourant l'arbre cinématique en profondeur d'abord. L'ordre de génération des classes \verb;Node<i>; dans la classe \verb;Robot;, par le module \emph{metapodfromurdf} suit cet ordre de parcours. Il suffit donc d'appliquer cette relation à l'attribut \verb;jointNuOfFwdDyn; de la classe \verb;Robot;.
+
+\begin{flushleft}
+On implémente l'algorithme \ref{algo_crbaFeatherstone} sous \emph{metapod} comme suis:\\
 
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
@@ -1556,7 +1579,8 @@ Et ci-dessous la version \emph{metapod}:\\
 				  F_i \GETS {I_i^c} \: S_i \\
 				  H_{ii} \GETS {S_i^T} F_i \\
 				  \textcolor{blue}{i_{end} \GETS \CALL{rootNodeOfNuFD}{model,i}} \\
-				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,\textcolor{blue}{i_{end}}}
+				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor, \vspace{-0.2cm}\\
+				                               model,i,\textcolor{blue}{i_{end}}}
 		  \END
 		\ENDPROCEDURE \\
 		\PROCEDURE{rootNodeOfNuFD}{model,i_{start}}
@@ -1566,7 +1590,7 @@ Et ci-dessous la version \emph{metapod}:\\
     
 		\begin{pseudocode}[display]{}{}
 		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
-		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    \textnormal{\# $j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
 		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
 		    \IF \textcolor{blue}{j \in fd} \THEN
 		    \BEGIN
@@ -1586,6 +1610,7 @@ Et ci-dessous la version \emph{metapod}:\\
 	  \end{spacing}
 \end{multicols}
 \end{minipage}}
+\end{flushleft}
 
 \paragraph{Calcul de $i_{end}$ dans \textsc{rootNodeOfNuFD}:}
 Dans l'appel de \textsc{BackwardTraversalPrev}, On veut remonter l'arbre tant que le noeud visité $\in \nu(fd)$, donc jusqu'à la racine de l'arbre $\{\nu(fd) \cap \kappa(i)\}$ (dans l'exemple de la figure \ref{fig_optimH}, ce serait le noeud $3$ si $i=11$). Le paramètre $i_{end}$ doit être le parent de cette racine.
@@ -1629,10 +1654,11 @@ Comme pour chaque terme $H_{ij}$ calculé, on calcule sa transposée, on obtient
 
 
 \begin{flushleft}
- On applique les changements à l'algorithme CRBA précédent: \\
- \end{flushleft}
+On applique les changements à l'algorithme CRBA précédent: \vspace{0.3cm} \\
+
 
 \begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns\small
     	\begin{spacing}{1.5}
@@ -1681,12 +1707,13 @@ Comme pour chaque terme $H_{ij}$ calculé, on calcule sa transposée, on obtient
 	  \end{pseudocode}
 	  \end{spacing}
 \end{multicols}
-\end{minipage} \\
+\end{minipage} \vspace{0.3cm} \\
 
-L'algorithme adapté à \emph{metapod} donne: \\
+L'algorithme adapté à \emph{metapod} donne: \vspace{0.3cm} \\
 
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
 \setlength{\columnseprule}{0.5pt}
 \begin{multicols}{2}\raggedcolumns
     	\begin{spacing}{1.5}
@@ -1709,7 +1736,8 @@ L'algorithme adapté à \emph{metapod} donne: \\
 				  \END
 				  \ELSE
 				      \textcolor{blue}{i_{end} \GETS \CALL{rootNodeOfNuFD}{model,i}} \\
-				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor,model,i,\textcolor{blue}{i_{end}}}
+				  \CALL{BackwardTraversalPrev}{crbaBckwrdVisitor, \vspace{-0.2cm}\\
+				                               model,i,\textcolor{blue}{i_{end}}}
 		  \END
 		\ENDPROCEDURE \\
 		\PROCEDURE{rootNodeOfNuFD}{model,i_{start}}
@@ -1719,7 +1747,7 @@ L'algorithme adapté à \emph{metapod} donne: \\
     
 		\begin{pseudocode}[display]{}{}
 		\PROCEDURE{crbaBckwrdVisitor.discover}{model,j,j_{prev}}
-		    \COMMENT{$j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
+		    \textnormal{\# $j=\lambda(j_{prev})$. Et lors du premier appel, $j_{prev}=i$.} \\
 		    F_i \GETS {^jX_{j_{prev}}^*} F_i \\
 		    \IF \textcolor{blue}{(i \in fd) \OR (j \in fd)} \THEN
 		    \BEGIN
@@ -1739,9 +1767,7 @@ L'algorithme adapté à \emph{metapod} donne: \\
 	  \end{spacing}
 \end{multicols}
 \end{minipage}}
-
-
-
+\end{flushleft}
 
 
 
@@ -1761,6 +1787,110 @@ Cette fois-ci, nous voulons calculer $\tau_2$ à l'aide  de l'équation:
                                                        0 
                                                    \end{bmatrix} \right)
 \end{equation}
+
+
+\section{tests unitaires et validation}
+
+\paragraph{méthodes de test unitaire des fonctions et sous-fonctions implémentées}
+
+Chacune des sous fonctions implémentées faisant partie de l'algorithme de dynamique hybride ou servant juste d'outil de test, ainsi que chacune des quatre étapes de l'algorithme principal lui-même ont été testés unitairement. L'algorithme global a ensuite été testé sur des vecteurs d'entrée construits aléatoirement mais de sorte à ce qu'on puisse vérifier les résultats numériques et leur précision.
+
+Les fonctions de tests ont été créées à l'aide de \verb;BOOST; (macro \verb;BOOST_AUTO_TEST_CASE;) pour la génération automatique des exécutables respectifs, ou pour permettre leur appel par l'exécutable de benchmarking\footnote{Le benchmarking permet ici le test de performance en vitesse d'exécution de tous les algorithmes implémentés sous \emph{metapod}.}.
+Voici la liste de toutes les méthodes créées et testées. On rappelle leur fonction principale:
+\begin{description}
+\item[$\centerdot$ crba:] calcul de la matrice d'inertie $H$
+\item[$\centerdot$ hcrba:] calcul de la matrice d'inertie réduite $H_{11}$
+\item[$\centerdot$ chda:] calcul de toutes les grandeurs inconnues ($H$, $H_{11}$, $H_{21}$, $C'$, $\tau$ inconnus, $\ddot{q}$ inconnus,s etc)
+\item[$\centerdot$ initnufwddyn:] calcul, à la compilation de \emph{metapod}, du champ statique \verb;jointNuOfFwdDyn; de chacune des classes \verb;Node<i>;. Ce champ booléen indique si le corps/noeud de l'arbre cinématique du robot $\in \nu(fd)$ (est supporté par au moins une articulation $fd$)
+\item[$\centerdot$ qcalc:] remplissage des vecteurs définissant la permutation matricielle $Q$, et création de l'opérateur de permutation $Q$ (classe \verb;PermutationMatrix;)
+\item[$\centerdot$ initnodeidconf:] contient deux fonctions. \verb;initNodeIdConf; rempli un vecteur de configuration $v$ de la dimension de $q$ (nombre de degrés de liberté du robot) suivant l'ordre spécifié dans le modèle (jambe gauche $\rightarrow$ jambe droite $\rightarrow$ ...). On obtient $v[i]=( <index du noeud> | indication fd ou id )$. \verb;initNodeIdConfReordRef; rempli un vecteur $v$ de même type, mais les noeuds $fd$ d'abord, et pour chacun des groupes $fd/id$, suivant l'ordre de parcours en profondeur de l'arbre cinématique.
+\item[$\centerdot$ initconf:] initialisation des vecteurs de test $q$, $\dot{q}$ et $\ddot{q}$ à partir de fichiers de données de référence.  Ces vecteurs sont remplis suivant l'ordre spécifié dans le modèle (jambe gauche $\rightarrow$ jambe droite $\rightarrow$ ...) Nous avons rajouté la prise en compte de la classification des articulations $fd/id$.
+\item[$\centerdot$ rootNode\_Of\_NuFD:] à partir d'un noeud donné $i$ de départ, calcule la racine de l'arbre résultant de l'intersection de $\nu(fd)$ et de $\kappa(i)$, \cad le noeud atteignable $j$ tel que $j$ est le plus proche de la racine de l'arbre du robot et $j \in \nu(fd)$.
+\end{description}
+\noindent
+Toutes les fonctions ont été testées pas à pas à l'aide d'un outil de "debug" \textbf{ddd} (GUI basé sur \textbf{gdb}), ou les plugins de test de \emph{QTcreator}. Des scripts de tests unitaires ont été implémentés pour les fonction réalisant des calculs dynamiques. Nous comparons souvent les vecteurs d'accélérations ($rad \cdot s^{-1}$) ou de couples (Newtons) avec des vecteurs de référence pour valider les résultats obtenus. La précision voulue est de $1 mN$ pour les couples et de $10^{-3} rad \simeq 0.05 deg$.
+
+\paragraph{initnufwddyn}
+Pour valider le champ \verb;jointNuOfFwdDyn; de la classe \verb;Node<i>;, le plus simple est de générer une trace complète de ce paramètre pour l'ensemble des classes \verb;Node<i>;. On obtient ainsi une table de booléens \verb;nuOfFwdDyn[i];. Il faut ensuite parcourir l'arbre cinématique à l'aide de la procédure de référence \textsc{DepthFirstTraversal} et recalculer \verb;nuOfFwdDyn[i]; suivant la relation définissant $\nu(fd)$. Les deux tables doivent être identiques. Il s'agit en fait de comparer le résultat d'un calcul obtenu en mode compilation avec celui obtenu en mode exécution.
+
+\paragraph{test du CRBA:}
+Nous avons amélioré la validation de  cet algorithme. Le vecteur en entrée ne permettait pas de mettre en évidence une erreur au niveau des matrices de passage de repère $^jX_i$. Aussi, nous avons rajouté une trace de l'état géométrique et dynamique interne du robot: $^jX_p, X_t, X_j, S, ^iX_0, v_i, a_i, I_i^c$ ainsi que les forces ou couples transmit à travers chaque articulation. Ceci nous a permis de détecter les changements au niveau de ces états, induits par une optimisation appliquée aux matrices de passage $^sX_p$.
+
+\paragraph{test du RNEA:}
+Ce test applique le RNEA à une configuration de référence $q, \dot{q}, \ddot{q}$ et compare la sortie, \cad les couples calculés aux couples de référence attendus:
+\begin{equation*}
+\tau = rnea(q,\dot{q},\ddot{q})
+\end{equation*}
+Nous avons rajouté un calcul alternatif de ces couples basé sur l'équation de mouvement:
+\begin{equation*}
+H \ddot{q} + C = \tau \qquad \textnormal{où C est l'ensemble des forces de contrainte et inclu les forces exterieures $f^{ext}$}
+\end{equation*}  
+Or le RNEA nous donne la valeur de $C$ ($C = rnea(q,\dot{q},\ddot{q}=0)$) et le CRBA nous donne la matrice $H$. Il ne nous reste plus qu'à comparer les deux valeurs de $\tau$.
+
+\paragraph{test de qcalc:}
+Nous validons l'opérateur de permutation Q (classe \verb;Eigen::PermutationMatrix;) et sa forme matricielle en vérifiant les propriété de Q:
+%\setlength{\intextsep}{2pt}
+%\begin{wrapfigure}[]{r}{0.4\textwidth}
+%  \begin{flushright}
+%    \incFig[1]{.3\textwidth}
+%    \caption{}
+%    \label{fig_}
+%  \end{flushright}
+%\end{wrapfigure}
+\begin{itemize}
+\item[$\centerdot$] les index dans le vecteur base de la permutation sont uniques
+\item[$\centerdot$] la matrice Q est orthogonale ($Q Q^T = I \iff Q^{-1} = Q^T$)
+\item[$\centerdot$] générer un vecteur contenant la liste des numéros de noeud (numéro dans l'arbre cinématique), ordonnés suivant l'ordre utilisé pour un vecteur de configuration $q$ (suivant le champ \verb;q_idx; de la classe \verb;Node<i>;)
+\item[$\centerdot$] appliquer la permutation $Q$ à ce vecteur
+\item[$\centerdot$] générer un autre vecteur du même type mais en deux coups, regroupant ainsi les noeuds $fd$en premier (appliquer l'ordre de parcours \gls{acr_algoDFS} et non le mapping \verb;q_idx;)
+\item[$\centerdot$] les deux vecteurs générés doivent être identiques
+\end{itemize}
+
+
+\paragraph{test du HCRBA:}
+L'objectif de ce test est de comparer le résultat de l'algorithme HCRBA avec celui du CRBA classique (matrice $H$ complète) auquel on a mis à 0, à posteriori, tous les termes qu'on peut associer à la sous-matrice $H_{22}$:\vspace{-1cm}
+\begin{spacing}{1.5}
+\begin{align*}
+&model,q \xmapsto[HCRBA]{} 
+H_{red} \quad \textnormal{tel que} \quad H_{red} \xmapsto[Q H_{red} Q^T]{} 
+H_{red}^Q = 
+\begin{bmatrix}
+  \left[H_{11}\right]_{fd \times fd} & \left[H_{12}\right]_{fd \times id} \\
+  \left[H_{21}\right]_{id \times fd} & \mathbf{\left[0\right]_{id \times id}} \\
+\end{bmatrix} \\
+&model,q \xmapsto[CRBA]{} H \xmapsto[Q H Q^T]{} H^Q \xmapsto[H_{22} \leftarrow 0]{} H_{\textsc{ref}}^Q \xmapsto[Q^T H Q]{} H_{\textsc{ref}}
+\end{align*}
+\end{spacing}
+
+$H_{red}$ st $H_{\textsc{ref}}$ doivent être identiques. Si on observe une différence au niveau du terme $H_{ij}$, on compare l'exécution de \verb;crba.hh; et \verb;hcrba.hh; au moment du calcul de $H_{ij}$. C'est ainsi que nous avons identifié les erreurs sur les matrices $^sX_p$.
+
+\paragraph{test du CHDA:}
+La particularité de cet algorithme est qu'il prend en entrée le vecteur d'accélérations $\ddot{q}$ et celui des couples $\tau$, en plus des vecteurs $q$, $\dot{q}$. $\ddot{q}$ et $\tau$ sont à priori incomplets, ou n'ont qu'un sous-ensemble de variables valides:
+\begin{itemize}
+\item[$\centerdot$ vecteur $\ddot{q}$:] toutes les valeurs de $\ddot{q}$ correspondant à une articulation $id$ sont valides, les autres sont invalides et peuvent être affectées à "nan" ou autre valeur constante comme \verb;0xFF FF FF FF;
+\item[$\centerdot$ vecteur $\tau$:] toutes les valeurs de $\tau$ correspondant à une articulation $fd$ sont valides, les autres sont invalides
+\end{itemize}
+On dispose au départ de vecteurs de référence $\ddot{q}$ et $\tau$ complets (tous les éléments sont valides). Le test consiste à:
+\begin{itemize}
+\item[$\centerdot$] générer deux vecteurs de configuration d'entrée, $\ddot{q}$ et $\tau$, à trous, \cad formatés suivant la description ci-dessus, à partir de vecteurs de référence.
+\item[$\centerdot$] appliquer l'algorithme aux vecteurs $\ddot{q}$ et $\tau$. Après cette étape, toutes leurs valeurs sont supposées valides.
+\item[$\centerdot$] comparer les résultats obtenus $\ddot{q}$ et $\tau$ avec les vecteurs de référence respectif.
+\end{itemize}
+
+Dans une deuxième phase, on poussé les tests plus loin en utilisant des vecteurs de référence générés aléatoirement (Eigen::confVector::Random). Les valeurs obtenues par cette méthode sont des flottants (valeurs comprises entre 0 et 1). Pour le vecteur $q$, nous avons choisi de multiplier ses valeurs par $\pi$ pour retrouver des angles $q$ compris entre $-\pi$ et $\pi$.
+En fait, les sous-étapes de calcul du CHDA sont testées à travers les tests des sous-fonctions précédentes.
+
+\paragraph{Mesure du temps d'exécution de chacune des étapes}
+Dans le but de se focaliser l'optimisation de l'algorithme CHDA sur les opérations les plus coûteuses, nous avons mesuré la durée totale de calcul ainsi que la durée de chacune des 4 étapes de traitement de l'algorithme. Pour la mesure de temps en $\mu s$, on utilise la classe \verb;Timer; de \emph{metapod} qui fourni une interface très simple (\verb;start(), stop(), resume();). Nous mesurons le temps sur 100000 boucles.
+
+
+\paragraph{Evolution de ces mesures en fonction du nombre d'articulations FD}
+
+
+
+\paragraph{Mesure du temps d'exécution par instruction}
+
+
 
 \section{future intégration dans le système de tâches "stack of tasks" de HRP2}
 
