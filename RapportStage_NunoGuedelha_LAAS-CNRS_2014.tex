@@ -724,14 +724,30 @@ Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
 \subsubsection{implémentation}
 
+Si l'objectif est de réarranger l'équation de mouvement comme nous l'avons décrit ci-dessus, nous devons dans un premier temps ajouter la génération de la classification $fd$/$id$ des articulations dans le fichier de modèle généré par metapod lors de sa compilation (fichier header \verb;../metapod/build/include/models/<nom_modele>/<nom_modele>.hh;). Plus précisément, nous voulons faire apparaître dans chaque classe "Node" attribuée à un noeud, un champ statique et constant\footnotemark[1] (booléen) représentant l'attribut $fwdDyn$ ("Forward Dynamics") associé à l'articulation qui supporte la classe "Node":
+\begin{equation*}
+fwdDyn = 
+\begin{cases}
+  0 & \textnormal{l'articulation $\in id \quad$ (on connaît son accélération)} \\
+  1 & \textnormal{l'articulation $\in fd \quad$ (on connaît son couple)}
+\end{cases}
+\end{equation*}
+
+\footnotetext{Le caractère statique et constant de $fwdDyn$ est indispensable à certaines optimisations de meta-programmation.}
+
+
+
+Nous avons vu, dans la section \ref{ch_concepts_implEtContr}, l'architecture globale de \emph{metapod}. On rappelle que dans le fichier de modèle généré, on veut faire En effet, le module \emph{metapodfromurdf} de \emph{metapod} reç
+
+
 Voici un schéma fonctionnel de du parseur URDF.
 
 %include figure
 
-\begin{itemize}
-  \item[représentation de la classification \emph{fd} / \emph{id}] Définition d'un attribut désignant le type d'articulation \emph{fd} ou \emph{id} dans le modèle \gls{acr_urdf} source et dans le modèle du système dérivé dans l'environnement de \emph{metapod} (fichier "header" destinataire).
-  \item[interprétation du modèle URDF dans \emph{metapod}] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
-\end{itemize}
+\begin{description}
+\item[représentation de la classification $fd$ / $id$:] Définition d'un attribut désignant le type d'articulation \emph{fd} ou \emph{id} dans le modèle \gls{acr_urdf} source et dans le modèle du système dérivé dans l'environnement de \emph{metapod} (fichier "header" destinataire).
+\item[interprétation du modèle URDF dans \emph{metapod}:] Reverse engineering du parseur URDF et implémentation Méthode de conversion ("parsing") de la source à la destination pour extraire ces attributs de classification.
+\end{description}
 \bigskip
 La résolution de l'équation de mouvement de la dynamique hybride se fait en quatre étapes, données dans l'algorithme de dynamique hybride (\cite{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
 \begin{enumerate}
@@ -927,6 +943,9 @@ Une description un peu plus détaillée de ces algorithmes sera donnée par  la 
 
 \subsubsection{Implémentation}
 
+
+\paragraph{Choix des librairies d'outils et identification des algorithmes de résolution de système linéaire}.\\
+
 \`{A} ce stade, les coefficients $A$ et $b$ du système d'équations linéaire $Ax=b$ sont connus. Il faut à présent choisir l'\textbf{algorithme de décomposition approprié} pour le résoudre. L'ensemble des composants logiciels liés à la plateforme robotique de \textbf{HRP2} utilisent majoritairement la librairie dynamique d'outils matriciels \emph{Eigen}. Parmi ces composant on distingue:
 \begin{itemize}
 \item la \emph{\gls{acr_sot}}, intégrée dans \textbf{HRP2}
@@ -938,21 +957,23 @@ Une description un peu plus détaillée de ces algorithmes sera donnée par  la 
 En accord avec l'état de ces composants, et avec la stratégie de leur développement et maintenance menée par l'équipe \emph{Gepetto}, l'emploi des méthodes d'\emph{Eigen} était prioritaire dans la mesure de leur disponibilité et compatibilité avec la nature des algorithmes clients. J'ai dressé dans un premier temps la liste complète des algorithmes de décomposition fournis dans \emph{Eigen}, suivant les critères mentionnés plus haut. En voici la description résumée:
 
 \begin{description}
-\item[La décomposition $LU$:] il s"agit d'une méthode de décomposition d'une matrice comme produit d'une matrice triangulaire inférieure $L$ (comme "lower", inférieure) et d'une matrice triangulaire supérieure $U$ (comme "upper", supérieure): $A=LU$ \cite{bib_decompositionLUwikipedia} \cite{bib_decompositionLU_2}
-\item[La décomposition Pivot $LU$ ou $PivLU$] dans les cas où $A$ n'admet pas de décomposition $LU$. On applique alors une permutation aux lignes de $A$, et on obtient la forme: $A=PLU$, où $P$ est une matrice de permutation. Cette décomposition a deux versions, la partielle et la complète. La version complète a une approche générique, et entre autres, calcule le rang de la matrice $A$ et vérifie si celle-ci est inversible. La version partielle n'effectue pas cette vérification, et minimise les calculs nécessaires pour atteindre le résultat final. La version partielle est donc plus rapide, mais plus sensible aux erreurs d'arrondi \cite{bib_decompositionLU_1} section 1.3.1, pages 25-26.
-\item[La décomposition $QR$:] est de la forme: $A=Q R$, où $Q$ est une matrice orthogonale et $R$ une matrice triangulaire \cite{bib_decompositionQRwikipedia}. Cette décomposition est souvent utilisée sur des systèmes linéaires non carrés, et permet, dans ces cas là, de calculer la pseudo-inverse de la matrice $A$.
-\item[La factorisation de Cholesky($:LLT$)] n'est applicable qu'aux matrice symétriques définies positives. Elle décompose $A$ suivant la forme: $A = L L^T$, où $L$ est une matrice triangulaire inférieure. La $LLT$ permet de calculer l'inverse de $A$ ainsi que son déterminant.
-\item[$LDLT$] est une variante de $LLT$. En évitant d'utiliser des résultats de calculs complexes de racine au sein de fractions, la $LDLT$ est plus robuste et potentiellement moins rapide.
-\item[Jacobienne $SVD$ (Singular Value Decomposition):] permet également le calcul de pseudo-inverse d'une matrice non carrée, le calcul du rang, etc. Elle est très utilisée dans des applications de traitement du signal. 
+\item[La décomposition LU:] il s"agit d'une méthode de décomposition d'une matrice comme produit d'une matrice triangulaire inférieure $L$ (comme "lower", inférieure) et d'une matrice triangulaire supérieure $U$ (comme "upper", supérieure): $A=LU$ \cite{bib_decompositionLUwikipedia} \cite{bib_decompositionLU_2}
+\item[Pivot LU ou PivLU] dans les cas où $A$ n'admet pas de décomposition $LU$. On applique alors une permutation aux lignes de $A$, et on obtient la forme: $A=PLU$, où $P$ est une matrice de permutation. Cette décomposition a deux versions, la partielle et la complète. La version complète a une approche générique, et entre autres, calcule le rang de la matrice $A$ et vérifie si celle-ci est inversible. La version partielle n'effectue pas cette vérification, et minimise les calculs nécessaires pour atteindre le résultat final. La version partielle est donc plus rapide, mais plus sensible aux erreurs d'arrondi \cite{bib_decompositionLU_1} section 1.3.1, pages 25-26.
+\item[QR:] est de la forme: $A=Q R$, où $Q$ est une matrice orthogonale et $R$ une matrice triangulaire \cite{bib_decompositionQRwikipedia}. Cette décomposition est souvent utilisée sur des systèmes linéaires non carrés, et permet, dans ces cas là, de calculer la pseudo-inverse de la matrice $A$.
+\item[La factorisation de Cholesky(LLT):] n'est applicable qu'aux matrice symétriques définies positives. Elle décompose $A$ suivant la forme: $A = L L^T$, où $L$ est une matrice triangulaire inférieure. La $LLT$ permet de calculer l'inverse de $A$ ainsi que son déterminant.
+\item[LDLT] est une variante de $LLT$. En évitant d'utiliser des résultats de calculs complexes de racine au sein de fractions, la $LDLT$ est plus robuste et potentiellement moins rapide.
+\item[La décomposition Jacobienne SVD (Singular Value Decomposition):] décompose la matrice $A$ en vecteurs propres, et a la forme: $A = U \Sigma V^\ast$, où $\Sigma$ est la matrice diagonale rectangulaire contenant les valeurs propres de $A$, et où les matrices orthogonales $U$ et $V^\ast$ sont les vecteurs propres de $A$ à gauche et à droite. Cette décomposition permet également le calcul de la pseudo-inverse d'une matrice non carrée, le calcul du rang, etc. Elle est très utilisée dans des applications de traitement du signal. 
 \end{description}
 
-Et un tableau regroupant les caractéristiques et contraintes spécifiques à chacun de ces algorithmes \cite{bib_eigen_tutorial_catalogue}:
+Et un tableau fourni sur le site de Eigen, regroupant les décompositions disponibles sous Eigen, avec leurs caractéristiques et contraintes:
 
-\begin{figure}[H]
+\begin{table}[H]
 \centering
 \includegraphics[width=\textwidth]{figs/decompositionCatalogueEigen1.png}
 \includegraphics[width=\textwidth]{figs/decompositionCatalogueEigen2.png}
-\end{figure}
+\caption[Table caption text]{Liste et caractéristiques des décompositions proposées par Eigen \cite{bib_eigen_tutorial_catalogue}.}
+\label{table:catalogue}
+\end{table}
 
 Tous ces algorithmes ont atteint une très bonne maturité d'implémentation dans la librairie \emph{Eigen}, à part FullPivHouseholderQR, qui est pourtant le plus robuste mais aussi plus lent. Parmi les plus rapides, on trouve les algorithmes de Cholesky, le LLT et le LDLT. Ils intègrent l'optimisation du traitement par blocs et bénéficient quand même d'une bonne fiabilité et précision. Leurs performances bénéficient des conditions les plus restrictives sur la matrice $A$:
 \begin{itemize}
@@ -960,33 +981,50 @@ Tous ces algorithmes ont atteint une très bonne maturité d'implémentation dan
 \item[\textbf{• LDLT:}] $A$ doit être semi-définie positive ou négative
 \end{itemize}
 
-%VERIFIER: Comment montrer que H est définie positive
+%VERIFIER: propriétés de H énoncées en premier dans le chapitre (equation de mouvement)
 Nous choisissons dans un premier temps l'algorithme le plus restrictif, \emph{LLT}, puisque comme vu précédemment, $H$ et $H_{11}$ sont définies positives. Cette décomposition est particulièrement efficace dans le cas de problèmes symétriques de la forme: $D^* D x = b$ \cite{bib_eigen_LLT_desc} où $D$ est une matrice diagonale. Le problème posé ici ne vérifie pas cette condition.
-%VERIFIER: vérifier avec Olivier.
 De plus, la décomposition \emph{LLT} devient instable si la matrice est semi-définie positive, or l'algorithme n'intègre pas la vérification de cette condition. Aussi, le calcul des termes de la matrice triangulaire $L$ utilise la division par des racines carrées, ce qui est une source potentielle d'instabilité. La décomposition \emph{LDLT} est plus robuste, évitant l'emploi de racines carrées, comme on peut voir dans comparaison des deux algorithmes ci-dessous:
 
-COMPLETER: comparer les complexités O()
+\setlength{\intextsep}{0pt}
+\setlength{\columnsep}{0cm}
+\begin{wraptable}[7]{r}{0.45\textwidth}\raggedleft
+\begin{tabular}[H]{|l|c|}
+\hline
+Décomposition ou méthode & Complexité $O$ \\ \hline \hline
+inversion directe de matrice & $O(n^3)$ \\ \hline
+LLT et LDLT & $O(n^3/3)$ \\ \hline
+LU & $O(2n^3/3)$ \\ \hline
+QR & $O(4n^3/3)$ \\
+\hline
+\end{tabular}
+\end{wraptable}
 
+\paragraph*{Complexités des différentes méthodes:}
+Comparons ci-contre la complexité de calcul $O$ de ces décompositions avec celle de l'inversion directe de la matrice $A$, en fonction de la taille du problème (taille de la matrice à inverser). La complexité théorique est de loin la meilleure pour les décompositions $LLT$ et $LDLT$. Idéalement, il faudrait vérifier les performances de chacun d'elles sur notre système linéaire et vérifier dans chaque cas la stabilité et précision des résultats, ainsi que la vitesse d'exécution. Eigen fournit, à cet effet, une interface pour tester en ligne le système à résoudre. Nous avons choisit de tester certaines des décompositions de la librairie Eigen directement dans \emph{metapod}:
+\begin{itemize}
+\item[$\centerdot$] La variante \emph{ColPivHouseholderQR} de QR donnait des résultats assez imprécis. La variante \emph{FullPivHouseholderQR} donnait de meilleurs résultats pour les quelques vecteurs d'entrée de référence testés ($q, \dot{q}, \ddot{q}$) mais ces deux décomposition QR restent très lentes et ont donc été abandonnées rapidement dans notre approche.
+\item[$\centerdot$] $LLT$  et $LDLT$ ont donné des résultats très satisfaisants en précision et vitesse de calcul. Ces résultats seront détaillés plus loin dans la section "tests unitaires"
+\end{itemize}
 
-Il faut tester les deux algorithmes sur notre système linéaire et vérifier dans chaque cas la stabilité et précision des résultats, ainsi que la vitesse d'exécution.
-
-voici les étapes réalisées pour la résolution du système linéaire:
-
-COMPLETER: fonctions Eigen et outils metapod utilisés
-
-Il ne nous reste plus que le calcul du vecteur $\tau_2$.
+\paragraph{Choix final:} La décomposition retenue a été la $LDLT$. La classe correspondante Eigen est:
+\begin{verbatim}
+Eigen::LDLT< _MatrixType, _UpLo >
+\end{verbatim}
+Où \verb;_MatrixType; est le type de la matrice $H$ (éléments à virgule flottante, taille $n_{fd} \times n_{fd}$) et \verb;_UpLo; est la partie triangulaire de $H$ qui sera utilisée dans la décomposition (par défaut la partie inférieure). On instancie cette classe en passant au constructeur la matrice à décomposer $H$. On résout ensuite le système en appelant la méthode \verb;solve; :
+\begin{verbatim}
+Eigen::LDLT<TypeOfMatrixH11> ldltOfH11(H11);
+ddq1 = ldltOfH11.solve(tau1 - C1prime);
+\end{verbatim}
 
 
 \subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau}
 
 Nous reprenons maintenant la deuxième équation du système linéaire \eqref{equ_equationMvt_dynHyb2}:
-\begin{spacing}{1.5}
 \begin{align}
 &H_{21} \ddot{q}_1 - \tau_2 = -C'_2 \notag \\
 \iff
 &\tau_2 = C'_2 + H_{21} \ddot{q}_1 \label{equ_tau}
 \end{align}
-\end{spacing}
 
 Cette équation représente la deuxième ligne de la relation matricielle proposée par Featherstone \cite{bib_featherstone} section 9.1 page 173:
 
