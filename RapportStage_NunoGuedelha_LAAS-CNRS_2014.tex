@@ -61,6 +61,7 @@
 
 %Packages pour les listes
 %\usepackage{enumitem}
+\usepackage{moreverb}
 
 \begin{document}
 
@@ -1793,7 +1794,7 @@ Cette fois-ci, nous voulons calculer $\tau_2$ à l'aide  de l'équation:
 
 \paragraph{méthodes de test unitaire des fonctions et sous-fonctions implémentées}
 
-Chacune des sous fonctions implémentées faisant partie de l'algorithme de dynamique hybride ou servant juste d'outil de test, ainsi que chacune des quatre étapes de l'algorithme principal lui-même ont été testés unitairement. L'algorithme global a ensuite été testé sur des vecteurs d'entrée construits aléatoirement mais de sorte à ce qu'on puisse vérifier les résultats numériques et leur précision.
+Chacune des sous fonctions implémentées faisant partie de l'algorithme de dynamique hybride ou servant juste d'outil de test, ainsi que chacune des quatre étapes de l'algorithme principal lui-même ont été testées unitairement. L'algorithme global a ensuite été testé sur des vecteurs d'entrée construits aléatoirement mais de sorte à ce qu'on puisse vérifier les résultats numériques et leur précision (voir le test de l'algorithme hybride CHDA plus loin).
 
 Les fonctions de tests ont été créées à l'aide de \verb;BOOST; (macro \verb;BOOST_AUTO_TEST_CASE;) pour la génération automatique des exécutables respectifs, ou pour permettre leur appel par l'exécutable de benchmarking\footnote{Le benchmarking permet ici le test de performance en vitesse d'exécution de tous les algorithmes implémentés sous \emph{metapod}.}.
 Voici la liste de toutes les méthodes créées et testées. On rappelle leur fonction principale:
@@ -1865,7 +1866,28 @@ H_{red}^Q =
 $H_{red}$ st $H_{\textsc{ref}}$ doivent être identiques. Si on observe une différence au niveau du terme $H_{ij}$, on compare l'exécution de \verb;crba.hh; et \verb;hcrba.hh; au moment du calcul de $H_{ij}$. C'est ainsi que nous avons identifié les erreurs sur les matrices $^sX_p$.
 
 \paragraph{test du CHDA:}
-La particularité de cet algorithme est qu'il prend en entrée le vecteur d'accélérations $\ddot{q}$ et celui des couples $\tau$, en plus des vecteurs $q$, $\dot{q}$. $\ddot{q}$ et $\tau$ sont à priori incomplets, ou n'ont qu'un sous-ensemble de variables valides:
+
+%COMPLETER
+% wrapfigure of simple humanoide
+%On peut voir ci-contre un schéma cinématique du robot, représentant les corps et degrés de liberté des articulations. 
+On a validé l'algorithme sur un modèle de robot humanoïde, simplifié par rapport au modèle de \textbf{HRP2}. En effet, ne spécifie pas de boîte de collision ni de texture d'affichage pour les différents corps. Il ne définit pas non plus les butées, ni les limites en vitesse et effort des articulations. Ce modèle a 7 degrés de liberté par bras (une rotule à l'épaule et au poignet, un coude), 6 degrés de liberté à chaque jambe (1 rotule à la anche, le genou et deux rotations à la cheville). On a choisit librement un sous-ensemble d'articulations \emph{fd} de sorte à varier les cas de figure à tester. Le modèle URDF défini ainsi comprend 7 articulations en mode \emph{fd} dont voici la liste:
+\begin{itemize}
+\item[$\centerdot$] la cheville droite (2 rotations)
+\item[$\centerdot$] le genou gauche (1 rotations)
+\item[$\centerdot$] le coude droit (1 rotations)
+\item[$\centerdot$] l'épaule droite (3 rotations)
+\end{itemize}
+%<joint name="RLEG_ANKLE_P" type="revolute">
+%<joint name="RLEG_ANKLE_R" type="revolute">
+%<joint name="RARM_ELBOW" type="revolute">
+%<joint name="LLEG_KNEE" type="revolute">
+%<joint name="LARM_SHOULDER_P" type="revolute">
+%<joint name="LARM_SHOULDER_R" type="revolute">
+%<joint name="LARM_SHOULDER_Y" type="revolute">
+
+En ce qui concerne la validation des sous-étapes de calcul du CHDA sont testées à travers les tests des sous-fonctions précédentes.
+
+Concernant la validation des résultats obtenus pour les couples et accélérations inconnues, la particularité de cet algorithme est qu'il prend en entrée le vecteur d'accélérations $\ddot{q}$ et celui des couples $\tau$, en plus des vecteurs $q$, $\dot{q}$. $\ddot{q}$ et $\tau$ sont à priori incomplets, ou n'ont qu'un sous-ensemble de variables valides:
 \begin{itemize}
 \item[$\centerdot$ vecteur $\ddot{q}$:] toutes les valeurs de $\ddot{q}$ correspondant à une articulation $id$ sont valides, les autres sont invalides et peuvent être affectées à "nan" ou autre valeur constante comme \verb;0xFF FF FF FF;
 \item[$\centerdot$ vecteur $\tau$:] toutes les valeurs de $\tau$ correspondant à une articulation $fd$ sont valides, les autres sont invalides
@@ -1877,19 +1899,103 @@ On dispose au départ de vecteurs de référence $\ddot{q}$ et $\tau$ complets (
 \item[$\centerdot$] comparer les résultats obtenus $\ddot{q}$ et $\tau$ avec les vecteurs de référence respectif.
 \end{itemize}
 
-Dans une deuxième phase, on poussé les tests plus loin en utilisant des vecteurs de référence générés aléatoirement (Eigen::confVector::Random). Les valeurs obtenues par cette méthode sont des flottants (valeurs comprises entre 0 et 1). Pour le vecteur $q$, nous avons choisi de multiplier ses valeurs par $\pi$ pour retrouver des angles $q$ compris entre $-\pi$ et $\pi$.
-En fait, les sous-étapes de calcul du CHDA sont testées à travers les tests des sous-fonctions précédentes.
+Dans une deuxième phase, on poussé les tests plus loin en utilisant des vecteurs de référence générés aléatoirement (Eigen::confVector::Random). Les valeurs obtenues par cette méthode sont des flottants (valeurs comprises entre -1 et 1). Pour le vecteur $q$, nous avons choisi de multiplier ses valeurs par $\pi$ pour les ramener dans l'intervalle [$-\pi$,$\pi$]. Effectivement, les limites articulaires d'un robot humanoïde comme HRP2 ne permettent pas de tour complet autour des axes de rotation des liaisons. Les vitesses articulaires peuvent atteindre quelques centaines de $degrés \cdot s^{-1}$, le couple maximal d'une articulation se trouve en moyenne autour de $100 N \cdot m$. Idéalement on aurait dû ramener les valeurs des vecteurs aléatoires respectifs au même ordre de grandeur, mais dans le cadre de la validation fonctionnelle et de précision, cela ne s'est pas avéré indispensable.
 
 \paragraph{Mesure du temps d'exécution de chacune des étapes}
-Dans le but de se focaliser l'optimisation de l'algorithme CHDA sur les opérations les plus coûteuses, nous avons mesuré la durée totale de calcul ainsi que la durée de chacune des 4 étapes de traitement de l'algorithme. Pour la mesure de temps en $\mu s$, on utilise la classe \verb;Timer; de \emph{metapod} qui fourni une interface très simple (\verb;start(), stop(), resume();). Nous mesurons le temps sur 100000 boucles.
+Les performances de l'algorithme dépendent du choix des articulations $fd$, puisque celui-ci impacte directement la définition des sous-arbres $\nu(fd)$. On teste premièrement la configuration décrite précédemment, avec 7 articulations $fd$. Pour focaliser l'optimisation de l'algorithme CHDA sur les opérations les plus coûteuses, nous avons mesuré la durée totale de calcul ainsi que la durée de chacune des 4 étapes de traitement de l'algorithme. Pour la mesure de temps en $\mu s$, on utilise la classe \verb;Timer; de \emph{metapod} qui fourni une interface très simple (\verb;start(), stop(), resume();). Nous mesurons le temps sur 100000 boucles, sur une machine munie d'un processeur aux propriétés suivantes:\\
+\begin{flushleft}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|}
+\hline
+Nom du CPU & Intel(R) Core(TM) i7-4700HQ CPU \\ \hline \hline
+Fréquence & 2.40GHz \\ \hline
+Fréquence bus CPU & 800 MHz \\ \hline
+Nombre de coeurs & 8(4) \\ \hline
+Taille du cache & 6144 Kb \\ \hline
+Distribution & Ubuntu 14.04 LTS (trusty) \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Propriétés du processeur réalisant le test.}
+\label{table:propriétésProc}
+\end{center}
+\end{table}
+
+On veut évaluer le gain de performances des différentes optimisations qu'on a implémentées et décrites dans la section précédente, par rapport à la version initiale. On défini ci-dessous la numérotation utilisée dans les tableaux de mesures:
+\begin{enumerate}
+\item matrices de passage à axes fixes prédéfinis
+\item HCRBA(CRBA hybride) $H_{11}-H_{12}-H_{21}$
+\item utilisation du module \emph{Eigen} de Sparsité
+\item HCRBA $H_{11}$ seule + Dynamique Inverse différenciel ($ID_\delta$), sans la sparsité \emph{Eigen}
+\end{enumerate}
+
+Sauf si c'est précisé, les optimisations sont cumulées dans l'ordre de numérotation. Voici l'ensemble des mesures réalisées sur notre modèle de robot humanoïde:\\
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|l|}
+\hline
+Version d'implémentation                   & implémentation initiale    & (1)      \\ \hline \hline
+Durée moyenne                              & 16.286723                  & 14.07054 \\
+a: RNEA                                    & 6.39608                    & 5.46801  \\
+b: CRBA                                    & 7.59427                    & 6.31883  \\
+c: $\ddot{q}_1$ (solver)                   & 0.894731                   & 0.872069 \\
+d: $\tau_2$                                & 0.730014                   & 0.734224 \\
+e: reconstruction de $\tau$ et $\ddot{q}$  & 0.671628                   & 0.677407 \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: optimisation liée aux repères à axes fixes.}
+\label{table:performancesOptimAxesFixes}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|l|l|l|l|l|l|l|}
+\hline
+Version d'implémentation                   & \multicolumn{2}{c|}{(1)}  & \multicolumn{2}{c|}{(2)} & \multicolumn{2}{c|}{(3)} & \multicolumn{2}{c|}{(4)} \\ \hline \hline
+                                           & $\mu s$      & (\%)      & $\mu s$     & (\%)   & $\mu s$     & (\%)   & $\mu s$   & (\%) \\ \hline
+Durée moyenne                              & 14.07054     & 2.57      & 11.118823   & 2.16   & 11.626056   & 2.16   & 10.968547 & 2.02 \\
+a: RNEA                                    & 5.46801      & 1         & 5.14257     & 1      & 5.38397     & 1      & 5.42778   & 1    \\
+b: CRBA                                    & 6.31883      & 1.16      & 3.66517     & 0.71   & 3.61689     & 0.67   & 2.3934    & 0.44 \\
+c: $\ddot{q}_1$ (solver)                   & 0.872069     & 0.16      & 0.889762    & 0.17   & 1.21743     & 0.23   & 0.886647  & 0.16 \\
+d: $\tau_2$                                & 0.734224     & 0.13      & 0.738075    & 0.14   & 0.731042    & 0.14   & 2.26072   & 0.42 \\
+e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12      & 0.683246    & 0.13   & 0.676724    & 0.13   & 0         & 0    \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: les optimisationsspécifiques au CHDA. On a reporté, pour chacune d'elles le gain relatif par rapport à un traitement de référence qui est l'étape 1 (RNEA classique).}
+\label{table:performancesOptimSpecifCHDA}
+\end{center}
+\end{table}
+
+\end{flushleft}
+
+On peut voir dans la table \ref{table:performancesOptimAxesFixes} que l'optimisation liée à l'utilisation de matrices de passage à axes fixes prédéfinis apporte un gain appréciable de $2\mu s$, correspondant à environ $1\mu s$ dans chacun des algorithmes RNEA et CRBA. En effet, cela correspond au gain en temps sur tous les produits matriciels impliquant les matrices $^{\lambda(i)}X_i$, ainsi que le calcul initial de ces matrices dans la procédure \verb;jcalc; appelée par RNEA. Ce gain n'est pas spécifique au CHDA, les résultats de l'optimisation (1) serviront de référence pour les mesures suivantes.
+
+Dans la table \ref{table:performancesOptimSpecifCHDA}, on a évalué des gains relatifs pour faire abstraction des propriétés du processeur ainsi que les éventuels pics de charge pouvant fausser les mesures. Ces mesures sont donc référencées par rapport à un traitement interne au CHDA, constant (non optimisé) et connu: le RNEA classique. Ainsi, on peut constater que:
+\begin{itemize}
+\item Le CRBA hybride (1) apporte un gain global de 16\% en divisant presque par 2 la duréedu calcul de $H$
+\item Le solveur \emph{Eigen} du module de sparsité est inefficace sur la matrice d'inertie $H$. La matrice $H$ a environ la moitié des termes à zero, ce qui n'est pas négligeable et pourrait nous faire espérer obtenir de bons résultats avec \emph{Eigen}.  Mais le fait que les valeurs non nulles se regroupent par blocs doit être pénalisant (chaque bloc regroupe l'ensemble des paramètres d'une branche du modèle). Il faudrait implémenter la factorisation "creuse" proposée par Featherstone \cite[p112]{bib_featherstone}. Celle-ci préserve bien la sparsité originale de la matrice et a l'avantage de suivre les branches de l'arbre cinématique, tenant en compte dès le départ, du non couplage entre noeuds de branches différentes.
+\end{itemize}
 
 
 \paragraph{Evolution de ces mesures en fonction du nombre d'articulations FD}
 
+Les performances varient significativement en fonction du nombre d'articulations \emph{fd}. En fait, les 3 étapes les plus gourmandes en temps de calcul sont les 3 premières. On liste ci-dessous leur complexité, où $n$ est le nombre de corps du robot (noeuds de l'arbre cinématique), $n_{fd}=|fd|$ la taille de l'ensemble $fd$, et $d_{\nu(fd)}$ la profondeur maximale de $\nu(fd)$:
+\begin{itemize}
+\item[$\centerdot$ 1ère (RNEA):] avec une complexité de $O(n)$
+\item[$\centerdot$ 2ème (HCRBA):] $O(nd_{\nu(fd)})$
+\item[$\centerdot$ 3ème (solveur LLT ou LDLT):] $O(n_{fd}^3/3)$
+\end{itemize}
+\noindent
+La complexité augmentera très rapidement avec la troisième étape, sera constante pour la première. La complexité de la 2ème étape est dure à prévoir puisque $d_{\nu(fd)}$ dépend plus du placement des articulations $fd$ que de leur nombre.
+
+On s'est intéressé à deux cas extrêmes: $|fd|=0$ et $|fd|=n$. Dans le cas où $|fd|=0$, le traitement est assimilable à un RNEA, avec un temps de calcul équivalent autour de $5\mu s$. Dans le cas où $|fd|=n$, la complexité est maximale. Pour notre robot humanoïde, $n=35$ et le temps de calcul monte à $20\mu s$. Ce cas de figure correspond à la dynamique directe pure, plus utilisée en simulation où les contraintes en performance sont moindres. Mais dans le cas d'un robot humanoïde intégrant un grand nombre d'articulations flexibles, comme le robot Coman de l'Instiruto Italiano de Technologia, et qu'on veut traiter ces articulations comme des articulations \emph{fd}, la complexité de l'algorithme Dynamique Hybride peut devenir critique, et la factorisation "creuse" de Featherstone devient indispensable, ou d'autres algorithmes globalement plus efficaces comme le \gls{acr_aba}.
 
 
 \paragraph{Mesure du temps d'exécution par instruction}
-
+Ce projet m'a permis de découvrir un autre outil très utile en analyse de profil de fonctions par rapport aux temps de d'exécution. Il s'agit de \verb;cachegrind;, outil de la suite logicielle \verb;Valgrind;. De plus, à l'aide de \verb;Kcachegrind;on peut visualiser ces données graphiquement. On donne quelques détails supplémentaires en annexe \ref{appx_cachegrind}.
 
 
 \section{future intégration dans le système de tâches "stack of tasks" de HRP2}

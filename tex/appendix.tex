@@ -3,6 +3,25 @@
 
 Les notations spécifiques à l'algèbre spatiale des torseurs permettent une formulation très simplifiée des relations cinématiques et dynamiques appliquées au \emph{modèle du système}.\\
 
+\chapter{cachegrind - mesures de performance en vitesse d'exécution} \label{appx_cachegrind}
+
+L'outil \textbf{cachegrind} est très efficace pour détecter des instructions ou blocs d'instructions très pénalisant pour la performance en vitesse d'un algorithme. Il s'agit d'un outil intégré à la boîte à outils Valgrind. L'outil permet de faire du profilage de fonctions. De plus, il existe un autre outil, \verb;Kcachegrind;, qui fournit une interface graphique permettant d'exploration ces données beaucoup plus facilement. Nous présentons rapidement ci-dessous son mode d'utilisation:
+\begin{itemize}
+\item[$\centerdot$ compilation du code source \emph{metapod}:] Il faut lancer la compilation avec les symboles de debug pour que \verb;Kcachegrind; puisse faire le lien entre les fonctions analysées et le code source correspondant.
+\item[$\centerdot$ génération de l'analyse:]  \emph{callgrind} prend comme entrée l'exécutable de l'application à analyser et génère un seul fichier en sortie contenant toutes les données d'analyse ( \verb;callgrind.out.xxxxx; ). C'est le fichier à ouvrir avec \verb;Kcachegrind;.
+\end{itemize}
+
+Voici une capture écran de \verb;Kcachegrind; montrant une fenêtre où on peut visualiser l'ensemble des fonctions appelées par la fonction $BOOST$ "test\_chda". La taille des boîtes est proportionnelle au coût en temps d'exécution de la fonction associée:
+
+\begin{figure}[H]
+  \begin{center}
+  \includegraphics[width=\textwidth]{figs/snapshotKcachegrind1.png}
+  \caption{Capture d'écran de Kcachegrind. Visualisation sous Kcachegrind du profil d'exécution des fonctions appelées par $test_chda$.}         % legende
+  \label{fig:Kcachegrind1} % pour citer le numéro de figure
+  \end{center}
+\end{figure}
+
+
 
 \chapter{Concepts et théorèmes en mécanique du solide à la base de l'algèbre spatiale} \label{appx_torseursToalgSpa}
 
