@@ -67,7 +67,7 @@
 
 %%%%%%%%%%%%%%%%%% page de couverture %%%%%%%%%%%%%%%%%%%
 
-\input{pageCouverture.tex}
+\input{./tex/pageCouverture.tex}
 
 %\begin{titlepage}
 %\title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
@@ -123,6 +123,9 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 En effet, le CNRS, Centre Nationnal de la Recherche Scientifique, est le principal organisme de recherche à caractère pluridisciplinaire en France, menant des recherches dans l'ensemble des domaines scientifiques, technologiques et sociétaux. Il emploie 33 000 personnes (dont 24 955 statutaires, 11 204 chercheurs et 13 751 ingénieurs, techniciens et administratifs), et bénéficie d'une implantation sur l'ensemble du territoire national, s'appuyant sur plus de 1100 unités de recherche et de service.
 
 Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unité propre du CNRS rattachée à l’Institut des Sciences de l'Ingénierie et des Systèmes (INSIS) et à l'Institut des Sciences de l'Information et de leurs Interactions (INS2I), et est associé à par convention à cinq membres fondateurs de la COMUE \og Université de Toulouse \fg{}, dont l'Université Paul Sabatier (UPS). Le laboratoire a le label \textbf{Institut Carnot}. Avec ses 648 employés dont 509 chercheurs et 247 doctorants, le LAAS mène des recherches en sciences et technologies de l’information, de la communication et des systèmes dans 8 thèmes scientifiques :
+
+\setlength{\columnsep}{10pt}
+\begin{multicols}{2}\raggedcolumns
 \begin{itemize}
 \item Informatique critique
 \item Réseaux et communications
@@ -133,7 +136,9 @@ Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unit
 \item Micro nano bio technologies
 \item Gestion de l'énergie
 \end{itemize}
+\end{multicols}
 
+\noindent
 Le laboratoire est à la pointe de la recherche en Robotique, notamment en Robotique humanoïde et dispose de moyens importants pour ses activités de recherche, notamment au sein de l'équipe Gepetto. 
 
 \subsection*{L'équipe Gepetto ...}
@@ -145,23 +150,50 @@ Jean-Paul Laumond, roboticien, aujourd'hui directeur de recherche au LAAS-CNRS, 
 
 \section*{problème posé et objectifs ...}
 
-Mon stage s'intègre dans ces deux niveaux, et plus précisément dans la modélisation mécanique du robot en vue d'optimiser et rendre plus robuste le contrôle local des différents corps du robot. Ce stage s'insère très bien dans la continuité de ma formation de Master. Celle-ci m'as apporté les concepts fondamentaux et l'application de la modélisation géométrique d'un robot (industriel fixe, ou mobile), ainsi que la modélisation cinématique et dynamique. La modélisation dynamique a abordé le formalisme de Lagrange, qui décrit les équations de mouvement en termes de travail et énergie et exprime l'effort généralisé sur chaque articulation. Ce formalisme serait à priori plus simple que le formalisme de Newton-Euler, qui décrit la dynamique d'un corps rigide en combinant la rotation et la translation. C'est justement le lien exact avec mon sujet de stage.
+Mon stage s'intègre dans le niveau d'intégration, et plus précisément dans l'intégration de nouveaux algorithmes de modélisation mécanique du robot en vue d'optimiser et rendre plus robuste le contrôle local des différents corps du robot. Ce stage s'insère très bien dans la continuité de ma formation de Master. Celle-ci m'as apporté les concepts fondamentaux et l'application de la modélisation géométrique d'un robot (industriel fixe, ou mobile), ainsi que la modélisation cinématique et dynamique. La modélisation dynamique a abordé le formalisme de Lagrange, qui décrit les équations de mouvement en termes de travail et énergie et exprime l'effort généralisé sur chaque articulation. Ce formalisme serait à priori plus simple que le formalisme de Newton-Euler, qui décrit la dynamique d'un corps rigide en combinant la rotation et la translation. C'est justement le lien exact avec mon sujet de stage, qui explore ce formalisme, qui a été revisité Roy Featherstone, chercheur roboticien à l'IIT, et qui est aujourd'hui intégré dans une librairie open source maintenue par le LAAS.
 
-L'objectif du stage était d'implémenter un algorithme de dynamique hybride optimisé proposé par Featherstone dans son ouvrage “Rigid Body Dynamics Algorithms” book (Roy Featherstone, Rigid Body Dynamics Algorithms, Springer Science+Business Media, LLC, 2° edition, 2008).
+L'objectif du stage était dans un premier temps d'implémenter un algorithme de dynamique hybride optimal proposé par Roy Featherstone dans son ouvrage “Rigid Body Dynamics Algorithms” \cite{bib_featherstone} et de l'intégrer dans une librairie open source d'algorithmes de dynamique des modèles, \emph{metapod}.
 
-Le Master IRR, et plus particulièrement, la modélisation de systèmes robotiques réels:
-modèle géométrique / Cinématique / Dynamique (Lagrange)
+Dans une seconde phase, le but était d'explorer les diverses optimisations supplémentaires proposées dans cet ouvrage, et d'adapter et d'intégrer à \emph{metapod} celles qui apporteraient un réel avantage par rapport aux optimisations natives de librairies de calcul comme \emph{Eigen}. Ces optimisations répondent aux contraintes de puissance de calcul embarquée dans un robot comme HRP2, face aux contraintes de contrôle optimal, prédictif, d'une structure mécanique sous-actionnée.
 
-Stage => complément, extension concepts modèle dynamique (équation dynamique du mouvt et algèbre spatiale)
-
-
-
-=> implémentation d'un algorithme
+Finalement, je devais aborder l'application de cet algorithme à la modélisation de systèmes à articulations rotoïdes flexibles, soit juste contraintes par un ressort, soit intégrant un actionnement (simple ou antagoniste) en série avec un système de ressorts suivant diverses configurations possibles.
 
 \section*{étude bibliographique}
+Parmi les concepts théoriques à comprendre et à analyser en plus de ce que m'a apporté le Master, l'algèbre spatiale revisitée par Featherstone (chercheur roboticien à l'IIT) dans son ouvrage “Rigid Body Dynamics Algorithms” \cite{bib_featherstone} était le point de départ. Cet ouvrage présente l'ensemble des fondements de l'algèbre spatiale, incluant:
+
+\begin{itemize}
+\item la définition des vecteurs spatiaux vitesse, force, accélération, et de l'inertie liés aux corps rigides.
+\item l'expression de ses grandeurs dans la base de Plücker spécifique à l'algèbre spatiale, et les transformations de coordonnées
+\item l'ensemble des opérations possibles entre les vecteurs spatiaux (addition, produit scalaire, produit vectoriel)
+\item la définition des contraintes aux articulations, la modélisation de la dynamique des systèmes multicorps avec la construction de l'équation de mouvement
+\item et enfin, la description de l'ensemble des algorithmes de dynamique pour résoudre ces systèmes (Dynamique directe "Forward Dinamics", Dynamique Inverse "Recursive Newton-Euler Algorithm" (RNEA), et la Dynamique Hybride
+\end{itemize}
+
+\noindent
+le site de Roy Featherstone \cite{bib_featherstoneSite} m'a apporté des compléments très utiles sur l'algèbre spatiale, et aussi sur les algorithmes à travers leur implémentation sous \emph{Matlab}.
+
+Pour mieux situer ces concepts dans le contexte des fondements en mécanique qui m'avaient été enseignés jusqu'ici, j'ai consulté un ouvrage de référence sur la la mécanique solide et des torseurs, à la base même de l'algèbre spatiale: "Mécanique, Fondements et applications" de José-Philippe Pérez \cite{bib_champVecteurs}, professeur émérite de physique de l’Université de Toulouse.
+
+Ce formalisme et les algorithmes de dynamique font souvent appel à des propriétés d'algèbre linéaire, ce qui m'a amené à consulter divers sites internet comme wikipedia et consolider ces informations à l'aide de l'ouvrage "Matrix Computations (Johns Hopkins Studies in the Mathematical Sciences)" de Gene H. Golub., ancien professeur de sciences informatiques à l'université de Stanford, expert reconnu en analyse numérique et algèbre spatiale.
+
+Concernant les aspects techniques autour des outils de calculs et de langage de programmation utilisés, je me suis appuyé sur la documentation technique de la librairie \emph{Eigen} (http://eigen.tuxfamily.org/dox), et de l'ouvrage très complet sur le C++ template et la méta-programmation \cite{bib_metaprogramming}.
+
+L'ensemble de ces sources techniques et scientifiques m'ont permis de mener à bien ma mission. Je vous présente dans la suite comment le rapport de cette mission est structuré.
+
+\section*{Structure de ce rapport}
+Dans le premier chapitre, je présente les concepts généraux sur la modélisation et les méthodes de contrôle des robots totalement ou sous-actionnés comme les robots humanoïdes. J'en déduit par la suite les contraintes à prendre en compte dans l'intégration de ces méthodes dans la librairie d'algorithmes dynamiques \emph{metapod}.
+
+Inévitablement, le deuxième chapitre se focalise sur les bases d'algèbre spatiale selon le formalisme de Featherstone, indispensables à la compréhension de l'algorithme de Dynamique Hybride à implémenter, ainsi qu'une présentation rapide des algorithmes ré-utilisés par l'algorithme de Dynamique Hybride. J'explicite également ce que la Dynamique Hybride peut apporter de plus par rapport aux autres algorithme de Dynamique Directe et Inverse.
+
+Naturellement, le troisième chapitre aborde l'implémentation proprement dite, détaillant bien les aspects, théorique concernant la modélisation mécanique, et techniques concernant son intégration dans l'architecture existante de \emph{metapod}.
+
+Le dernier chapitre présente plus en détail:
+\begin{itemize}
+\item la réflexion que j'ai pu mener avec mon maître de stage sur l'application de la Dynamique Hybride à la modélisation d'articulations flexibles
+\item ma recherche de l'état de l'art sur l'utilisation de la Dynamique Hybride au contrôle optimal de systèmes robotiques sous-actionnés.
+\end{itemize}
 
 
-\section*{annonce du plan}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
