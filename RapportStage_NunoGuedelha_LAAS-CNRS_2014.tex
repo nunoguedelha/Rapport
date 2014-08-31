@@ -117,9 +117,46 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 
 \section*{contexte}
 
+\'{E}tudiant en deuxième année de Master de Robotique (IRR) à Paul Sabatier, j'ai effectué mon stage de fin d'année au Laboratoire d'Analyses A et Systèmes, au sein de l'équipe Gepetto, sous la responsabilité de Olivier Stasse, chargé de recherche, au coeur du thème de la robotique humanoïde. Issu d'une formation d'Ingénieur en informatique et télécommunications, et suite à une expérience professionnelle de douze ans, j'ai choisi de reprendre des études pour me spécialiser en Robotique, et pouvoir ainsi explorer ce domaine multidisciplinaire et riche en opportunités d'innovation. Ce qui me motive également c'est de faire un métier dans la recherche, dans un laboratoire ou dans une entreprise en tant qu'ingénieur de recherche. Ces objectifs m'ont amené à suivre le Master I.R.R., qui réunissait toutes les composantes d'une formation équilibrée et complète autour des fonctions robotiques comme la perception, l'intelligence artificielle mais aussi, et surtout, la manipulation et la mobilité. Ces deux derniers points sont au centre de mon intérêt pour la robotique. Je souhaitais développer mes compétences dans le thème de la robotique mobile, plus particulièrement des robots articulés, comme les robots humanoïdes, plus précisément au niveau de la modélisation spatiale et fonctionnelle de ces systèmes, ainsi que le contrôle optimal. Ce domaine est naturellement dans la continuïté de mon expérience dans l'embarqué, le temps réel et l'optimisation. Le LAAS-CNRS m'est alors apparu comme un des meilleurs choix pour effectuer un stage.
 
-\section*{problème posé et objectifs}
+\subsection*{Le LAAS ...}
+En effet, le CNRS, Centre Nationnal de la Recherche Scientifique, est le principal organisme de recherche à caractère pluridisciplinaire en France, menant des recherches dans l'ensemble des domaines scientifiques, technologiques et sociétaux. Il emploie 33 000 personnes (dont 24 955 statutaires, 11 204 chercheurs et 13 751 ingénieurs, techniciens et administratifs), et bénéficie d'une implantation sur l'ensemble du territoire national, s'appuyant sur plus de 1100 unités de recherche et de service.
 
+Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unité propre du CNRS rattachée à l’Institut des Sciences de l'Ingénierie et des Systèmes (INSIS) et à l'Institut des Sciences de l'Information et de leurs Interactions (INS2I), et est associé à par convention à cinq membres fondateurs de la COMUE \og Université de Toulouse \fg{}, dont l'Université Paul Sabatier (UPS). Le laboratoire a le label \textbf{Institut Carnot}. Avec ses 648 employés dont 509 chercheurs et 247 doctorants, le LAAS mène des recherches en sciences et technologies de l’information, de la communication et des systèmes dans 8 thèmes scientifiques :
+\begin{itemize}
+\item Informatique critique
+\item Réseaux et communications
+\item Robotique
+\item Décision et optimisation
+\item HF et optique : de l'EM aux systèmes
+\item Nano ingénierie et intégration
+\item Micro nano bio technologies
+\item Gestion de l'énergie
+\end{itemize}
+
+Le laboratoire est à la pointe de la recherche en Robotique, notamment en Robotique humanoïde et dispose de moyens importants pour ses activités de recherche, notamment au sein de l'équipe Gepetto. 
+
+\subsection*{L'équipe Gepetto ...}
+Jean-Paul Laumond, roboticien, aujourd'hui directeur de recherche au LAAS-CNRS, a crée en 2006 GEPETTO, une équipe de recherche centrée sur le thème de la robotique humanoïde. De 2005 à 2008, il co-dirige le laboratoire franco-japonais AIST-CNRS JRL en robotique humanoïde. C’est dans ce cadre que le CNRS acquiert le robot humanoïde HRP-2 en 2006. L’activité de recherche de l’équipe Gepetto est aujourd'hui centrée sur l’analyse et la génération de mouvement des systèmes anthropomorphes. Elle est unanimement reconnue pour son expertise dans ce domaine. La difficulté du problème de commande des systèmes anthropomorphes vient de la complexité de leur structure arborescente qui les rend redondants par rapport à la plupart des tâches de positionnement, de l’instabilité naturelle de leur posture bipède, et du sous-actionnement de leurs déplacement dans l’espace. Gepetto étudie ce problème en suivant une approche interdisciplinaire structure en trois niveaux :  fondamental,  d'intégration et applicatif.
+\begin{itemize}
+\item Le niveau fondamental inclut, entre autres, la modélisation physique du système robotique, la planification de mouvements des éléments de ce système, et la commande locale de ces éléments. Tout cela s'appuie sur des disciplines comme la mécanique, la biomécanique , les neurosciences du mouvement et d'autres disciplines complémentaires.
+\item Le niveau d'intégration concerne l'intégration des développements théoriques ou d'outils techniques dans des paquets open source comme des outils de simulation ou des librairies de modélisation dynamique des robots.
+\end{itemize}
+
+\section*{problème posé et objectifs ...}
+
+Mon stage s'intègre dans ces deux niveaux, et plus précisément dans la modélisation mécanique du robot en vue d'optimiser et rendre plus robuste le contrôle local des différents corps du robot. Ce stage s'insère très bien dans la continuité de ma formation de Master. Celle-ci m'as apporté les concepts fondamentaux et l'application de la modélisation géométrique d'un robot (industriel fixe, ou mobile), ainsi que la modélisation cinématique et dynamique. La modélisation dynamique a abordé le formalisme de Lagrange, qui décrit les équations de mouvement en termes de travail et énergie et exprime l'effort généralisé sur chaque articulation. Ce formalisme serait à priori plus simple que le formalisme de Newton-Euler, qui décrit la dynamique d'un corps rigide en combinant la rotation et la translation. C'est justement le lien exact avec mon sujet de stage.
+
+L'objectif du stage était d'implémenter un algorithme de dynamique hybride optimisé proposé par Featherstone dans son ouvrage “Rigid Body Dynamics Algorithms” book (Roy Featherstone, Rigid Body Dynamics Algorithms, Springer Science+Business Media, LLC, 2° edition, 2008).
+
+Le Master IRR, et plus particulièrement, la modélisation de systèmes robotiques réels:
+modèle géométrique / Cinématique / Dynamique (Lagrange)
+
+Stage => complément, extension concepts modèle dynamique (équation dynamique du mouvt et algèbre spatiale)
+
+
+
+=> implémentation d'un algorithme
 
 \section*{étude bibliographique}
 
