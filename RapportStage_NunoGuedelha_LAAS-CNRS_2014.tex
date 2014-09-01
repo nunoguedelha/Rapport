@@ -271,7 +271,7 @@ Et sur un Laptop Intel(R) Core(TM) i7-4700HQ CPU, la vitesse moyenne est d'envir
 
 \subsection{Contrainte en précision}
 
-Je suis parti de l'hypothèse que pour un robot humanoïde de taille humaine, qui subit des perturbations dûes à la flexibilité des semelles, qu'il était acceptable de contrôler les articulations du robot avec une précision maximale à 0.5 degrés, ce qui correspond à $10^{-3} rad$ pour les grandeurs $q, \dot{q} et \ddot{q}$. De même, une précision de $10^{-3}$ Newton dans le calcul de couples devrait suffire largement. On tolérera donc, dans les tests de validation de l'algorithme Hybride principal et de ses sous-fonctions, les erreurs numériques $\leqslant 10^{-3}$.
+Pour la vérification des résultats numériques de l'algorithme à implémenter, les vecteurs de sortie $\ddot{q}$ ou $\tau$ sont comparés à des vecteurs de référence. Ce qui est vérifié est l'écart relatif entre ces grandeurs. L'écart toléré défini pour les algorithmes déjà implémentés est de $10^{-3}$. L'algorithme hybride manipulant les mêmes grandeurs que le RNEA ou CRBA, j'ai supposé cette précision suffisante. Mais idéalement il faudrait faire une étude plus poussée pour vérifier l'impact de cette erreur relative sur la commande du robot, et d'évaluer la marge qu'on a avant que l'impact soit significatif.
 
 
 \subsection{Algèbre spatiale et méta programmation}
@@ -377,7 +377,7 @@ Un des désavantages des algorithmes basés sur un modèle générique est qu'il
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{figs/principeAlgoGenerique.pdf}
+\includegraphics[width=0.9\textwidth]{figs/principeAlgoGenerique.pdf}
 \caption{Génération automatique d'algorithmes optimisés et spécialisés}
 \end{figure}
 
@@ -404,7 +404,7 @@ Il nous reste maintenant à voir un aperçu des concepts et notations en Algèbr
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{algèbre spatiale selon Roy Featherstone}
+\chapter{Algèbre spatiale selon Roy Featherstone}
 %Formalisme compacte et plus adapté :\vspace{0.3cm}
 %- au calcul numérique et récursif\vspace{0.3cm}
 %- au parcours en profondeur d'abord d'arbres cinématiques\vspace{0.3cm}
@@ -952,7 +952,10 @@ Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
 \paragraph{Modifications à apporter au modèle URDF (format XML) et au parseur URDF:}
 
-Afin de réaliser les permutations décrites ci-dessus, nous devons dans un premier temps ajouter la génération de la classification $fd$/$id$ des articulations dans le fichier de modèle généré par "metapodfromurdf": \verb;../metapod/build/include/models/<nom_modele>/<nom_modele>.hh; (voir section \ref{ch_concepts_implEtContr}). Plus précisément, nous voulons faire apparaître dans chaque classe "Node" attribuée à un noeud, un champ statique et constant\footnotemark[1] (booléen) représentant l'attribut \verb;fwdDyn; ("Forward Dynamics") associé à l'articulation qui supporte le corps de classe "Node":
+Afin de réaliser les permutations décrites ci-dessus, nous devons dans un premier temps ajouter la génération de la classification $fd$/$id$ des articulations dans le fichier de modèle généré par "metapodfromurdf":
+
+\noindent
+\verb;../metapod/build/include/models/<nom_modele>/<nom_modele>.hh; (voir section \ref{ch_concepts_implEtContr}). Plus précisément, nous voulons faire apparaître dans chaque classe "Node" attribuée à un noeud, un champ statique et constant\footnotemark[1] (booléen) représentant l'attribut \verb;fwdDyn; ("Forward Dynamics") associé à l'articulation qui supporte le corps de classe "Node":
 \begin{equation*}
 fwdDyn = 
 \begin{cases}
@@ -1285,7 +1288,7 @@ H_{21} \ddot{q}_1
 Q^T
 \begin{bmatrix}
 H_{11} \ddot{q}_1 \\ 
-H_{21} \ddot{q}_1
+H_{21} \ddot{q}_1 \label{equ_tauIDdiff}
 \end{bmatrix}
 \end{align}
 
@@ -1355,7 +1358,8 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 \setmyFiguresFile{optimisations}
 
 \subsection{jcalc et le calcul des matrices de passage jXi}
-correction d'une erreur de code dans le repo officiel concernant les opérations sur matrices à axes fixes x, y ou z.
+
+\verb;jcalc(); est la fonction appelée pour mettre à jour les matrices de passage $^sX_p$ entre les repères liés aux deux corps $p$ (prédécesseur) et $s$ (successeur) pour chaque articulation du robot. Ces matrices $^sX_p$ sont incluses dans la classe $model$ (modèle du robot), et générées avec ce modèle à la compilation de \emph{metapod}. Elles peuvent être générées comme des matrices génériques: ce sont alors des structures templatées qui peuvent définir n'importe quel axe de rotation suivant ce qu'on leur passe en paramètre à kleur instanciation. Sinon, elles peuvent être définies comme des matrices spéciales, simplifiées, dont l'axe est parallèle à un des axes $(Ox)$, $Oy$  ou $Oz$ du repère lié au corps $s$. Ces matrices $^sX_p$ sont dites à axes fixes. Elles permettent d'accélérer significativement les calculs matriciels dans lesquels elles sont impliquées. Cela est dû au fait qu'elles soient creuses. Pour exploiter cette "sparsité", des règles spécifiques de produit matriciel ont été définies. Le version officielle servant de base à mon développement avait une erreur au niveau des fonction définissant ces règles de calcul.Cette correction a été la première à être intégrée dans la version officiele de \emph{metapod}.
 
 \subsection{Permutation optimale sous Eigen des variables et coefficients de l'équation de mouvement}
 
@@ -1674,7 +1678,7 @@ Pour déterminer le domaine de calcul de $I_i^c$ et $^jF_i$, on introduit (\cite
 \end{equation}
 
 \begin{minipage}[c]{0.5\textwidth}
-  \dispFig[H]{5}{0.7\textwidth}{Exemple de $\nu(fd)$ dans l'arbre cinématique.}{fig_chdaArbreK_nuFD}
+  \dispFig[H]{5}{0.7\textwidth}{Exemple de $\nu(fd)$ dans l'arbre cinématique. Le noeud 1 n'appartient pas à $\nu(fd)$}{fig_chdaArbreK_nuFD}
 \end{minipage}
 \begin{minipage}[c]{0.5\textwidth}
     On calcule alors $\nu(fd)$ par récurrence:
@@ -1691,8 +1695,6 @@ Pour déterminer le domaine de calcul de $I_i^c$ et $^jF_i$, on introduit (\cite
     \end{spacing}
 \end{minipage}
 
-\setlength{\columnseprule}{0.5pt}
-\begin{multicols}{2}\raggedcolumns
 \begin{flushleft}
 Une des propriétés importantes de $\nu(fd)$ à retenir est:
 \begin{equation*}
@@ -1704,6 +1706,10 @@ La conséquence de cette propriété est qu'il est inutile de calculer les terme
 
 Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé pour $H_{11}$, suivant Featherstone (\cite{bib_featherstone} table9.1):\\
 
+\begin{minipage}[t]{\textwidth}
+\setlength{\columnsep}{10pt}
+\setlength{\columnseprule}{0.5pt}
+\begin{multicols}{2}\raggedcolumns\small
     	\begin{spacing}{1.5}
 		\begin{pseudocode}{CRBA - Featherstone}{model,q} \label{algo_crbaFeatherstoneH11}
     H \GETS 0 \\
@@ -1714,6 +1720,14 @@ Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé
 		  \IF \lambda(i) \in \nu(fd)
 		  \THEN
 		    I_{\lambda(i)}^c \GETS I_{\lambda(i)}^c + {^{\lambda(i)}X_i^*} \: {I_i^c} \: {^iX_{\lambda(i)}} \\
+		  \ldots
+		\END
+	  \end{pseudocode}
+	  
+	  \begin{pseudocode}[display]{}{}
+	  \DO
+    \BEGIN
+      \ldots \\
 		  \IF i \in fd \THEN
 		  \BEGIN
 			  F \GETS {I_i^c} \: S_i \\
@@ -1733,9 +1747,8 @@ Nous pouvons à présent écrire, ci-contre, l'algorithme complet CRBA optimisé
 		\END
 	  \end{pseudocode}
 	  \end{spacing}
-
 \end{multicols}
-
+\end{minipage} \vspace{0.3cm} \\
 
 \paragraph{Implémentation:}
 La génération de l'ensemble $\nu(fd)$ se fait via un paramètre de sélection \verb;jointNuOfFwdDyn; dans la classe \verb;Node<i>; du modèle du robot. Ce paramètre est un booléen statique et constant indiquant si l'articulation $\in fd$ (= \verb;true;) ou pas (= \verb;false;). Il est calculé à la compilation de la classe \verb;Robot; (modèle du robot). L'algorithme vu précédemment décrivant $\nu(fd)$ nous dit que:
@@ -1837,7 +1850,7 @@ On décline les alculs nécessaires faits sur les termes en dépendance de $H_{i
 
 Comme pour chaque terme $H_{ij}$ calculé, on calcule sa transposée, on obtient les trois matrices $H_{11}$, $H_{21}$ et $H_{12}$. On illustre dans la figure \ref{fig_optimH11H12H21}  un exemple pour chacune des méthodes de résolution évoquées plus haut. \\
 
-\dispFig[H]{7}{\textwidth}{Deux méthodes de traitement sur un arbre simple: à gauche, le parcours en arrière calcule toujours les termes $H_{ij}$ tels que $j \in fd$; à droite, le calcul de ces termes dépend de la nature du noeud $i$}{fig_optimH11H12H21}
+\dispFig[H]{7}{\textwidth}{Deux méthodes de traitement sur un arbre simple: à gauche, le parcours en arrière calcule toujours les termes $H_{ij}$ tels que $j \in fd$; à droite, le calcul de ces termes dépend de la nature du noeud $i$. Les noeuds rouges $\in fd$. Les rouges et les bleus $\in \nu(fd)$}{fig_optimH11H12H21}
 
 
 \begin{flushleft}
@@ -1960,20 +1973,53 @@ L'algorithme adapté à \emph{metapod} donne: \vspace{0.3cm} \\
 
 \subsection{impact of branch sparsity on motion equation solving}
 \textbf{impact on Eigen solver}
-branch sparsity => SparseMatrix, SimplicialLLT ou SimplicialLDLT
+On peut exploiter le fait que la matrice soit creuse. Featherstone propose un algorithme de factorisation basé sur le \emph{pattern} de parcours en profondeur \textsc{DepthFirstTraversal} \cite[table 6.3 p112]{bib_featherstone}. Mais faute de temps pour implémenter et valider cet algorithme, et dans le but d'éviter de "surcharger" les fonctions \emph{Eigen}, J'ai choisit d'implémenter la méthode \emph{Eigen} \verb;SimplicialLLT; ou \verb;SimplicialLDLT; qui exploite la sparsité d'une matrice préalablement analysée (à condition que cette sparsité ne varie pas, et c'est le cas). On manipule alors des types de matrices spécifiques (\verb;SparseMatrix;). Nous ne détaillerons pas cette implémentation ici. D'ailleurs, les tests réalisés (non documentés ici) ne révèlent aucune amélioration de performance.
 
-\textbf{Use Featherstone's LDLT factorization}  (overview of the concept)
-impact of $\nu(fd)$ sparsity in parent array of section 6.5 (réduction de l'arbre cinématique $\Rightarrow \lambda'$)
 
 \subsection{Dynamique inverse differentielle pour le calcul optimal de $\tau_2$}
 
-Cette fois-ci, nous voulons calculer $\tau_2$ à l'aide  de l'équation:
+Cette fois-ci, nous voulons calculer $\tau_2$ à l'aide de l'équation \cite[p104,173]{bib_featherstone}:
 \begin{equation}
 \tau = C' + ID_{\delta} \left( Q^T \begin{bmatrix} 
-                                                       \ddot{q}_1 \\
-                                                       0 
-                                                   \end{bmatrix} \right)
+                                     \ddot{q}_1 \\
+                                     0 
+                                   \end{bmatrix} \right) \label{equ_tauIDdiff_2}
 \end{equation}
+
+On peut la retrouver assez simplement en quelques étapes. $\tau$ est donné à partir de l'équation \ref{equ_tauIDdiff}. On cherche donc à calculer la grandeur $Q^T \begin{bmatrix}
+                            H_{11} \\
+                            H_{21}
+                          \end{bmatrix} \ddot{q}_1$ puisqu'on connaît déjà $C'$. On retrouve cette grandeur dans l'équation \ref{equ_local_eqMvt_2} si $\ddot{q}_2 = 0$:
+
+\begin{align*}
+\ref{equ_local_eqMvt_2} \textnormal{ et } \ddot{q}_2 = 0 \implies 
+\begin{bmatrix}
+  H_{11} \\
+  H_{21}
+\end{bmatrix} \ddot{q}_1
+=
+\begin{bmatrix}
+  \tau_1 \\
+  \tau_2
+\end{bmatrix}
+-
+\begin{bmatrix}
+  C_1 \\
+  C_2
+\end{bmatrix}
+=
+Q \: \mathrm{ID}(q,\dot{q},Q^T\begin{bmatrix}
+                                \ddot{q}_1 \\      
+                                0         
+                              \end{bmatrix}) - Q \: \mathrm{ID}(q,\dot{q},0) 
+=
+Q \: \mathrm{ID}_{\delta}(q,\dot{q},Q^T\begin{bmatrix}
+                                         \ddot{q}_1 \\      
+                                         0         
+                                       \end{bmatrix}) \implies \ref{equ_tauIDdiff_2}
+\end{align*} 
+
+Featherstone nous dit \cite[p103]{bib_featherstone} que la fonction $\mathrm{ID}_{\delta}$ ("differential Inverse Dynamics") a beaucoup de termes qui se sont annulés. Il nous donne l'algorithme qui réalise cette fonction \cite[p104]{bib_featherstone}. On implémente cette fonction. On verra plus loin si cette méthode est plus efficace pour le calcul de $\tau2$.
 
 
 \section{tests unitaires et validation}
@@ -2211,7 +2257,7 @@ On dispose donc de tous les paramètres d'entrée de l'algorithme Hybride: $\tau
 
 \subsection{Contrôle optimal de robots sous-actionnés}
 
-On peut envisager une application différente au contrôle optimal. Si on part du problème général d'optimisation, basé sur l'équation de mouvement d'un système à base fixe sous contraintes, la solution à ce problème très complexe donne directement l'ensemble des couples $\mathbf{\tau}$ dans l'espace des configurations à partir de la trajectoire du robot (par exemple le centre de masse) dans l'espace des tâches. Andrea Del Prete avait alors proposé \cite{bib_paper_Andrea} de séparer le problème en deux phases: appliquer d'abord la Cinétique Inverse (ou modèle différentiel inverse) à la trajectoire pour pour passer ainsi de l'espace des tâches à l'espace des configurations et déterminer $q, \dot{q} et \ddot{q}$; appliquer ensuite cette configuration au problème d'optimisation. Pour être appliquée à un robot à base flottante (humanoïde), cette méthode devrait utiliser la Dynamique Hybride. C'était un des sujets traités dans la thèse d'Andrea Del Prete \cite{bib_these_andrea}.
+On peut envisager une application différente au contrôle optimal. Si on part du problème général d'optimisation, basé sur l'équation de mouvement d'un système à base fixe sous contraintes, la solution à ce problème très complexe donne directement l'ensemble des couples $\mathbf{\tau}$ dans l'espace des configurations à partir de la trajectoire du robot (par exemple le centre de masse) dans l'espace des tâches. Andrea Del Prete avait alors proposé \cite{bib_paper_Andrea} de séparer le problème en deux phases: appliquer d'abord la Cinétique Inverse (ou modèle différentiel inverse) à la trajectoire pour passer ainsi de l'espace des tâches à l'espace des configurations et déterminer $q$, $\dot{q}$ et $\ddot{q}$; appliquer ensuite cette configuration au problème d'optimisation. Pour être appliquée à un robot à base flottante (humanoïde), cette méthode devrait utiliser la Dynamique Hybride. C'était un des sujets traités dans la thèse d'Andrea Del Prete \cite{bib_these_andrea}.
 
 
 
@@ -2222,35 +2268,42 @@ On peut envisager une application différente au contrôle optimal. Si on part d
 
 \section*{Bilan du travail}
 
-- objectif initial et réalisations
+%- objectif initial et réalisations
+%
+%		- correction du code source metapod de départ (calculdes matrices de passage Xs)
+%		
+%		- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
+%		
+%		- extention des optimisations de Featherstone pour le calcul de H21
+%		
+%		- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
+%		
+%		- [complément suggéré à l'algorithmede Kajita]
 
-	- correction du code source metapod de départ (calculdes matrices de passage Xs)
-	
-	- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
-	
-	- extention des optimisations de Featherstone pour le calcul de H21
-	
-	- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
-	
-	- [complément suggéré à l'algorithmede Kajita]
+Lors de mon stage de six mois dans l'équipe Gepetto au LAAS-CNRS, l'objectif central de la mission était d'implémenter, optimiser et intégrer l'algorithme de Dynamique Hybride selon Featherstone dans une librairie open source de modélisation dynamique \emph{metapod}, maintenue par le LAAS. Pendant ma mission, je me suis intégré à l'équipe, j'ai participé aux réunions de communication et de partage de problèmes ou de réalisations.
 
+En phase initiale du stage, j'ai dû me familiariser avec les outils et procédés de développement du laboratoire:
+\begin{itemize}
+\item les outils de compilation cmake, que j'ai eu l'occasion de découvrir et qui apportent une certaine souplesse à la compilation du code source
+\item de nouveaux IDE permettant d'accélérer le développement, dont qtcreator, le plus adapté à cmake selon mon point de vue
+\item la librairie \emph{Eigen} incontournable pour les opération matricielle templatée et offrant des optimisations natives de produits de matrices, ainsi que la résolution optimale de divers types de systèmes linéaires (décompositions, factorisations, ...).
+\item un outil d'analyse de profil de fonctions, \verb;cachegrind; (de la suite \verb;Valgrind;). Il établi un profil de coût en temps d'exécution et crée des liens avec le code source, ce qui rend l'outil très efficace.
+\item la méta programmation C++, et la librairie BOOST qui introduisent une approche de programmation nouvelle et prometteuse, et apportent de nouvelles perspectives d'optimisation d'algorithmes
+\item et enfin le formalisme de l'Algèbre Spatiale et les algorithmes optimisés de Featherstone
+\end{itemize}
+Concernant ce dernier point, central à la mission, j'ai dû revoir certaines bases de la mécanique des torseurs pour mieux assimiler le formalisme de Featherstone. J'ai par la suite analysé en profondeur les différents algorithmes de Dynamique Directe, Indirecte, Hybride et les fonctions dont ils dépendent. Au final, cet apprentissage a requis une lecture presque complète de l'ouvrage dédié \cite{bib_featherstone}.
 
-- concepts acquis:
+En parallèle avec l'exploration de l'ouvrage de Featherstone, j'ai analysé l'architecture de la librairie \emph{metapod}. Cette étape a constitué une des difficultés majeures du stage. En effet, malgré les efforts en documentation, et un code propre, cette documentation reste encore largement insuffisante. \`{A} cette difficulté et à la complexité intrinsèque d'un méta programme, s'ajoute la complexité des conditions d'analyse d'erreurs: la syntaxe lourde du langage pénalise beaucoup la lisibilité des messages du compilateur.
 
-	- algèbre spatiale et algorithmes de Featherstone
-	
-	- metapod
-	
-	- outils et environnement de développement (cmake, Eigen, Boost, Template/Mete-programmation)
+Une fois le langage assez maîtrisé, j'ai pu implémenter, valider et intégré l'algorithme de Dynamique Hybride dans la librairie \emph{metapod} dans sa version officielle partagée en ligne sur GITHUB. Dans ces descriptions, Featherstone proposait souvent des alternatives (étape 2 et 4 de l'algorithme). Un de mes choix imposait une contrainte supplémentaire, pas clairement explicitée, sur les étapes précédentes. Ceci m'a amené à apporter quelques modifications à l'algorithme original dans la phase d'optimisation.
 
-
+Parmi les optimisations réalisées par la suite, la plus complexe était le calcul minimal de l'inertie $H$ (CRBA hybride), et la tentative d'application des méthodes \emph{Eigen} de "sparsité" pour la résolution de systèmes linéaires. La performance en rapidité d'exécution est déjà très intéressante, mais je pense qu'il y a la place pour quelques optimisations supplémentaires.
 
 \section*{Bilan personnel}
 
-- appliqué et étendu les conceptsde modélisation et contrôle de robots vus en Master IRR
+Ce stage m'a apporté une très bonne première expérience dans le monde de la Robotique et la découverte du travail en laboratoire. J'ai pu appliquer une partie des concepts appris en Master, mais surtout j'ai étendu considérablement mes connaissances en Dynamique des corps solides, qui est au coeur de mes disciplines préférées.
 
-- bonne introduction à la robotique humanoïde
-
+%J'ai pu observer un peu 
 - outils de développement appréciés
 
 - contact avec le monde de la recherche
@@ -2258,6 +2311,8 @@ On peut envisager une application différente au contrôle optimal. Si on part d
 - acquis de l'expérience en méta programmation et algorithmes dynamiques
 
 (conformte mon désir de trabvailler dans la recherche en robotique mobile et plus particulièrement humanoide)
+
+ ce qui m'a poussé à mener plus loin ma compréhension du CRBA.
 
 \section*{Perspectives}
 
