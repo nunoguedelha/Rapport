@@ -181,11 +181,11 @@ Concernant les aspects techniques autour des outils de calculs et de langage de 
 L'ensemble de ces sources techniques et scientifiques m'ont permis de mener à bien ma mission. Je vous présente dans la suite comment le rapport de cette mission est structuré.
 
 \section*{Structure de ce rapport}
-Dans le premier chapitre, je présente les concepts généraux sur la modélisation et les méthodes de contrôle des robots totalement ou sous-actionnés comme les robots humanoïdes. J'en déduit par la suite les contraintes à prendre en compte dans l'intégration de ces méthodes dans la librairie d'algorithmes dynamiques \emph{metapod}.
+Dans le premier chapitre, je présente les concepts généraux sur la modélisation et les méthodes de contrôle des robots totalement ou sous-actionnés comme les robots humanoïdes. J'en déduit par la suite les contraintes à prendre en compte dans l'intégration de ces méthodes dans la librairie d'algorithmes de dynamique \emph{metapod}.
 
-Inévitablement, le deuxième chapitre se focalise sur les bases d'algèbre spatiale selon le formalisme de Featherstone, indispensables à la compréhension de l'algorithme de Dynamique Hybride à implémenter, ainsi qu'une présentation rapide des algorithmes ré-utilisés par l'algorithme de Dynamique Hybride. J'explicite également ce que la Dynamique Hybride peut apporter de plus par rapport aux autres algorithme de Dynamique Directe et Inverse.
+Inévitablement, le deuxième chapitre se focalise sur les bases d'algèbre spatiale selon le formalisme de Featherstone, indispensables à la compréhension de l'algorithme de Dynamique Hybride à implémenter, ainsi qu'une présentation rapide des algorithmes ré-utilisés. J'explicite également ce que la Dynamique Hybride peut apporter de plus par rapport aux autres algorithme de Dynamique Directe et Inverse.
 
-Naturellement, le troisième chapitre aborde l'implémentation proprement dite, détaillant bien les aspects, théorique concernant la modélisation mécanique, et techniques concernant son intégration dans l'architecture existante de \emph{metapod}.
+Naturellement, le troisième chapitre aborde l'implémentation proprement dite, détaillant bien les aspects, théoriques concernant la modélisation mécanique, et techniques concernant son intégration dans l'architecture existante de \emph{metapod}.
 
 Le dernier chapitre présente plus en détail:
 \begin{itemize}
@@ -197,51 +197,63 @@ Le dernier chapitre présente plus en détail:
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Concepts généraux sur le contrôle dynamique des robots totalement actionnés}
+\chapter{Dynamique et contrôle des systèmes articulés de corps rigides}
 
-\section{généralités sur le contrôle en couple ou position (vitesse ou accélération), et cas d'utilisation}
+\section{Definition des problèmes de Dynamique Directe, Inverse, et Hybride, et applications} \label{ch_concepts_definitions}
 
-\section{dynamique directe / inverse et cas d'utilisation}
+Lorsqu'un robot en mouvement est constitués de corps légers, de sorte à ce qu'on puisse négliger leur inertie, le modèle cinétique est suffisant pour modéliser les mouvements du robot ainsi que son contrôle. Par contre, lorsque les parties en mouvement ont une inertie significative ou lorsque le robot n'a pas une base fixe (le moindre mouvement est susceptible de perturber sont appui au sol), il faut tenir compte de la dynamique du système. C'est le cas des mouvements de la marche des robots humanoïdes, dont le contrôle est basé sur le modèle dynamique.
 
-dynamique directe => simulation
-\vspace{0.3cm}
+On parle alors de problème de Dynamique Directe ou problème de Dynamique Inverse (respectivement "Forward Dynamics" ou "Inverse Dynamics" dans la littérature internationale). Dans ce rapport, on ne traitera que des systèmes sans boucles dynamiques (le cas par exemple des robots parallèles), aussi désignés comme des arbres cinématiques. En général, pour résoudre le problème dynamique d'un système, on pose une équation de mouvement qui met en relation les grandeurs:
 
-dynamique inverse => contrôle en couple
-\vspace{0.3cm}
+\begin{description}
+  \item[$model$ :] le modèle dynamique du système à multi-corps rigides
+  \item[$q, \dot{q}, \ddot{q}$ :] vecteurs de position, vitesse, accélération des articulations du système
+  \item[$\tau$ :] forces/couples moteurs (internes) appliqués aux articulations
+  \item[$f^{ext}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
+\end{description}
 
-dynamique hybride => contrôle en couple, avec articulations spéciales:
-\vspace{0.3cm}
+\subsection{La Dynamique Directe}
 
-	- articulation Freeflyer à la base du robot
+La Dynamique directe, souvent appliquée à la simulation, consiste à trouver les accélérations des corps d'un système articulé induites par des forces appliquées aux articulations. Ceci revient à poser l'équation de mouvement suivante, où \textbf{FD} est la fonction donnant les accélérations:
 
-	- articulation flexible	ou contraintes de force sur la trajectoire de l'outil terminal
-	
-	- usinage (force appliquée le long d'une trajectoire
-	
-	- manipulation de pièces
-	
-	- simplification d'une simulation de système en supprimant les articulations au contrôle parfait (couple adaptatif permettant d'asservir la position/vitesse/accélération)
+\begin{equation}
+\ddot{q} = \mathrm{FD}(model,\mathbf{q,\dot{q},\tau})
+\end{equation}
+
+\subsection{La Dynamique Inverse}
+
+\`{A} l'opposé, la Dynamique Inverse consiste à déterminer les forces à appliquer aux articulations d'un système pour produire une accélération donnée. Elle peut se résumer à l'équation de mouvement suivante, où \textbf{ID} est la fonction donnant les couples:
+
+\begin{equation}
+\mathbf{\tau} = \mathrm{ID}(model,\mathbf{q,\dot{q},\ddot{q}})
+\end{equation}
+
+La résolution de ce problème s'applique au contrôle optimal d'un système réel dynamique de corps rigides, ou de figures digitales, mais peut aussi être une composante d'un algorithme de Dynamique Directe ou de Dynamique Hybride comme on verra dans le chapitre \ref{ch_impl}. Dans le cas du contrôle optimal, on trouve dans l'état de l'art, plusieurs types de contrôle:
+\begin{itemize}
+\item le contrôle en couple, plus rare, à cause de la limitation en puissance des moteurs
+\item le contrôle en position (cas du HRP2). Dans ce cas, le RNEA servira à filtrer dynamiquement la trajectoire désirée du centre de masse \cite{bib_filtrageTrajectoireCoM}. Cette technique consiste à utiliser, par approximation, la trajectoire désirée du \gls{acr_com} pour calculer le \gls{gls_cop} "réel" du robot, dit "Multi-body CoP" ($CoP^{MB}$) et en déduire la correction à appliquer par le filtre dynamique à la trajectoire du \gls{acr_com}.
+\end{itemize}
+
+Je reviendrai rapidement sur cette méthode dans la section \ref{ch_concepts_implEtContr} pour en déduire les contraintes de performance en vitesse d'exécution à tenir compte dans l'implémentation de l'algorithme de Dynamique Hybride.
+
+\subsection{La Dynamique Hybride}
+
+Justement, le problème de Dynamique Hybride est une généralisation de la Dynamique Directe et de la Dynamique Indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues. Il est applicable aux cas suivants:
+
+\begin{itemize}
+\item simulation de la réponse d'un système articulé ayant soumis à une excitation cinétique sur une des articulations
+\item la simplification d'une simulation dynamique de système en supprimant des calculs les articulations au contrôle parfait (couple adaptatif bas niveau permettant d'asservir la position/vitesse/accélération), pour lesquelles un contrôle en position est suffisant. On considère alors les accélérations connues pour ces articulations là.
+\item un robot ayant des articulations flexibles, composées par exemple d'un actionneur en série avec un ressort, connues aussi sous le nom de SEA ("Series Elastic Actuator"). Dans ce cas, si on considère qu'un tel système dispose de capteurs de position (encodeurs), le couple de ces articulations serait déterminé par la variable articulaire $q$ et la raideur $k$ du ressort
+\item enfin, un robot sans base fixe, donc typiquement le robot humanoïde.
+\end{itemize}
+
+Regardons de plus prêt le cas du robot humanoïde. On peut modéliser le robot comme un arbre cinématique à base fixe mais avec une liaison flottante \cite[chap.9 p171]{bib_featherstone}, désignée aussi comme \emph{Freeflyer}, à 6 degrés de liberté, et dont le couple "interne" $\tau$ d'actionnement est considéré nul. En effet, le robot ne contrôle sa position dans l'espace que via les forces de contact (extérieures) appliquées sous ses semelles. Ces forces sont une contre-réaction de la résultante de l'action de la gravité sur le corps du robot, ajoutée à l'action des articulations du robot.
+
+Si on veut contrôler avec robustesse la trajectoire du \gls{acr_com} du robot (quelque soit la méthode d'asservissement employée), on doit être capable d'estimer avec la plus grande précision possible la position instantanée de celui-ci. Or dans la modélisation énoncée ci-dessus, on connaît les paramètres $q, \dot{q}, \ddot{q}$ de toutes les articulations sauf celle du \emph{Freeflyer}, mais pour cette articulation on connaît le couple moteur appliqué: il est nul. La Dynamique Hybride sauve alors la partie en calculant tous les couples inconnus (ceux des articulations réellement actionnées), et l'accélération du \emph{Freeflyer}. Sa vitesse et position peuvent alors être déduites par intégration.
 
 
-\section{contrôle d'un robot humanoïde: modèle du double pendule inversé}
+\section{Contraintes en performances et implémentation} \label{ch_concepts_implEtContr}
 
-modèle du double pendule inversé
-
-filtre de Kallmann
-
-cinématique inverse vers l'espace des configurations
-
-dynamique inverse dans l'espace des configurations
-
-Problème de la flexibilité de la semelle du pied de HRP2
-
-Asservissement du couple "Backdrive" appliqué de la cheville au sol
-
-Application à la stabilisation du robot (Shuuji Kajita)
-
-=> algorithme dynamique hybride nécessaire.
-
-\section{implémentation, méthodes et contraintes} \label{ch_concepts_implEtContr}
 - performances: précision, vitesse d'exécution , taille du code\\
 - interface (vecteurs d'entrée / sortie)\\
 - langage de programmation\\
@@ -548,31 +560,35 @@ Comme précédemment, nous considérons le champ de positions du corps $C$ éten
 
 
 
-\chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles}
+\chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles} \label{ch_impl}
 
 \setmyFiguresFile{hybridDynamics4etapes}
 
-L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
-Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rnea}, ainsi que d'un \gls{acr_crba} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
 Dans les sections précédentes, nous avons posé les bases de l'algèbre spatiale des torseurs cinématiques et dynamiques, ainsi que la modélisation généralisée d'un arbre cinématique (\emph{modèle de sytème} du robot). Nous allons décrire dans cette section la définition de l'\emph{algorithme hybride}, et son implémentation qui s'est déroulée sur plusieurs phases:\\
+
 \begin{itemize}
-  \item[$\centerdot$] Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_featherstone} chap.9). Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
+\item (section \ref{ch_impl_apercu}) Analyse de l'algorithme tel qu'il est présenté par Featherstone (\cite{bib_featherstone} chap.9).
+\item (sections \ref{ch_impl_equReord} à \ref{ch_impl_calculTau2})
+  \begin{itemize}
   \item[$\centerdot$] Analyse des dépendances:
   \begin{itemize}
     \item[-] méthodes (\gls{gls_jcalc}, méthodes de résolution des systèmes linéaires)
-    \item[-] algorithmes (\gls{acr_rnea} et \gls{acr_crba}) réutilisés par l'\emph{hybride dynamics}
     \item[-] impacts sur la définition du modèle du système dynamique (modèle \gls{acr_urdf}) et sur le parseur de modèle URDF pour la prise en compte des spécificités de l'algorithme hybride
+    \item[-] Identification et analyse des algorithmes réutilisés par l'algorithme de Dynamique Hybride, qui étaient déjà implémentés (\gls{acr_rnea} et \gls{acr_crba}), mais doivent éventuellement être modifiés voire ré-implémentés entièrement
   \end{itemize}
-  \item[$\centerdot$] Identification des algorithmes déjà implémentés, à modifier ou à implémenter entièrement dans la librairie dynamique \gls{gls_metapod}
-  \item[$\centerdot$] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen})
-  \item[$\centerdot$] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}
-  \item[$\centerdot$] Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
+  \item[$\centerdot$] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen_tutorial_alg_lin})
+  \item[$\centerdot$] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}. Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
+  \end{itemize}
+\item ( section \ref{ch_impl_optimisation}) Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
 \end{itemize}
 
 
 \section{l'algorithme hybride en quatre étapes}
 
-\subsection{mise en place de l'équation de mouvement et séparation des variable connues/inconnues}
+\subsection{Aperçu de l'algorithme} \label{ch_impl_apercu}
+
+L'algorithme Dynamique Hybride est une généralisation de la dynamique directe et de la dynamique indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues.\\
+Cet algorithme est décomposé en cinq étapes incluant le déroulement complet d'un \gls{acr_rnea}, ainsi que d'un \gls{acr_crba} pour la construction de la matrice d'inertie du système entier. Ces deux algorithmes sont utilisés sous une forme adaptée à l'algorithme hybride, et j'ai dû apporter certains compléments afin de permettre leur intégration dans l'algorithme principal.\\
 
 Nous considérons l'équation de mouvement relative à un arbre cinématique générique (à base fixe ou flottante), sous la forme matricielle (\cite{bib_featherstone} chap.6) comme suit:
 
@@ -597,7 +613,59 @@ H(q)\ddot{q} + C(q,\dot{q},f^{ext}) = \tau
 
 qui regroupe les éléments dynamiques décrits ci-contre: vecteurs de position / vitesse / accélération des articulations; les couples moteurs (internes) appliqués aux articulations; les forces extérieures au système éventuelles appliquées aux corps et ramenés aux articulations; la matrice inertielle dans l'espace de configuration et le vecteur de forces de précontrainte ou "bias" (force de Coriolis, la pesanteur, etc).
 Pour simplifier les notations, les dépendances $q$, $\dot{q}$ et $f^x$ des coefficients $H$ et $C$ de l'équation seront omises. Les variables sont les forces/couples $\tau$ et les accélérations $\ddot{q}$.\\
-Pour chaque articulation $i$, on connaît soit le couple appliqué soit l'accélération. L'objectif est de calculer toutes les variables inconnues. Cela passe par une mise en forme de l'équation de mouvement, visant à ramener toutes les variables inconnues du même côté de l'égalité, et laisser toutes les variables connues de l'autre côté.
+Pour chaque articulation $i$, on connaît soit le couple appliqué soit l'accélération. L'objectif est de calculer toutes les variables inconnues. Cela passe par une mise en forme de l'équation de mouvement, visant à ramener toutes les variables inconnues du même côté de l'égalité, et laisser toutes les variables connues de l'autre côté. On obtient ainsi l'équation réordonnée:
+
+\begin{align}
+&\begin{bmatrix}
+  H_{11} & 0 \\
+  H_{21} &  -I
+\end{bmatrix} 
+\cdot
+\begin{bmatrix}
+  \ddot{q}_1 \\
+  \tau_2
+\end{bmatrix} 
+=
+\begin{bmatrix}
+  \tau_1 \\
+  0
+\end{bmatrix} 
+-
+\begin{bmatrix}
+  C'_{1} \\
+  C'_{2}
+\end{bmatrix} \label{equ_equationMvt_dynHyb2} \\
+\notag \\
+&\textnormal{Avec} \qquad
+\begin{bmatrix}
+  C'_{1} \\
+  C'_{2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+  C_{1} \\
+  C_{2}
+\end{bmatrix}
++
+\begin{bmatrix}
+  H_{12} \ddot{q}_2 \\
+  H_{22} \ddot{q}_2
+\end{bmatrix} \label{equ_cPrime}
+\end{align}
+
+\`{à} partir de là, la résolution de l'équation de mouvement de la dynamique hybride se fera en quatre étapes, suivant la description par Featherstone \cite[section 9.1 p173]{bib_featherstone}:
+\begin{enumerate}
+\item calculer $C'$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
+\item calculer $H_{11}$
+\item résoudre $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
+\item calculer $\tau_2$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
+\end{enumerate}
+
+\noindent
+On détaille par la suite la mise en forme de l'équation \eqref{equ_equationMvt_dynHyb2} et les 4 étapes énoncées.
+
+
+\subsection{Séparation des variable connues/inconnues et mise en place de l'équation de mouvement réordonnée} \label{ch_impl_equReord}
 
 \subsubsection{Permutation des vecteurs de variables et de coefficients}
 
@@ -681,7 +749,7 @@ Avec $\underline{\ddot{q}_1}$ et $\underline{\tau_1}$ les sous-vecteurs des vari
 \)
 \end{center}
 \medskip
-\item[•] Toute matrice de permutation est inversible et $Q^{-1}=Q^T$. Cette propriété se démontre simplement grâce aux propriétés de la transposition de matrice. Soit une matrice quelconque $A$. $(AA^T)^T=(A^T)^TA^T=AA^T$, donc la matrice $AA^T$ est une matrice symétrique. On en déduit que $QQ^T$ est une matrice symétrique. Or $Q^T$, ainsi que $Q(Q^T)$ (permutation des lignes de $Q^T$), ont les mêmes propriétés que $Q$ (un seul élément à 1 par ligne). On en déduit que $QQ^T$ est une matrice symétrique avec un seul élément à 1 par ligne, ce qui correspond à la matrice identité $I$.
+\item[$\centerdot$] Toute matrice de permutation est inversible et $Q^{-1}=Q^T$. Cette propriété se démontre simplement grâce aux propriétés de la transposition de matrice. Soit une matrice quelconque $A$. $(AA^T)^T=(A^T)^TA^T=AA^T$, donc la matrice $AA^T$ est une matrice symétrique. On en déduit que $QQ^T$ est une matrice symétrique. Or $Q^T$, ainsi que $Q(Q^T)$ (permutation des lignes de $Q^T$), ont les mêmes propriétés que $Q$ (un seul élément à 1 par ligne). On en déduit que $QQ^T$ est une matrice symétrique avec un seul élément à 1 par ligne, ce qui correspond à la matrice identité $I$.
 \end{itemize}
 \end{flushleft}
 
@@ -803,7 +871,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \begin{bmatrix}
   C'_{1} \\
   C'_{2}
-\end{bmatrix} \label{equ_equationMvt_dynHyb2}
+\end{bmatrix}
 \end{alignat}
 \begin{align}
 &\textnormal{Avec} \qquad
@@ -820,7 +888,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \begin{bmatrix}
   H_{12} \ddot{q}_2 \\
   H_{22} \ddot{q}_2
-\end{bmatrix} \label{equ_cPrime}
+\end{bmatrix}
 \end{align}
 \\
 Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
@@ -863,13 +931,7 @@ La construction de l'opérateur de permutation pouvait se faire pendant l'une de
 l'opérateur de permutation se crée à partir d'un vecteur de permutation (classe \verb;Matrix; de Eigen) qu'on rempli suivant les permutations désirées. Le soin nous est réservé de vérifier que ces permutations équivalent à une matrice de permutation $Q$ orthogonale. Nous avons choisi d'éviter d'introduire dans le module \emph{metapodfromurdf} des dépendances avec les algorithmes de \emph{metapod}. De plus, remplir ces vecteurs en parcourant l'arbre cinématique en phase de compilation est assez complexe, faisant appel à des "metafonctions". On peut se permettre de faire le remplissage en phase d'exécution de \emph{metapod} puisque l'opérateur de permutation est calculé une bonne fois pour toutes. On choisit de le faire dans le constructeur de l'objet de la classe du modèle (classe \verb;<nom_modele>;), donc avant tout appel possible de la méthode de dynamique hybride \verb;chda();.
 
 \paragraph{résolution du système...}
-Pour la suite, la résolution de l'équation de mouvement de la dynamique hybride se fera donc en quatre étapes, données dans l'algorithme de dynamique hybride (\cite{bib_featherstone} section 9.1 p.173), et que nous décrivons dans les sections suivantes:
-\begin{enumerate}
-\item calculer $C'$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
-\item calculer $H_{11}$
-\item résoudre $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
-\item calculer $\tau_2$ d'après l'équation \eqref{equ_equationMvt_dynHyb2}
-\end{enumerate}
+Déroulons maintenant les quatre étapes de l'algorithme, énoncées plus haut: calcul de $C'$, calcul de $H_{11}$, résolution de $H_{11} \ddot{q}_1 = \tau_1 - C'_1$ et calcul de $\tau_2$.
 
 
 \subsection{calcul de C'}
@@ -965,9 +1027,9 @@ Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'
 
 Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs méthodes sont proposées dans l'algèbre spatiale selon Featherstone (\cite{bib_featherstone} section 9.1) . La plus simple, moins performante, consiste à:
 \begin{itemize}
-\item[•] calculer la matrice $H$ complète
-\item[•] la réordonner suivant la permutation $Q$: $H'=Q H Q^T$
-\item[•] Et finalement extraire la sous-matrice $H_{11}$ = $(h_{ij})_{1 \leqslant i \leqslant n_{fd},1 \leqslant j \leqslant n_{fd}}$
+\item[$\centerdot$] calculer la matrice $H$ complète
+\item[$\centerdot$] la réordonner suivant la permutation $Q$: $H'=Q H Q^T$
+\item[$\centerdot$] Et finalement extraire la sous-matrice $H_{11}$ = $(h_{ij})_{1 \leqslant i \leqslant n_{fd},1 \leqslant j \leqslant n_{fd}}$
 \end{itemize}
 \bigskip
 La deuxième méthode, beaucoup plus performante dans le cas où $n_{\emph{fd}}$ est signicativement plus petit que $n_{dof}$, consiste à modifier l'algorithme \gls{acr_crba}, de sorte à le réduire aux seuls calculs produisant les termes de $H_{11}$. Cette méthode sera abordée en détail dans la section sur les optimisations \ref{ch_impl_optimisation}.
@@ -1007,12 +1069,12 @@ H_{11} \ddot{q}_1 = \tau_1 - C'_1 \\
 Si $H_{11}$ est inversible. Justement, il est important de noter ici que \textbf{$H$ et $H_{11}$ sont définies positives et symétriques\footnotemark[1]}, et toute matrice définie positive est inversible \cite{bib_matriceDefiniePositive_1} \cite{bib_matriceDefiniePositive_2}. On connaît ces propriétés à la base pour $H$. Intéressons-nous alors aux propriétés de $H_{11}$ qui en découlent:
 \begin{flushleft}
 \begin{itemize}
-\item[•] Symétrique:
+\item[$\centerdot$] Symétrique:
 \begin{equation*}
 \textnormal{H est symétrique}  \iff   H = H^T \iff (Q H Q^T)^T = Q (Q H)^T = Q (H^T Q^T) = Q H Q^T
 \end{equation*}
 Donc la matrice permutée $Q H Q^T$ est également symétrique.\medskip
-\item[•] Définie positive: une matrice réelle M carrée de dimension $n \times n$ est définie positive si $x^T H x > 0$ pour tout vecteur colonne $x$, réel et non nul \cite{bib_matriceDefiniePositive_2}:
+\item[$\centerdot$] Définie positive: une matrice réelle M carrée de dimension $n \times n$ est définie positive si $x^T H x > 0$ pour tout vecteur colonne $x$, réel et non nul \cite{bib_matriceDefiniePositive_2}:
 \begin{align*}
 \textnormal{H définie positive} \iff  &\forall x: x^T H x > 0 \\
 \textnormal{or} \quad &x^T (Q H Q^T) x = (x^T Q) H ((Q^T x)^T)^T = (x^T Q) H (x^T Q)^T = y H y^T > 0 \quad \forall y \\
@@ -1020,7 +1082,7 @@ Donc la matrice permutée $Q H Q^T$ est également symétrique.\medskip
 \textnormal{où} \quad &y = x^T Q \quad \textnormal{est un vecteur colonne réel quelconque.}
 \end{align*}
 Donc la matrice permutée $Q H Q^T$ est également définie positive.\medskip
-\item[•] Par construction, la matrice carrée $H_{11}$ hérite de ces propriétés.
+\item[$\centerdot$] Par construction, la matrice carrée $H_{11}$ hérite de ces propriétés.
 \end{itemize}
 \end{flushleft}
 \medskip
@@ -1079,8 +1141,8 @@ Et un tableau fourni sur le site de Eigen, regroupant les décompositions dispon
 
 Tous ces algorithmes ont atteint une très bonne maturité d'implémentation dans la librairie \emph{Eigen}, à part FullPivHouseholderQR, qui est pourtant le plus robuste mais aussi plus lent. Parmi les plus rapides, on trouve les algorithmes de Cholesky, le LLT et le LDLT. Ils intègrent l'optimisation du traitement par blocs et bénéficient quand même d'une bonne fiabilité et précision. Leurs performances bénéficient des conditions les plus restrictives sur la matrice $A$:
 \begin{itemize}
-\item[\textbf{• LLT:}] $A$ doit être définie positive et symétrique
-\item[\textbf{• LDLT:}] $A$ doit être semi-définie positive ou négative
+\item[\textbf{$\centerdot$ LLT:}] $A$ doit être définie positive et symétrique
+\item[\textbf{$\centerdot$ LDLT:}] $A$ doit être semi-définie positive ou négative
 \end{itemize}
 
 %VERIFIER: propriétés de H énoncées en premier dans le chapitre (equation de mouvement)
@@ -1119,7 +1181,7 @@ ddq1 = ldltOfH11.solve(tau1 - C1prime);
 \end{verbatim}
 
 
-\subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau}
+\subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau} \label{ch_impl_calculTau2}
 
 Nous reprenons maintenant la deuxième équation du système linéaire \eqref{equ_equationMvt_dynHyb2}:
 \begin{align}
@@ -2067,12 +2129,15 @@ On s'est intéressé à deux cas extrêmes: $|fd|=0$ et $|fd|=n$. Dans le cas o�
 Ce projet m'a permis de découvrir un autre outil très utile en analyse de profil de fonctions par rapport aux temps de d'exécution. Il s'agit de \verb;cachegrind;, outil de la suite logicielle \verb;Valgrind;. De plus, à l'aide de \verb;Kcachegrind;on peut visualiser ces données graphiquement. On donne quelques détails supplémentaires en annexe \ref{appx_cachegrind}.
 
 
-\section{future intégration dans le système de tâches "stack of tasks" de HRP2}
-
-TBD
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Application au contrôle de couple "Backdrive" pour la stabilisation du robot: prise en compte de la flexibilité de l'appui au sol}
+
+=>
+\`{A} partir de là, on a au moins deux choix possibles pour contrôler le robot: soit on choisit la technique du filtrage de la trajectoire du \gls{acr_com}, au risque de voir diverger l'erreur de l'estimation de cette trajectoire dans certaines conditions particulières (montée de marches d'escalier); soit on utilise l'algorithme de Dynamique Hybride pour calculer la vraie trajectoire du \gls{acr_com} avant d'injecter celle-ci dans le filtre dynamique.
+
+=>
+Contrôle optimal (Andrea)
+
 
 \section{retour sur le modèle de pendule inversé et le problème de la flexibilité de la semelle}
 
