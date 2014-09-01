@@ -107,8 +107,9 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 %%%%%%%%%%%%%%%%%% glossaire %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{./tex/glossaire.tex}
+
 \glsaddall
-\printglossary
+\printglossaries
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -176,7 +177,7 @@ Pour mieux situer ces concepts dans le contexte des fondements en mécanique qui
 
 Ce formalisme et les algorithmes de dynamique font souvent appel à des propriétés d'algèbre linéaire, ce qui m'a amené à consulter divers sites internet comme wikipedia et consolider ces informations à l'aide de l'ouvrage "Matrix Computations (Johns Hopkins Studies in the Mathematical Sciences)" de Gene H. Golub., ancien professeur de sciences informatiques à l'université de Stanford, expert reconnu en analyse numérique et algèbre spatiale.
 
-Concernant les aspects techniques autour des outils de calculs et de langage de programmation utilisés, je me suis appuyé sur la documentation technique de la librairie \emph{Eigen} (http://eigen.tuxfamily.org/dox), et de l'ouvrage très complet sur le C++ template et la méta-programmation \cite{bib_metaprogramming}.
+Concernant les aspects techniques autour des outils de calculs et de langage de programmation utilisés, je me suis appuyé sur la documentation technique de la librairie \emph{Eigen} (http://eigen.tuxfamily.org/dox), et de l'ouvrage très complet sur le C++ template et la méta programmation \cite{bib_metaprogramming}.
 
 L'ensemble de ces sources techniques et scientifiques m'ont permis de mener à bien ma mission. Je vous présente dans la suite comment le rapport de cette mission est structuré.
 
@@ -187,7 +188,7 @@ Inévitablement, le deuxième chapitre se focalise sur les bases d'algèbre spat
 
 Naturellement, le troisième chapitre aborde l'implémentation proprement dite, détaillant bien les aspects, théoriques concernant la modélisation mécanique, et techniques concernant son intégration dans l'architecture existante de \emph{metapod}.
 
-Le dernier chapitre présente plus en détail:
+Je termine ce chapitre en présentant rapidement:
 \begin{itemize}
 \item la réflexion que j'ai pu mener avec mon maître de stage sur l'application de la Dynamique Hybride à la modélisation d'articulations flexibles
 \item ma recherche de l'état de l'art sur l'utilisation de la Dynamique Hybride au contrôle optimal de systèmes robotiques sous-actionnés.
@@ -220,6 +221,8 @@ La Dynamique directe, souvent appliquée à la simulation, consiste à trouver l
 \ddot{q} = \mathrm{FD}(model,\mathbf{q,\dot{q},\tau})
 \end{equation}
 
+Une des méthodes proposées par Featherstone \cite[(6.2)]{bib_featherstone} passe par le calcul de la matrice $H$ d'Inertie composite du système.  L'algorithme optimal réalisant ce calcul est le CRBA (Composite Rigid Body Algorithm).
+
 \subsection{La Dynamique Inverse}
 
 \`{A} l'opposé, la Dynamique Inverse consiste à déterminer les forces à appliquer aux articulations d'un système pour produire une accélération donnée. Elle peut se résumer à l'équation de mouvement suivante, où \textbf{ID} est la fonction donnant les couples:
@@ -228,7 +231,7 @@ La Dynamique directe, souvent appliquée à la simulation, consiste à trouver l
 \mathbf{\tau} = \mathrm{ID}(model,\mathbf{q,\dot{q},\ddot{q}})
 \end{equation}
 
-La résolution de ce problème s'applique au contrôle optimal d'un système réel dynamique de corps rigides, ou de figures digitales, mais peut aussi être une composante d'un algorithme de Dynamique Directe ou de Dynamique Hybride comme on verra dans le chapitre \ref{ch_impl}. Dans le cas du contrôle optimal, on trouve dans l'état de l'art, plusieurs types de contrôle:
+L'algorithme optimal réalisant cette fonction le RNEA (Recursive Newton-Euler Algorithm). La résolution de ce problème s'applique au contrôle optimal d'un système réel dynamique de corps rigides, ou de figures digitales, mais peut aussi être une composante d'un algorithme de Dynamique Directe ou de Dynamique Hybride comme on verra dans le chapitre \ref{ch_impl}. Dans le cas du contrôle optimal, on trouve dans l'état de l'art, plusieurs types de contrôle:
 \begin{itemize}
 \item le contrôle en couple, plus rare, à cause de la limitation en puissance des moteurs
 \item le contrôle en position (cas du HRP2). Dans ce cas, le RNEA servira à filtrer dynamiquement la trajectoire désirée du centre de masse \cite{bib_filtrageTrajectoireCoM}. Cette technique consiste à utiliser, par approximation, la trajectoire désirée du \gls{acr_com} pour calculer le \gls{gls_cop} "réel" du robot, dit "Multi-body CoP" ($CoP^{MB}$) et en déduire la correction à appliquer par le filtre dynamique à la trajectoire du \gls{acr_com}.
@@ -247,51 +250,72 @@ Justement, le problème de Dynamique Hybride est une généralisation de la Dyna
 \item enfin, un robot sans base fixe, donc typiquement le robot humanoïde.
 \end{itemize}
 
-Regardons de plus prêt le cas du robot humanoïde. On peut modéliser le robot comme un arbre cinématique à base fixe mais avec une liaison flottante \cite[chap.9 p171]{bib_featherstone}, désignée aussi comme \emph{Freeflyer}, à 6 degrés de liberté, et dont le couple "interne" $\tau$ d'actionnement est considéré nul. En effet, le robot ne contrôle sa position dans l'espace que via les forces de contact (extérieures) appliquées sous ses semelles. Ces forces sont une contre-réaction de la résultante de l'action de la gravité sur le corps du robot, ajoutée à l'action des articulations du robot.
+Le robot à liaisons flexibles SEA et le robot humanoïde en général sont des systèmes sous-actionnés, \cad qu'ils ont plus de degrés de liberté que d'actionneurs. Regardons de plus prêt le cas du robot humanoïde. On peut modéliser le robot comme un arbre cinématique à base fixe mais avec une liaison flottante \cite[chap.9 p171]{bib_featherstone}, désignée aussi comme \emph{Freeflyer}, à 6 degrés de liberté, et dont le couple "interne" $\tau$ d'actionnement est considéré nul: cette articulation n'est pas actionnée directement. En effet, le robot ne contrôle sa position dans l'espace que via les forces de contact (extérieures) appliquées sous ses semelles. Ces forces sont une contre-réaction de la résultante de l'action de la gravité sur le corps du robot, ajoutée à l'action des articulations du robot.
 
 Si on veut contrôler avec robustesse la trajectoire du \gls{acr_com} du robot (quelque soit la méthode d'asservissement employée), on doit être capable d'estimer avec la plus grande précision possible la position instantanée de celui-ci. Or dans la modélisation énoncée ci-dessus, on connaît les paramètres $q, \dot{q}, \ddot{q}$ de toutes les articulations sauf celle du \emph{Freeflyer}, mais pour cette articulation on connaît le couple moteur appliqué: il est nul. La Dynamique Hybride sauve alors la partie en calculant tous les couples inconnus (ceux des articulations réellement actionnées), et l'accélération du \emph{Freeflyer}. Sa vitesse et position peuvent alors être déduites par intégration.
 
 
-\section{Contraintes en performances et implémentation} \label{ch_concepts_implEtContr}
+\section{Contraintes en performances et méthodes d'implémentation} \label{ch_concepts_implEtContr}
 
-- performances: précision, vitesse d'exécution , taille du code\\
-- interface (vecteurs d'entrée / sortie)\\
-- langage de programmation\\
-- Algorithme générique pour tous les modèles URDF de robots (arbre cinématique), mais optimisé pour chaque modèle spécifique (template et meta-programing)\\
+\subsection{Contraintes en vitesse d'exécution}
 
-Un des désavantages des algorithmes basés sur un modèle générique est qu'ils sont susceptibles de dérouler des calculs inutiles, trop génériques dans le cas de certains modèles spécifiques plus simples, ayant par exemple un nombre réduit de degrés de liberté ou bien que des axes de rotation parallèles. Une des solutions est de générer automatiquement des algorithmes spécialisés, dont les traitements ont été réduits au minimum pour réaliser uniquement les calculs nécessaires à un modèle spécifique. La définition et l'application de tels algorithmes suivraient donc le schéma suivant:
+Les algorithmes de Dynamique Directe ou Inverse ont été implémentés en respectant des contraintes strictes en performance, qu'il fallait tenir compte lors de la phase d'optimisation de l'algorithme de Dynamique Hybride. Je me suis alors intéressé aux contraintes mises en évidence dans la description du Filtrage Dynamique Pour La Marche \cite{bib_filtrageTrajectoireCoM}, qui utilise l'algorithme RNEA pour filtrer la trajectoire du centre de masse.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figs/principeAlgoGenerique.pdf}
-\caption{Génération automatique d'algorithmes optimisés et spécialisés}
-\end{figure}
+La fréquence d'échantillonnage du robot humanoïde HRP2 s'élève à $200 Hz$ , correspondant à une période de $5 ms$. C'est la fréquence avec laquelle le contrôleur de trajectoire envoie une commande vectorielle de configuration articulaire ($\mathbf{q}$) pour les 30 degrés de liberté du robot. Le filtrage dynamique se fait sur une fenêtre de $1.6 s$ à la même fréquence d'échantillonnage de $200 Hz$, d'après le cahier des charges du \gls{acr_wpg} proposé par Morisawa, ce qui correspond à $200 \times 1.6 = 320$ itérations de calcul d'un vecteur $\mathbf{q}$ \cite[I.B et III.B]{bib_filtrageTrajectoireCoM}, autrement dit à 2 pas de marche. \`{A} chaque période d'échantillonnage, le \gls{acr_wpg} ne dispose que $3 ms$ pour s'exécuter, et cela comprend les 320 itérations de RNEA. Par conséquent ces 320 itérations doivent s'exécuter en moins $400 \mu s$, soit un RNEA en $1.25 \mu s$. comme cette contrainte n'était pas réalisable par les librairies disponibles, la fréquence d'échantillonnage sur la fenêtre de filtrage a été réduite à $20 Hz$, et la cadence des RNEA réduite à 32 toutes les $0.1 s$. Actuellement, les résultats sur HRP2 (Intel(R) Core2(TM) Duo E7500) sont les suivants:
+\begin{itemize}
+\item[$\centerdot$ vitesse moyenne:] $15 \mu s$
+\item[$\centerdot$ vitesse maximale:] $342 \mu s$
+\end{itemize}
+Et sur un Laptop Intel(R) Core(TM) i7-4700HQ CPU, la vitesse moyenne est d'environ $4.2 \mu s$
 
 
-\subsection{L'architecture de \emph{metapod}}
+\subsection{Contrainte en précision}
 
-\emph{Metapod} fournit une librairie d'algorithmes de calcul dynamique de robot, applicable à un modèle de robot au format \gls{acr_urdf}. Ce format est représenté dans l'outil sous forme de classes templatées. LA librairie est écrite en langage C++ templaté suivant des techniques de meta-programmation. Ainsi, chaque algorithme est indépendant des modèles de robot (le modèle est une variable de type et un paramètre d'entrée pour l'algorithme templaté), mais est optimisé et adapté, lors de la compilation, au modèle spécifique traité. La représentation des modèles cinématiques (arbres) et les algorithmes sont basés sur l'algèbre spatiale selon Featherstone, elle même basée sur les concepts de torseurs \cite{bib_featherstone}. On liste ci-dessous les composants principaux de la librairie (sous la racine de \emph{metapod}):
-\begin{description}
-\item[$\centerdot$ include/metapod:] algorithmes de dynamique de robot et outils
-\item[$\centerdot$ data:] fichiers XML donnant la définition URDF des modèles de référence "simple\_arm" (chaîne à 3 corps) et "simple\_humanoid" (modèle humanoïde à 29 corps/articulations et 35 degrés de liberté) pour les tests unitaires et les benchmarks
-\item[$\centerdot$ robotbuilder:] librairie d'aide pour la génération du code source 
-\item[$\centerdot$ metapodfromurdf:] génère, à l'aide du module "robotbuilder", le code source (fichier d'entête) définissant les classes du modèle de robot, à partir des structures URDF fournies par le parseur URDF
-\item[$\centerdot$ build/include/metapod/models:] code source généré par "metapodfromurdf".
-\end{description}
+Je suis parti de l'hypothèse que pour un robot humanoïde de taille humaine, qui subit des perturbations dûes à la flexibilité des semelles, qu'il était acceptable de contrôler les articulations du robot avec une précision maximale à 0.5 degrés, ce qui correspond à $10^{-3} rad$ pour les grandeurs $q, \dot{q} et \ddot{q}$. De même, une précision de $10^{-3}$ Newton dans le calcul de couples devrait suffire largement. On tolérera donc, dans les tests de validation de l'algorithme Hybride principal et de ses sous-fonctions, les erreurs numériques $\leqslant 10^{-3}$.
 
-Cette architecture a comme dépendance principale le parseur URDF. Celui-ci converti le fichier XML contenant le modèle URDF, en classes C++ envoyées à leur tour au module "metapodfromurdf".
 
-La compilation de metapod se déroule donc en deux étapes: dans un premier temps, le parseur URDF est appelé pour interpréter le fichier XML (\verb;data/<nom_modele>.hh;) et remplir ses classes URDF exportables. Ces données sont ensuite envoyées à "metapodfromurdf" qui génère le code source avec les classes du modèle de robot (fichier d'entête \emph{metapod} dans \verb;build/include/metapod/models;). En deuxième phase de compilation, les classes du modèle de robot sont compilées avec le code source des algorithmes (\verb;include/metapod;). Les algorithmes sont des structures templates. C'est à ce moment là que celles-ci sont instanciées avec le type [modèle de robot]. Nous allons voir justement dans la suite, quelques propriétés intéressantes qui font la particularité de la meta-programmation.
+\subsection{Algèbre spatiale et méta programmation}
 
-\subsection{Quelques propriétés de la meta-programmation}
+\subsubsection*{L'Algèbre Spatiale et la récursivité}
 
-\subsubsection*{Le traitement à la compilation ou à l'exécution}
+L'Algèbre Spatiale est à la base des algorithmes de Dynamique décrits par Featherstone. On va rapidement illustrer comment ce formalisme, combiné à la méta programmation, peut nous aider à atteindre le cahier des charges de performance. L'algèbre spatiale est très efficace lorsqu'elle est associée à des algorithmes récursifs, à cause de la composition simplifiée des vecteurs spatiaux de vitesse, accélération et force, et d'autres propriétés particulières comme l'invariance des vecteurs spatiaux par rapport à la base de Plücker choisie (base dans laquelle on exprime le vecteur).
 
-La méta-programmation du template C++ nous permet d'obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Métafonction}, dans le deuxième cas en présence d'une \emph{Metafonction numérique} (\cite{bib_metaprogramming} chap.2 section 2.9).
+Justement, les algorithmes CRBA et RNEA utilisent beaucoup la récursivité. Ils exploitent également, très efficacement, la sparsité d'un arbre cinématique, en tenant compte de l'absence de couplage entre branches cinématiques (par exemple les bras ou les jambes). Certains langages comme les langages symboliques détectent ces branches et permettent d'éliminer les calcul inutiles qui y sont liés. La Meta-programmation a également cette capacité.
 
-\subsubsection*{Le mécanisme de parcours récursif à l'aide de visiteurs} \label{ch_concepts_visiteurs}
+\subsubsection*{La méta programmation et le traitement à la compilation}
 
-On définit, pour le parcours récursif d'un arbre cinématique, deux procédures suivant la méthode d'exploration:
+La méta programmation signifierait "la programmation d'un programme". C'est en effet un programme qui manipule du code. Le concept est déjà présent dans un compilateur ou un générateur de "parseur" comme YACC. Le mécanisme "template" du C++ fournit méthode native de méta programmation \cite[p2,3]{bib_metaprogramming}. Cette méthode permet de traiter le calcul de grandeur numériques, et de dérouler des séquences de branchement de code à la compilation. La condition dans ces deux cas, est que les grandeurs et branchements sont constants et connus à la compilation.
+
+On peut alors Obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Méta fonction}, dans le deuxième cas en présence d'une \emph{Méta fonction numérique} (\cite[(2.9)]{bib_metaprogramming}. On présente ci-dessous un exemple de méta fonction très connu réalisant la fonction mathématique Factoriel:
+
+\begin{verbatim}
+template <int n>
+struct factorial {
+  enum {
+    value = n * factorial<n - 1>::value
+  };
+};
+
+template <>
+struct factorial<0> {   // "specialisation", termine le calcul récursif
+  enum{ value = 1 }
+};
+\end{verbatim} 
+
+Lorsque le compilateur traite l'appel:
+
+\begin{verbatim}
+factorial<4>
+\end{verbatim}
+
+Il déroule tout le calcul récursif par substitutions consécutive jusqu'à obtenir le résultat $24$.
+
+\textbf{Note:} Certains processeurs tirent également profit de ces méthodes. Ils utilisent ce qu'on appelle la prédiction de branchement, qui consiste à établir des statistiques sur les branchements d'un programme pour les anticiper. La méta programmation soulage ainsi le processeur en réduisant le nombre de branchements qu'il doit traiter.  
+
+\subsection{Le mécanisme de parcours récursif à l'aide du \emph{pattern} "visitor"} \label{ch_concepts_visiteurs}
+
+Le parcours récursif d'arbres cinématiques est récurrent dans les algorithmes de Dynamique, surtout dans le cas su RNEA ou le CRBA. Ce parcours utilise le \emph{pattern} "Visitor" avec deux déclinaisons suivant le sens du parcours de l'arbre:
+
 \begin{itemize}
 \item[$\centerdot$] \textsc{DepthFirstTraversal} pour un parcours en profondeur d'abord, implémenté sous \emph{métapod} dans la fonction $\mathit{template<visitor, model, node_{id}> \quad struct \quad depth\_first\_traversal()}$
 \item[$\centerdot$] \textsc{BackwardTraversal} pour un parcours arrière en remontant l'arbre vers la racine, implémenté sous \emph{metapo} dans la fonction $\mathit{template<visitor, model, node_{id}, end\_node\_{id}> struct backward\_traversal()}$.
@@ -345,6 +369,37 @@ La procédure \textsc{DepthFirstTraversal} parcours l'arbre cinématique du \emp
 
 \paragraph{Parcours en arrière:}
 La procédure \textsc{BackwardTraversalPrev} parcours l'arbre en partant du noeud $i_start$, et en remontant vers la racine par l'appel récursif du parent du noeud visité, jusqu'au noeud $end\_node$. Comme pour \textsc{DepthFirstTraversal}, pour chaque noeud visité, sauf pour le noeud $i_start$, les fonctions \textsc{visitor.discover} et \textsc{visitor.finish} sont appelées respectivement avant et après l'exploration du noeud parent.
+
+
+\subsection{Méta programmation et algorithmes génériques}
+
+Un des désavantages des algorithmes basés sur un modèle générique est qu'ils sont susceptibles de dérouler des calculs inutiles, trop génériques dans le cas de certains modèles spécifiques plus simples, ayant par exemple un nombre réduit de degrés de liberté ou bien que des axes de rotation parallèles. Le C++ templaté et la méta programmation permettent de générer automatiquement des algorithmes spécialisés, dont les traitements ont été réduits au minimum pour réaliser uniquement les calculs nécessaires à un modèle spécifique. La définition et l'application de tels algorithmes suivraient donc le schéma suivant:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figs/principeAlgoGenerique.pdf}
+\caption{Génération automatique d'algorithmes optimisés et spécialisés}
+\end{figure}
+
+
+
+\subsection{L'architecture de \emph{metapod}}
+
+\emph{Metapod} fournit une librairie d'algorithmes de calcul dynamique de robot, applicable à un modèle de robot au format \gls{acr_urdf}. Ce format est représenté dans l'outil sous forme de classes templatées. LA librairie est écrite en langage C++ templaté suivant des techniques de méta programmation. Ainsi, chaque algorithme est indépendant des modèles de robot (le modèle est une variable de type et un paramètre d'entrée pour l'algorithme templaté), mais est optimisé et adapté, lors de la compilation, au modèle spécifique traité. La représentation des modèles cinématiques (arbres) et les algorithmes sont basés sur l'algèbre spatiale selon Featherstone, elle même basée sur les concepts de torseurs \cite{bib_featherstone}. On liste ci-dessous les composants principaux de la librairie (sous la racine de \emph{metapod}):
+\begin{description}
+\item[$\centerdot$ include/metapod:] algorithmes de dynamique de robot et outils
+\item[$\centerdot$ data:] fichiers XML donnant la définition URDF des modèles de référence "simple\_arm" (chaîne planaire à 3 corps) et "simple\_humanoid" (modèle humanoïde à 29 corps/articulations et 35 degrés de liberté) pour les tests unitaires et les benchmarks
+\item[$\centerdot$ robotbuilder:] librairie d'aide pour la génération du code source 
+\item[$\centerdot$ metapodfromurdf:] génère, à l'aide du module "robotbuilder", le code source (fichier d'entête) définissant les classes du modèle de robot, à partir des structures URDF fournies par le parseur URDF
+\item[$\centerdot$ build/include/metapod/models:] code source généré par "metapodfromurdf".
+\end{description}
+
+Cette architecture a comme dépendance principale le parseur URDF. Celui-ci converti le fichier XML contenant le modèle URDF, en classes C++ envoyées à leur tour au module "metapodfromurdf".
+
+La compilation de metapod se déroule donc en deux étapes: dans un premier temps, le parseur URDF est appelé pour interpréter le fichier XML (\verb;data/<nom_modele>.hh;) et remplir ses classes URDF exportables. Ces données sont ensuite envoyées à "metapodfromurdf" qui génère le code source avec les classes du modèle de robot, encapsulées dans une classe templatée qu'on désigne par \emph{model} (fichier d'entête \emph{metapod} dans \verb;build/include/metapod/models;). En deuxième phase de compilation, les classes du modèle de robot sont compilées avec le code source des algorithmes (\verb;include/metapod;). Les algorithmes sont des structures templates. C'est à ce moment là que celles-ci sont instanciées avec le type [classe \emph{model}].
+
+
+Il nous reste maintenant à voir un aperçu des concepts et notations en Algèbre Spatiale avant d'aborder l'implémentation de l'algorithme de Dynamique Hybride.
 
 
 
@@ -579,7 +634,7 @@ Dans les sections précédentes, nous avons posé les bases de l'algèbre spatia
   \item[$\centerdot$] Identification et prise en main des outils logiciels pour la manipulation de matrices et systèmes linéaires (matrices et solveurs \gls{gls_eigen} \cite{bib_eigen_tutorial_alg_lin})
   \item[$\centerdot$] Implémentation d'une version modifiée des algorithmes \gls{acr_rnea} et \gls{acr_crba} adaptée à l'\emph{hybrid dynamics}, ainsi que de l'algorithme principal dans \emph{metapod}. Lors de cette phase, j'ai dû apporter certains compléments au calcul des éléments de la matrice d'inertie, face à la proposition initiale de Featherstone non totalement explicitée, afin de permettre le calcul de toutes les inconnues.
   \end{itemize}
-\item ( section \ref{ch_impl_optimisation}) Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{Meta-programmation}
+\item ( section \ref{ch_impl_optimisation}) Optimisation logique visant à réduire le nombre d'étapes de calcul, ainsi que l'optimisation de la compilation et exécution de ces étapes à l'aide des thecniques de \emph{méta programmation}
 \end{itemize}
 
 
@@ -906,7 +961,7 @@ fwdDyn =
 \end{cases}
 \end{equation*}
 
-\footnotetext[1]{Le caractère statique et constant de \verb;fwdDyn; est indispensable à certaines optimisations de meta-programmation.}
+\footnotetext[1]{Le caractère statique et constant de \verb;fwdDyn; est indispensable à certaines optimisations de méta programmation.}
 
 Nous avons vu, dans la section \ref{ch_concepts_implEtContr}, l'architecture globale de \emph{metapod}. La création d'un champ dans la classe du modèle interne à \emph{metapod} et dans le fichier URDF XML impacte toute la chaîne de conversion entre ces deux points:
 \begin{description}
@@ -1181,7 +1236,7 @@ ddq1 = ldltOfH11.solve(tau1 - C1prime);
 \end{verbatim}
 
 
-\subsection{résolution de tau2 et reconstruction des vecteurs de sortie ddq et tau} \label{ch_impl_calculTau2}
+\subsection{résolution de $\mathbf{\tau_2}$ et reconstruction des vecteurs de sortie ddq et tau} \label{ch_impl_calculTau2}
 
 Nous reprenons maintenant la deuxième équation du système linéaire \eqref{equ_equationMvt_dynHyb2}:
 \begin{align}
@@ -1750,7 +1805,7 @@ Dans l'appel de \textsc{BackwardTraversalPrev}, On veut remonter l'arbre tant qu
 \dispFig[H]{4}{0.8\textwidth}{Exemple d'un arbre simple: termes $H_{ij}$ non nuls tels que $i,j \in fd$ (On n'a pas représenté les transposées). $fd={3,4,11}$ et $\nu(fd)={4,8,3,6,7,10,11}$.}{fig_optimH11}
 
 \paragraph{Optimisation de \textsc{rootNodeOfNuFD}:}
-La méta-programmation m'a permis d'optimiser cette procédure à l'extrême en l'implémentant sous forme de \emph{Metafonction numérique} (section \ref{ch_concepts_implEtContr}).
+La méta programmation m'a permis d'optimiser cette procédure à l'extrême en l'implémentant sous forme de \emph{Metafonction numérique} (section \ref{ch_concepts_implEtContr}).
 
 
 \subsubsection{Suppléments pour le calcul de H21}
@@ -2130,22 +2185,34 @@ Ce projet m'a permis de découvrir un autre outil très utile en analyse de prof
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Application au contrôle de couple "Backdrive" pour la stabilisation du robot: prise en compte de la flexibilité de l'appui au sol}
+\section{Recherches sur quelques applications}
 
-=>
-\`{A} partir de là, on a au moins deux choix possibles pour contrôler le robot: soit on choisit la technique du filtrage de la trajectoire du \gls{acr_com}, au risque de voir diverger l'erreur de l'estimation de cette trajectoire dans certaines conditions particulières (montée de marches d'escalier); soit on utilise l'algorithme de Dynamique Hybride pour calculer la vraie trajectoire du \gls{acr_com} avant d'injecter celle-ci dans le filtre dynamique.
+\subsection{Contrôle de couple "Backdrive" pour la stabilisation du robot: prise en compte de la flexibilité de l'appui au sol}
 
-=>
-Contrôle optimal (Andrea)
+\begin{wrapfigure}{r}[0pt]{0.4\textwidth}
+  \centering
+  \includegraphics[width=0.3\textwidth]{figs/HRP2foot.png}
+  \caption{HRP2 foot)}
+  \label{fig_hrp2Foot}
+\end{wrapfigure}
 
+On peut appliquer le problème de Dynamique Hybride au contrôle d'un robot sous-actionné ayant des articulations flexibles dont le seul "actionneur" est équivalent à un système de ressorts. C'est le cas du HRP2 avec ses semelles flexibles. Dans ce cas, la flexibilité se situe entre la semelle et le corps du pied, juste en dessous de l'articulation de la cheville. Il existe des études en cours visant à définir un observateur performant de cette flexibilité. Kajita avait déjà abordé le sujet dans son article sur l'utilisation du retour de moment angulaire du robot pour le contrôle du couple appliqué à la cheville \cite{bib_backdrive}. On illustre ci-contre le modèle tel que décrit par Kajita. Lorsque la cheville fait pivoter le corps du pied, celui-ci appuie sur le matériaux souple ("compliant material") appliquant ainsi un couple au sol.
+\paragraph{Contrôle du couple:} Kajita utilise une boucle de contrôle pour asservir le couple appliqué au sol. Le contrôleur se sert de l'estimation de couple au sol fournie par les mesures des capteurs de pression intégrés à la semelle. On connaît donc le couple associé à l'articulation flexible. On désigne par $q_f, \dot{q}_f, \ddot{q}_f$ et $\tau_f$ les paramètres articulaires associés.
+\paragraph{paramètres $q_f$ et $\dot{q}_f$:} Le couple d'appui résulte de la compression du ressort équivalent de raideur $k_e$ (figure \ref{fig_hrp2ankle}). Ceci nous permettrait d'estimer $q_f$ à tout instant, donc $\dot{q}_f$ par dérivation. $q_f$ servirait à estimer la position du \gls{acr_com} du robot en tenant compte de sa flexibilité.
 
-\section{retour sur le modèle de pendule inversé et le problème de la flexibilité de la semelle}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{figs/contactTorque.png}
+  \caption{Contrôleur de couple de contact. Extrait de \cite[figure 2,3]{bib_backdrive}}
+  \label{fig_hrp2ankle}
+\end{figure}
 
-\section{framework de simulation intégré à metapod}
+On dispose donc de tous les paramètres d'entrée de l'algorithme Hybride: $\tau_f$ et $\tau_0$(couple nul du \emph{Freeflyer}), et les $\ddot{q}_i$ des autres articulations. L'algorithme nous fournit alors l'accélération $\ddot{q}_f$ et celle du \emph{Freeflyer} $\ddot{q}_0$ qu'on peut assimiler au \gls{acr_com}. La suite est un problème d'optimisation.
 
-\section{prise en compte des paramètres identifiés de HRP2}
+\subsection{Contrôle optimal de robots sous-actionnés}
 
-\section{génération et projection des couples de actifs et passifs de la cheville sur la trajectoire planifiée}
+On peut envisager une application différente au contrôle optimal. Si on part du problème général d'optimisation, basé sur l'équation de mouvement d'un système à base fixe sous contraintes, la solution à ce problème très complexe donne directement l'ensemble des couples $\mathbf{\tau}$ dans l'espace des configurations à partir de la trajectoire du robot (par exemple le centre de masse) dans l'espace des tâches. Andrea Del Prete avait alors proposé \cite{bib_paper_Andrea} de séparer le problème en deux phases: appliquer d'abord la Cinétique Inverse (ou modèle différentiel inverse) à la trajectoire pour pour passer ainsi de l'espace des tâches à l'espace des configurations et déterminer $q, \dot{q} et \ddot{q}$; appliquer ensuite cette configuration au problème d'optimisation. Pour être appliquée à un robot à base flottante (humanoïde), cette méthode devrait utiliser la Dynamique Hybride. C'était un des sujets traités dans la thèse d'Andrea Del Prete \cite{bib_these_andrea}.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2155,7 +2222,18 @@ Contrôle optimal (Andrea)
 
 \section*{Bilan du travail}
 
-- objectif initial
+- objectif initial et réalisations
+
+	- correction du code source metapod de départ (calculdes matrices de passage Xs)
+	
+	- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
+	
+	- extention des optimisations de Featherstone pour le calcul de H21
+	
+	- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
+	
+	- [complément suggéré à l'algorithmede Kajita]
+
 
 - concepts acquis:
 
@@ -2165,15 +2243,6 @@ Contrôle optimal (Andrea)
 	
 	- outils et environnement de développement (cmake, Eigen, Boost, Template/Mete-programmation)
 
-- correction du code source metapod de départ (calculdes matrices de passage Xs)
-
-- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
-
-- extention des optimisations de Featherstone pour le calcul de H21
-
-- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
-
-- [complément suggéré à l'algorithmede Kajita]
 
 
 \section*{Bilan personnel}
@@ -2186,8 +2255,9 @@ Contrôle optimal (Andrea)
 
 - contact avec le monde de la recherche
 
-- acquis de l'expérience en Méta-programmation et algorithmes dynamiques
+- acquis de l'expérience en méta programmation et algorithmes dynamiques
 
+(conformte mon désir de trabvailler dans la recherche en robotique mobile et plus particulièrement humanoide)
 
 \section*{Perspectives}
 
