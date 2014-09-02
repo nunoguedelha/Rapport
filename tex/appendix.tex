@@ -1,8 +1,4 @@
 
-\chapter{Notations en Algèbre spatiale} \label{appx_notations}
-
-Les notations spécifiques à l'algèbre spatiale des torseurs permettent une formulation très simplifiée des relations cinématiques et dynamiques appliquées au \emph{modèle du système}.\\
-
 \chapter{cachegrind - mesures de performance en vitesse d'exécution} \label{appx_cachegrind}
 
 L'outil \textbf{cachegrind} est très efficace pour détecter des instructions ou blocs d'instructions très pénalisant pour la performance en vitesse d'un algorithme. Il s'agit d'un outil intégré à la boîte à outils Valgrind. L'outil permet de faire du profilage de fonctions. De plus, il existe un autre outil, \verb;Kcachegrind;, qui fournit une interface graphique permettant d'exploration ces données beaucoup plus facilement. Nous présentons rapidement ci-dessous son mode d'utilisation:
@@ -297,9 +293,24 @@ On peut donc associer au système de vecteurs liés ${(A,\rho \mathbf{a}_A \math
 
 \section{Invariance du vecteur spacial $\widehat{v}$}
 
-\subsection{invariance entre deux bases de \emph{Plücker} ayant la même orientation}
+Si on définit deux bases de \emph{Plücker} différentes $D_{O}$ et $D_{P}$, centrées respectivement sur $O$ et $P$:
 
-Nous allons démontrer l'invariance du vecteur spatial dans le cas simple illustré ci-dessous:
+\begin{align*}
+D_{O} = \lbrace &\textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
+D_{P} = \lbrace &\textbf{d}_{Px}, \textbf{d}_{Py}, \textbf{d}_{Py}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
+\end{align*}
+
+Ainsi que les vecteurs spatiaux associés $\widehat{v}$ et $\widehat{v'}$, on obtient:
+
+\begin{align}
+\widehat{v}  &= \underline{v}_{O} \cdot D_{O} \notag \\
+\widehat{v'} &= \underline{v}_{P} \cdot D_{P} \notag \\
+^{D_{O}}\widehat{v} \quad &= \quad ^{D_{O}}\widehat{v'}
+\label{equ_invariant}
+\end{align}
+
+
+Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ dans la même base de \emph{Plücker} sont identiques \eqref{equ_invariant}. Il faut noter que si les deux bases ont la même orientation, elles auront les mêmes vecteurs unitaires de translation ($\textbf{d}_{x}$, $\textbf{d}_{y}$ et $\textbf{d}_{z}$), mais les vecteurs unitaires de rotations diffèrent si $O \neq P$ ne sont pas confondus, comme illustré dans le l'exemple de cas simple ci-dessous:
 
 \dispThreeFig[H]
 {4}{Deux bases de \emph{Plücker} de même orientation.}
@@ -308,14 +319,8 @@ Nous allons démontrer l'invariance du vecteur spatial dans le cas simple illust
 {Expression de $\textbf{d}_{Px}$, $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.}
 {vitessePointCoincidant}
 
-On considère les deux bases de \emph{Plücker}:
 
-\begin{align*}
-D_{O} = \lbrace &\textbf{d}_{Ox}, \textbf{d}_{Oy}, \textbf{d}_{Oy}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
-D_{P} = \lbrace &\textbf{d}_{Px}, \textbf{d}_{Py}, \textbf{d}_{Py}, \textbf{d}_{x}, \textbf{d}_{y}, \textbf{d}_{z} \rbrace \\
-\end{align*}
-
-Dans la section \ref{algSpa_Vitesse}, figure \ref{fig_transPlucker}, nous avons montré la relation entre les vecteurs unitaires de mouvement des deux bases de \emph{Plücker} $D_{O}$ et $D_{P}$:
+Pour rapidement comprendre ces transformations, on peut visualiser un corps tournant autour de l'axe $P_{y}$ à la vitesse $w_{y}$. On définit initialement le vecteur spatial $\widehat{v'}$ en $P$ (\cad considérant l'axe de rotation du corps autour de $P_{y}$) est alors $w_{y}\textbf{d}_{Py}$. Or la vitesse d'un point lié au corps et passant par $O$ (par rapport au repère fixe $R(O,x,y,z)$) vaut $rw_{y}\textbf{d}_{z}$. Le vecteur spatial en $O$ (\cad considérant le corps en rotation autour de l'axe $O_{y}$) est alors $\widehat{v}=\textbf{d}_{Oy}+r\textbf{d}_{z}$. Nous montrons ainsi, pour tous les axes, que:
 
 \begin{align*}
   \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
@@ -392,10 +397,9 @@ Nous voulons l'exprimer dans la base $D_{O}$. $w_{x}$, $w_{y}$ et $w_{z}$ sont c
 
 Nous avons ainsi montré l'équivalence des deux vecturs spatiaux $\widehat{v}$ et $\widehat{v'}$.
 
-\subsection{invariance entre deux bases de \emph{Plücker} quelconques et relation avec }
+La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
 
 
-\chapter{\textsc{é}léments d'algèbre linéaire} \label{appx_algLineaire}
 
 
 

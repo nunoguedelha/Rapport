@@ -63,6 +63,8 @@
 %\usepackage{enumitem}
 \usepackage{moreverb}
 
+
+
 \begin{document}
 
 %%%%%%%%%%%%%%%%%% page de couverture %%%%%%%%%%%%%%%%%%%
@@ -108,6 +110,7 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 
 \input{./tex/glossaire.tex}
 
+
 \glsaddall
 \printglossaries
 
@@ -118,7 +121,7 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 
 \section*{contexte}
 
-\'{E}tudiant en deuxième année de Master de Robotique (IRR) à Paul Sabatier, j'ai effectué mon stage de fin d'année au Laboratoire d'Analyses A et Systèmes, au sein de l'équipe Gepetto, sous la responsabilité de Olivier Stasse, chargé de recherche, au coeur du thème de la robotique humanoïde. Issu d'une formation d'Ingénieur en informatique et télécommunications, et suite à une expérience professionnelle de douze ans, j'ai choisi de reprendre des études pour me spécialiser en Robotique, et pouvoir ainsi explorer ce domaine multidisciplinaire et riche en opportunités d'innovation. Ce qui me motive également c'est de faire un métier dans la recherche, dans un laboratoire ou dans une entreprise en tant qu'ingénieur de recherche. Ces objectifs m'ont amené à suivre le Master I.R.R., qui réunissait toutes les composantes d'une formation équilibrée et complète autour des fonctions robotiques comme la perception, l'intelligence artificielle mais aussi, et surtout, la manipulation et la mobilité. Ces deux derniers points sont au centre de mon intérêt pour la robotique. Je souhaitais développer mes compétences dans le thème de la robotique mobile, plus particulièrement des robots articulés, comme les robots humanoïdes, plus précisément au niveau de la modélisation spatiale et fonctionnelle de ces systèmes, ainsi que le contrôle optimal. Ce domaine est naturellement dans la continuïté de mon expérience dans l'embarqué, le temps réel et l'optimisation. Le LAAS-CNRS m'est alors apparu comme un des meilleurs choix pour effectuer un stage.
+\'{E}tudiant en deuxième année de Master de Robotique (IRR) à Paul Sabatier, j'ai effectué mon stage de fin d'année au Laboratoire d'Analyse et d'Architecture des Systèmes, au sein de l'équipe Gepetto, sous la responsabilité de Olivier Stasse, chargé de recherche, au coeur du thème de la robotique humanoïde. Issu d'une formation d'Ingénieur en informatique et télécommunications, et suite à une expérience professionnelle de douze ans, j'ai choisi de reprendre des études pour me spécialiser en Robotique, et pouvoir ainsi explorer ce domaine multidisciplinaire et riche en opportunités d'innovation. Ce qui me motive également c'est de faire un métier dans la recherche, dans un laboratoire ou dans une entreprise en tant qu'ingénieur de recherche. Ces objectifs m'ont amené à suivre le Master I.R.R., qui réunissait toutes les composantes d'une formation équilibrée et complète autour des fonctions robotiques comme la perception, l'intelligence artificielle mais aussi, et surtout, la manipulation et la mobilité. Ces deux derniers points sont au centre de mon intérêt pour la robotique. Je souhaitais développer mes compétences dans le thème de la robotique mobile, plus particulièrement des robots articulés, comme les robots humanoïdes, plus précisément au niveau de la modélisation spatiale et fonctionnelle de ces systèmes, ainsi que le contrôle optimal. Ce domaine est naturellement dans la continuïté de mon expérience dans l'embarqué, le temps réel et l'optimisation. Le LAAS-CNRS m'est alors apparu comme un des meilleurs choix pour effectuer un stage.
 
 \subsection*{Le LAAS ...}
 En effet, le CNRS, Centre Nationnal de la Recherche Scientifique, est le principal organisme de recherche à caractère pluridisciplinaire en France, menant des recherches dans l'ensemble des domaines scientifiques, technologiques et sociétaux. Il emploie 33 000 personnes (dont 24 955 statutaires, 11 204 chercheurs et 13 751 ingénieurs, techniciens et administratifs), et bénéficie d'une implantation sur l'ensemble du territoire national, s'appuyant sur plus de 1100 unités de recherche et de service.
@@ -411,20 +414,20 @@ Il nous reste maintenant à voir un aperçu des concepts et notations en Algèbr
 
 \setmyFiguresFile{figures}
 
-L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{Featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rnea}}), l'algorithme "corps rigide composite" (\emph{\gls{acr_crba}}) et l'algorithme de corps articulés (\emph{\gls{acr_aba}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale, ainsi que les algorithmes impliqués dans la construction de l'algorithme hybride: le \gls{acr_rnea} et le \gls{acr_crba}.\\
+L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{bib_featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rnea}}) ou algorithme de Dynamique Inverse, l'algorithme "corps rigide composite" (\emph{\gls{acr_crba}}) ou algorithme de Dynamique Directe, et l'algorithme de corps articulés (\emph{\gls{acr_aba}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale.\\
 
 
 \section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle de système}
 
-L'algèbre spatiale est un système de notation très concis et léger pour décrire la vitesse, l'accélération et les forces appliquées à des corps rigides, à l'aide de vecteurs à six dimensions (tenseurs) dits vecteurs spatiaux. Cette notation réduit grandement la taille des équations de mouvement des modèles cinématique et dynamique du robot. En particulier, elle simplifie la transformation des tenseurs entre les repères liés aux différents corps du robot. Quelques exemples seront donnés après la présentation de ces fondements.\\
+L'algèbre spatiale est un système de notation très concis et léger pour décrire la vitesse, l'accélération et les forces appliquées à des corps rigides, à l'aide de vecteurs à six dimensions (torseurs) dits vecteurs spatiaux. Cette notation réduit grandement la taille des équations de mouvement des modèles cinématique et dynamique du robot. En particulier, elle simplifie la transformation des torseurs entre les repères liés aux différents corps du robot. Quelques exemples seront donnés après la présentation de ces fondements.\\
 
 
 \subsection{Vecteurs spatiaux: espaces mathématique et bases}
 
-Pour décrire le mouvement d'un corps rigide dans un espace 3D, et ayant six degrés de liberté, nous devons décrire le déplacement en translation et en rotation. Pour cela, on définit des tenseurs combinant ces deux types de grandeurs dans des espaces de vecteurs à six dimensions (6D). On définit ainsi :\\
+Pour décrire le mouvement d'un corps rigide dans un espace 3D, et ayant six degrés de liberté, nous devons décrire le déplacement en translation et en rotation. Pour cela, on définit des torseurs combinant ces deux types de grandeurs dans des espaces de vecteurs à six dimensions (6D). On définit ainsi :\\
 \begin{itemize}
-\item dans un espace noté $M^{6}$, un tenseur de mouvement pour les vitesses ou accélérations du corps
-\item dans l'espace noté $F^{6}$, un tenseur de forces pour les forces et les couples appliqués à ce même corps
+\item dans un espace noté $M^{6}$, un torseur de mouvement pour les vitesses ou accélérations du corps
+\item dans l'espace noté $F^{6}$, un torseur de forces pour les forces et les couples appliqués à ce même corps
 \end{itemize}
 On définit des bases dans ces espaces, ainsi que les opérateurs : somme, produit scalaire, produit vectoriel.\\
 Le vecteur de coordonnée $\underline{m}=[m_{1},...,m_{6}]^T$ représente le vecteur $m$ dans la base ${d_{1},...,d_{6}}$ dans $M^{6}$.
@@ -450,7 +453,7 @@ $$
 
 \subsection{Vitesse}\label{ch_algSpa_Vitesse}
 
-On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $w$, et en translation avec une vitesse linéaire $v_{P}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
+On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considère un corps en rotation autour d'un axe passant par un point $P$ du solide, avec une vitesse angulaire $\omega$, et en translation avec une vitesse linéaire $v_{P}$. On défini un repère $R_{O}$ dans l'espace à trois dimensions du solide ($R(O,x,y,z)$).
 
 \dispTwoFig[H]
 {1}{Rotation autour d'un point du solide $P$}
@@ -460,7 +463,7 @@ On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considè
 
 
 Soit $P'$ un point quelconque lié au corps solide $C$ (donc fixe dans n'importe quel repère lié au solide). La vitesse du point $P'$ dans $R$ est donnée par	$v_{P'}=v_{P}+\overrightarrow{P'P} \times w$ .\\
-On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Il est impératif de remarquer que ce vecteur vitesse n'est pas lié au solide, mais plutôt au point fixe $O$ (voir l'annexe \ref{appx_torseursToalgSpa_torseurs_appl} sur les torseurs). Comme pour le point $P'$ évoqué précedemment, on a:
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Comme pour le point $P'$ évoqué précedemment, on a:
 $$
 v_{O} = v_{P} + w \times \overrightarrow{PO}\\
 \Leftrightarrow v_{P} = v_{O} - w \times \overrightarrow{PO} = v_{O} + w \times \overrightarrow{OP}
@@ -468,12 +471,14 @@ $$
 
 On peut donc voir le corps $C$ comme un solide en translation à la vitesse $v_{O}$ et en rotation autour d'un axe passant par $O$ (parallèle à l'axe défini initialement) à la vitesse angulaire $w$. La vitesse de tout point $P$ de ce solide dans le repère $R(O,x,y,z)$ est alors donnée par:
 \begin{equation}
-v_{P} = v_{O} + w \times \overrightarrow{OP}
+v_{P} = v_{O} + \omega \times \overrightarrow{OP}
 \quad\quad
 \footnote{Bien que la vitesse $v_{P}$ soit définie en fonction de $O$, elle ne dépend pas de l'origine choisie puisqu'il s'agit du vecteur vitesse associé à $P$ par le champ de vitesses du solide, qui lui est indépendant de l'origine. En effet, $v_{O}$ et $\overrightarrow{OP}$ dépendent tous deux de $O$, mais ces dépendances se compensent.}
 \end{equation}
+\noindent
+Les vecteurs spatiaux sont équivalents à des torseurs, pour lesquels on retrouve les même représentations de champs de position et champs de vitesse (annexe \ref{appx_torseursToalgSpa_torseurs_appl}).\\
 
-On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des tenseurs de mouvement $M^{6}$:\\
+On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des torseurs de mouvement $M^{6}$:\\
 
 \begin{figure}[H]
 \minipages[3]{t}{.3}{.3}{.4}
@@ -543,45 +548,45 @@ $$
 
 \vspace{0.3cm} % retour à la ligne
 
-Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie. Si on définit deux bases de \emph{Plücker} différentes $D_{O}$ et $D_{P}$, centrées respectivement sur $O$ et $P$, ainsi que les vecteurs spatiaux associés $\widehat{v}$ et $\widehat{v'}$, on obtient:
-
-\begin{align}
-\widehat{v}  &= \underline{v}_{O} \cdot D_{O} \notag \\
-\widehat{v'} &= \underline{v}_{P} \cdot D_{P} \notag \\
-^{D_{O}}\widehat{v} \quad &= \quad ^{D_{O}}\widehat{v'}
-\label{equ_invariant}
-\end{align}
+Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie (annexe \ref{appx_dem}). La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
 
 
-Les projections de ces deux vecteurs spatiaux $\widehat{v}$ et $\widehat{v'}$ dans la même base de \emph{Plücker} sont identiques \eqref{equ_invariant}. Il faut noter que si les deux bases ont la même orientation, elles auront les mêmes vecteurs unitaires de translation ($\textbf{d}_{x}$, $\textbf{d}_{y}$ et $\textbf{d}_{z}$), mais les vecteurs unitaires de rotations diffèrent si $O \neq P$ ne sont pas confondus, comme illustré dans le l'exemple de cas simple ci-dessous:
+\subsection{Force}
+
+Nous nous intéressons à présent aux forces appliquées au corps rigide $\emph{C}$. Soit une force $\textbf{f}$ quelconque appliquée au solide. On le définit comme une somme:
+\begin{itemize}
+\item d'une force linéaire passant par un point donné $P$ de $\emph{C}$
+\item d'un couple $\textbf{n}_{P}$ autour d'un axe passant par $P$
+\end{itemize}
+
+Comme précédemment, on retrouve l'équivalence avec un torseur force, où la force linéaire ici est le vecteur $\mathbf{S}$ du torseur, et le couple est le moment $\mathbf{M(O)}$ du torseur (annexe \ref{appx_torseursToalgSpa_torseurs_appl}).
+
+
+\subsection{Articulations, contraintes et transformation de bases} \label{ch_algSpa_transformations}
+
+Dans cette section, nous allons juste aborder les notation importantes utilisées dans les algorithmes de Dynamique, et décrivant les articulations entre les corps, les repères liés au corps, les transformations associées à ces articulations et entre les différents repères. On illustre l'ensemble de ces entités dans la figure \ref{fig_corpsEtReperes}.
 
 \begin{figure}[H]
-\begin{center}
-  \subfloat[Equivalence des vecteurs de translation.]{\includegraphics[width=.3\textwidth, page=4]{figs/figures}}\hspace{.05\textwidth}
-  \subfloat[Visualisation de $\textbf{d}_{Py}$ et $\textbf{d}_{Pz}$ en $O$.]{\includegraphics[width=.3\textwidth, page=5]{figs/figures}}\hspace{.05\textwidth}
-  \subfloat[Expression des vecteurs de rotation dans $D_{O}$]
-  {%
-  \begin{minipage}[t]{.2\textwidth}
-  \begin{center}
-    \(\begin{aligned}
-      \textbf{d}_{Px} &= \textbf{d}_{Ox} \\
-      \textbf{d}_{Py} &= \textbf{d}_{Oy}+r \textbf{d}_{z} \\
-      \textbf{d}_{Pz} &= \textbf{d}_{Px}-r \textbf{d}_{y}
-    \end{aligned}\)
-  \end{center}
-  \end{minipage}
-  }
-  \caption{Transformation des vecteurs unitaires de mouvement entre deux bases de \emph{Plücker} de même orientation}  % legende
-  \label{fig_transPlucker}    % pour citer le numéro de figure
-\end{center}
+  \centering
+  \includegraphics[width=\textwidth]{figs/modeleGeoEtArticulations.png}
+  \caption{Modèle géométrique d'un système de corps rigides, et ses repères liés. extrait de la \cite[section 4.2, figure 4.7]{bib_featherstone}}
+  \label{fig_corpsEtReperes}
 \end{figure}
 
-Pour rapidement comprendre ces transformations, on peut visualiser un corps tournant autour de l'axe $P_{y}$ à la vitesse $w_{y}$. On définit initialement le vecteur spatial $\widehat{v'}$ en $P$ (\cad considérant l'axe de rotation du corps autour de $P_{y}$) est alors $w_{y}\textbf{d}_{Py}$. Or la vitesse d'un point lié au corps et passant par $O$ (par rapport au repère fixe $R(O,x,y,z)$) vaut $rw_{y}\textbf{d}_{z}$. Le vecteur spatial en $O$ (\cad considérant le corps en rotation autour de l'axe $O_{y}$) est alors $\widehat{v}=\textbf{d}_{Oy}+r\textbf{d}_{z}$.
+Pour pouvoir déterminer les contraintes d'une articulation, il faut connaître les mouvements autorisés par l'articulation (modèle de l'articulation) et sa position relative par rapport à chacun des corps qu'elle connecte (géométrie du système). Comme illustré dans la figure, on peut décrire la position du corps $B_1$ par rapport à $B_0$ comme la position du repère $F_1$ par rapport à $F_0$. ça nous donne la transformation $^iX_0$ exprimant les vecteurs spatiaux du repère $F_0$ dans le repère $F_1$.
 
-La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
+On défini par $^{i,j}X_i$ la transformation correspondant à la position du repère $F_{i,j}$ par rapport au repère $F_i$. $F_i$ est le repère lié à la base du corps $i$ (peut être confondu avec le centre d'inertie). $F_{i,j}$ est le repère lié à l'articulation connectant le corps $i$ et le corps $j$. Featherstone emploie le plus souvent une notation plus simple:
+
+\begin{equation*}
+^jX_i = ^jX_{i,j} \cdot ^{i,j}X_i = X_J \cdot X_T
+\end{equation*}
+
+où $X_T$ est la position de l'articulation $j$ par rapport au corps $i$, et $X_J$ est la transformation résultant de l'actionnement de l'articulation (rotation, translation, ...).
+
+
 
 \subsubsection*{Composition de vitesses}
-On rappelle  la définition de la matrice de sélection $S_k$ d'une articulation $k$ donnée, liant la vitesse spatiale du corps $k$ à la variable articulaire $\dot{q}_k$ (section \ref{ch_algSpa_transformations}). Soit $v_J$ la "vitesse à travers l'articulation $i$", \cad la vitesse du corps $k$ par rapport au corp parent $\lambda(k)$, et soit $\dot{q}_i$ la variable vitesse articulaire associée. On a alors:
+On définit la matrice de sélection $S_k$ d'une articulation $k$ donnée, liant la vitesse spatiale du corps $k$ à la variable articulaire $\dot{q}_k$ (\cite[section 3.5]{bib_featherstone}). Soit $v_J$ la "vitesse à travers l'articulation $i$", \cad la vitesse du corps $k$ par rapport au corp parent $\lambda(k)$, et soit $\dot{q}_i$ la variable vitesse articulaire associée. On a alors:
 \begin{align}
 \textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère $R_k$ lié au corps $k$} : {^kv_J} &= {^kS_k} \: \dot{q}_k \\
 \textnormal{Vitesse du corps $k$ par rapport à $\lambda(k)$ dans le repère base $R_0$ lié au corps $0$} : {^0v_J} &= {^0X_k} {^kS_k} \: \dot{q}_k = {^0S_k} \: \dot{q}_k \\
@@ -594,24 +599,6 @@ Ceci exprime la composition des vitesses des corps supportant le corps $k$.
 \paragraph*{Différence entre la notion de vitesse relative à un corps et vitesse exprimée dans le repère dans le repère de \emph{Plücker} de ce même corps:} La différence entre $v_{i:j} = {^0v_{i:j}}$ (vitesse du corps $i$ par rapport à $j$ exprimée en un repère fixe quelconque $R_0$), et $^iv_j = {^iv_{0:j}}$ (vitesse du corps $j$ par rapport à un repère fixe quelconque $R_0$, exprimée dans le repère lié à $i$).
 En algèbre spatiale, lorsqu'on note une vitesse spatiale ${^iv_{0:j}}$ exprimée dans le repère lié à un corps $i$ donné, on considère une "photo" instantanée de ce repère, on le considère donc fixe. La composition (somme) des vitesses des différents corps se fait à travers la somme des vecteurs spatiaux, et non pas à travers les matrices de passage $^BX_A$ entre repères de \emph{Plücker}. C'est à dire que si un corps $j$ est immobile par rapport à un autre corps $j$, mais tous les deux sont mobiles par rapport à un repère fixe $R_0$, on a ${^iv_j } = {^iv_{0:j}} \neq 0$.
 
-\subsection{Force}
-
-Nous nous intéressons à présent aux forces appliquées au corps rigide $\emph{C}$. Soit une force $\textbf{f}$ quelconque appliquée au solide. On le définit comme une somme:
-\begin{itemize}
-\item d'une force linéaire passant par un point donné $P$ de $\emph{C}$
-\item d'un couple $\textbf{n}_{P}$ autour d'un axe passant par $P$
-\end{itemize}
-
-Comme précédemment, nous considérons le champ de positions du corps $C$ étendu à tout l'espace. nous choisissons un point $O$ fixe dans l'espace. Nous définissons la force 
-
-\subsection{Coordonnées de Plücker et transformation de bases} \label{ch_algSpa_transformations}
-
-
-\section{construction du modèle du système et de l'équation de mouvement} \label{ch_algSpa_equationMouvement}
-
-\section{Dynamique inverse et \gls{acr_rnea}}
-
-\section{Dynamique directe et \gls{acr_crba}}
 
 
 
@@ -948,7 +935,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \\
 Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
-\subsubsection{implémentation}
+\subsubsection{implémentation} \label{ch_implURDF}
 
 \paragraph{Modifications à apporter au modèle URDF (format XML) et au parseur URDF:}
 
@@ -1357,7 +1344,7 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 
 \setmyFiguresFile{optimisations}
 
-\subsection{jcalc et le calcul des matrices de passage jXi}
+\subsection{jcalc et le calcul des matrices de passage $^sX_p$}
 
 \verb;jcalc(); est la fonction appelée pour mettre à jour les matrices de passage $^sX_p$ entre les repères liés aux deux corps $p$ (prédécesseur) et $s$ (successeur) pour chaque articulation du robot. Ces matrices $^sX_p$ sont incluses dans la classe $model$ (modèle du robot), et générées avec ce modèle à la compilation de \emph{metapod}. Elles peuvent être générées comme des matrices génériques: ce sont alors des structures templatées qui peuvent définir n'importe quel axe de rotation suivant ce qu'on leur passe en paramètre à kleur instanciation. Sinon, elles peuvent être définies comme des matrices spéciales, simplifiées, dont l'axe est parallèle à un des axes $(Ox)$, $Oy$  ou $Oz$ du repère lié au corps $s$. Ces matrices $^sX_p$ sont dites à axes fixes. Elles permettent d'accélérer significativement les calculs matriciels dans lesquels elles sont impliquées. Cela est dû au fait qu'elles soient creuses. Pour exploiter cette "sparsité", des règles spécifiques de produit matriciel ont été définies. Le version officielle servant de base à mon développement avait une erreur au niveau des fonction définissant ces règles de calcul.Cette correction a été la première à être intégrée dans la version officiele de \emph{metapod}.
 
@@ -2246,7 +2233,7 @@ On peut appliquer le problème de Dynamique Hybride au contrôle d'un robot sous
 \paragraph{Contrôle du couple:} Kajita utilise une boucle de contrôle pour asservir le couple appliqué au sol. Le contrôleur se sert de l'estimation de couple au sol fournie par les mesures des capteurs de pression intégrés à la semelle. On connaît donc le couple associé à l'articulation flexible. On désigne par $q_f, \dot{q}_f, \ddot{q}_f$ et $\tau_f$ les paramètres articulaires associés.
 \paragraph{paramètres $q_f$ et $\dot{q}_f$:} Le couple d'appui résulte de la compression du ressort équivalent de raideur $k_e$ (figure \ref{fig_hrp2ankle}). Ceci nous permettrait d'estimer $q_f$ à tout instant, donc $\dot{q}_f$ par dérivation. $q_f$ servirait à estimer la position du \gls{acr_com} du robot en tenant compte de sa flexibilité.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figs/contactTorque.png}
   \caption{Contrôleur de couple de contact. Extrait de \cite[figure 2,3]{bib_backdrive}}
@@ -2266,59 +2253,50 @@ On peut envisager une application différente au contrôle optimal. Si on part d
 \addcontentsline{toc}{chapter}{Conclusion}
 %
 
-\section*{Bilan du travail}
+%\section*{Bilan du travail}
 
-%- objectif initial et réalisations
-%
-%		- correction du code source metapod de départ (calculdes matrices de passage Xs)
-%		
-%		- [développement d'un solveur LLT (amélioration des performances par rapport à Eigen)]
-%		
-%		- extention des optimisations de Featherstone pour le calcul de H21
-%		
-%		- contribution à l'évolution du standard et parseur URDF ROS pour la modélisation d'articulations flexibles
-%		
-%		- [complément suggéré à l'algorithmede Kajita]
 
-Lors de mon stage de six mois dans l'équipe Gepetto au LAAS-CNRS, l'objectif central de la mission était d'implémenter, optimiser et intégrer l'algorithme de Dynamique Hybride selon Featherstone dans une librairie open source de modélisation dynamique \emph{metapod}, maintenue par le LAAS. Pendant ma mission, je me suis intégré à l'équipe, j'ai participé aux réunions de communication et de partage de problèmes ou de réalisations.
+Lors de mon stage de six mois dans l'équipe Gepetto, l'objectif central de la mission était d'implémenter, optimiser et intégrer l'algorithme de Dynamique Hybride selon Featherstone dans la librairie open source de modélisation dynamique \emph{metapod}. Pendant ma mission, je me suis intégré à l'équipe, j'ai participé aux réunions de communication et de partage de problèmes ou de réalisations.
 
 En phase initiale du stage, j'ai dû me familiariser avec les outils et procédés de développement du laboratoire:
 \begin{itemize}
-\item les outils de compilation cmake, que j'ai eu l'occasion de découvrir et qui apportent une certaine souplesse à la compilation du code source
-\item de nouveaux IDE permettant d'accélérer le développement, dont qtcreator, le plus adapté à cmake selon mon point de vue
-\item la librairie \emph{Eigen} incontournable pour les opération matricielle templatée et offrant des optimisations natives de produits de matrices, ainsi que la résolution optimale de divers types de systèmes linéaires (décompositions, factorisations, ...).
+\item les outils de compilation \emph{cmake}, que j'ai eu l'occasion de découvrir et qui apportent une certaine souplesse et simplicité par rapport à l'outil de compilation \emph{make}
+\item de nouveaux IDE permettant d'accélérer le développement, dont qtcreator, le plus adapté à \emph{cmake} selon mon point de vue
+\item la librairie \emph{Eigen} incontournable pour les opérations matricielles templatées et optimisées, et des "solveurs" systèmes linéaires spécialisés et optimisés pour divers types de matrices (décompositions, factorisations, ...)
 \item un outil d'analyse de profil de fonctions, \verb;cachegrind; (de la suite \verb;Valgrind;). Il établi un profil de coût en temps d'exécution et crée des liens avec le code source, ce qui rend l'outil très efficace.
 \item la méta programmation C++, et la librairie BOOST qui introduisent une approche de programmation nouvelle et prometteuse, et apportent de nouvelles perspectives d'optimisation d'algorithmes
-\item et enfin le formalisme de l'Algèbre Spatiale et les algorithmes optimisés de Featherstone
+\item et enfin le formalisme de l'Algèbre Spatiale et les algorithmes optimisés de Featherstone.
 \end{itemize}
-Concernant ce dernier point, central à la mission, j'ai dû revoir certaines bases de la mécanique des torseurs pour mieux assimiler le formalisme de Featherstone. J'ai par la suite analysé en profondeur les différents algorithmes de Dynamique Directe, Indirecte, Hybride et les fonctions dont ils dépendent. Au final, cet apprentissage a requis une lecture presque complète de l'ouvrage dédié \cite{bib_featherstone}.
+Concernant ce dernier point, central à ma mission, j'ai dû revoir certaines bases de la mécanique des torseurs pour mieux assimiler le formalisme de Featherstone. J'ai par la suite analysé en profondeur les différents algorithmes de Dynamique Directe, Indirecte, Hybride et les fonctions dont ils dépendent. Au final, cet apprentissage a requis une lecture approfondie de l'ouvrage dédié \cite{bib_featherstone}.
 
-En parallèle avec l'exploration de l'ouvrage de Featherstone, j'ai analysé l'architecture de la librairie \emph{metapod}. Cette étape a constitué une des difficultés majeures du stage. En effet, malgré les efforts en documentation, et un code propre, cette documentation reste encore largement insuffisante. \`{A} cette difficulté et à la complexité intrinsèque d'un méta programme, s'ajoute la complexité des conditions d'analyse d'erreurs: la syntaxe lourde du langage pénalise beaucoup la lisibilité des messages du compilateur.
+En parallèle avec l'exploration de l'ouvrage de Featherstone, j'ai analysé l'architecture de la librairie \emph{metapod}. Cette étape a constitué une des difficultés majeures du stage. En effet, malgré les efforts de l'équipe en documentation, et un code propre, cette documentation reste encore largement insuffisante. \`{A} cette difficulté et à la complexité intrinsèque d'un méta programme, s'ajoute la complexité des conditions d'analyse d'erreurs: la syntaxe lourde du langage pénalise beaucoup la lisibilité des messages d'erreur du compilateur.
 
-Une fois le langage assez maîtrisé, j'ai pu implémenter, valider et intégré l'algorithme de Dynamique Hybride dans la librairie \emph{metapod} dans sa version officielle partagée en ligne sur GITHUB. Dans ces descriptions, Featherstone proposait souvent des alternatives (étape 2 et 4 de l'algorithme). Un de mes choix imposait une contrainte supplémentaire, pas clairement explicitée, sur les étapes précédentes. Ceci m'a amené à apporter quelques modifications à l'algorithme original dans la phase d'optimisation.
+Une fois le langage assez maîtrisé, j'ai pu implémenter, valider et intégré l'algorithme de Dynamique Hybride dans la librairie \emph{metapod} dans sa version officielle partagée en ligne sur GITHUB. Dans ces descriptions, Featherstone proposait souvent des alternatives (étape 2 et 4 de l'algorithme). Un de mes choix imposait une contrainte supplémentaire, sur les étapes précédentes, pas clairement explicitée dans l'ouvrage. Ceci m'a amené à apporter quelques modifications à l'algorithme original dans la phase d'optimisation (calcul de la matrice d'inertie optimisée à l'étape 2).
 
-Parmi les optimisations réalisées par la suite, la plus complexe était le calcul minimal de l'inertie $H$ (CRBA hybride), et la tentative d'application des méthodes \emph{Eigen} de "sparsité" pour la résolution de systèmes linéaires. La performance en rapidité d'exécution est déjà très intéressante, mais je pense qu'il y a la place pour quelques optimisations supplémentaires.
+Parmi les optimisations réalisées par la suite, la plus complexe était le calcul minimal de l'inertie $H$ (CRBA hybride), et la tentative d'application des méthodes \emph{Eigen} de "sparsité" pour la résolution de systèmes linéaires. La performance en rapidité d'exécution est déjà très intéressante, mais je suis convaincu que l'algorithme peut encore être significativement optimisé grâce aux méta fonctions et à l'exploitation de la "sparsité" de H, en implémentant par exemple la factorisation LDLT selon Featherstone ou l'\gls{acr_aba}.
 
-\section*{Bilan personnel}
+Parmi les tâches qui pourraient être définies dans la continuation de ce projet de développement, il y aurait entre autres:
+\begin{itemize}
+\item la vérification de l'état actuel du standard URDF et proposition éventuelle des modifications en accord avec l'algorithme de Dynamique Hybride, comme décrit en section \ref{ch_implURDF}
+\item chercher à appliquer la Dynamique Hybride au filtrage dynamique de la trajectoire du \gls{acr_com} de HRP2, ou bien chercher d'autres approches de contrôle rendues possibles par cet algorithme.
+\end{itemize}
 
-Ce stage m'a apporté une très bonne première expérience dans le monde de la Robotique et la découverte du travail en laboratoire. J'ai pu appliquer une partie des concepts appris en Master, mais surtout j'ai étendu considérablement mes connaissances en Dynamique des corps solides, qui est au coeur de mes disciplines préférées.
+Dans la phase finale de mon stage, j'ai eu l'occasion de discuter avec mon maître de stage, Dr.Olivier Stasse et avec le Dr.Andrea Del Prete à propos des applications futures de la Dynamique Hybride et sa place importante dans les stratégies de contrôle robuste des robots humanoïdes.
 
-%J'ai pu observer un peu 
-- outils de développement appréciés
 
-- contact avec le monde de la recherche
+\section*{} %Bilan personnel
 
-- acquis de l'expérience en méta programmation et algorithmes dynamiques
+Ce stage m'a apporté une première expérience dans le monde de la Robotique très appréciable. J'ai pu appliquer une partie des concepts appris en Master, et aussi développé mes compétences en programmation, en analyse et en optimisation d'algorithmes.
 
-(conformte mon désir de trabvailler dans la recherche en robotique mobile et plus particulièrement humanoide)
+Mais surtout, j'ai étendu considérablement mes connaissances en Dynamique des corps solides, qui est une de mes disciplines préférées. Plus précisément  j'ai acquis une expertise dans le formalisme de Featherstone très appréciée pour la résolution de problèmes dynamiques de systèmes articulés, notamment les robots humanoïdes.
 
- ce qui m'a poussé à mener plus loin ma compréhension du CRBA.
+Ces connaissances combinées à la méta programmation me permettent de créer une réelle compétence qui pourra m'aider à trouver ma place au sein d'une équipe de recherche, en entreprise ou dans un laboratoire. Cette expérience m'a d'ailleurs permis de découvrir et apprécier un peu plus le travail dans un laboratoire comme le LAAS, et d'apprécier les échanges de connaissances et de compétences à travers les échanges de personnel avec d'autres centres de recherche.
 
-\section*{Perspectives}
+\section*{} %Perspectives
 
-- ingénieur de recherche dans un laboratoire (CNRS, LIRMM, IIT, NTU, ...) pour 1 ou 2 ans
 
-- Thèse puis poste poste d'ingénieur de recherche dans une entreprise (Aldébaran, PAL, autre PME, ...)
+Cette expérience a ainsi conforté mon désir de travailler dans la recherche en robotique mobile et plus particulièrement humanoïde. J'envisage par la suite de poursuivre en Thèse, dans le domaine de la modélisation et le contrôle dynamique du robot humanoïde. Après ma Thèse, je chercherai un poste de recherche soit dans une entreprise, soit dans un laboratoire, suivant les opportunités qui s'offrent à moi.
+
 
 
 
