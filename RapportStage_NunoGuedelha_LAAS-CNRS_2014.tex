@@ -71,12 +71,6 @@
 
 \input{./tex/pageCouverture.tex}
 
-%\begin{titlepage}
-%\title{Rapport de stage - IRR \\ Implémentation et application d'un algorithme dynamique hybride pour le contrôle d'articulations flexibles}
-%\date{3 Mars 2014 - 31 Août 2014}
-%\author{Auteur: \bsc{Guedelha} Nuno \\ Tuteur: \bsc{Stasse} Olivier}
-%\end{titlepage}
-
 \setcounter{secnumdepth}{3}
 
 \graphicspath{{illustrations/}}
@@ -98,12 +92,12 @@
 
 Je voudrais remercier, avant tout, tous ceux qui ont rendu cette expérience possible, et très enrichissante.\\
 Je tiens à remercier dans un premier temps, toute l’équipe pédagogique du Master I.R.R. et les intervenants professionnels responsables de la formation, pour avoir assuré la partie académique de celle-ci. Je remercie Mme. Viviane Cadenat et M. Michel Taix pour leurs conseils sur les critères de choix d'une formation de 2ème cycle en Robotique, qui ont facilité mon orientation à l'origine de mon inscription en Master I.R.R.\\
-Je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.\\
-Je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’elles m’ont permis de vivre durant ces six mois au sein du LAAS :\\
-Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’il m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations ; sans oublier sa participation au cheminement de ce rapport.\\
-Monsieur Jean Paul Laumond, Maximilien Naveau, Justin Carpentier, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.\\
-Tous ceux qui ont délivré des formations techniques sur la planification de mouvements, la dynamique inverse et les algorithmes de contrôle.\\
-
+Ensuite, je remercie également Monsieur Vincent Durola, mon tuteur pédagogique attitré, pour ses conseils concernant la mission de ce stage, conseils qui m'ont permis de prendre du recul par rapport à mes tâches et aux différents aspects techniques.\\
+Enfin, je tiens à remercier tout particulièrement et à témoigner toute ma reconnaissance aux membres de l'équipe Gepetto, pour l’expérience enrichissante qu’ils m’ont permis de vivre durant ces six mois au sein du LAAS :\\
+Monsieur Olivier Stasse, pour m’avoir intégré rapidement au sein du laboratoire et m’avoir accordé toute sa confiance ; pour le temps qu’il m’a consacré tout au long de cette période, sachant répondre à toutes mes interrogations. Maximilien Naveau et Justin Carpentier pour leur accompagnement et conseils sur metapod et l'Algèbre Spatiale; sans oublier leurs participations respectives au cheminement de ce rapport.\\
+Monsieur Jean Paul Laumond, ainsi que l’ensemble des membres de l'équipe Gepetto pour leur accueil sympathique et leur coopération professionnelle tout au long de ces six mois.\\
+Andrea Del Prete et tous ceux qui ont délivré des formations techniques sur la modélisation dynamique, les algorithmes de contrôle et la planification de mouvements.\\
+Et pour terminer, tous mes collègues de stage, avec qui j'ai partagé l'espace des stagiaires.
 \vspace{0.3cm} % retour à la ligne
 
 %%%%%%%%%%%%%%%%%% glossaire %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -119,14 +113,14 @@ Tous ceux qui ont délivré des formations techniques sur la planification de mo
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
-\section*{contexte}
+\section*{Contexte}
 
-\'{E}tudiant en deuxième année de Master de Robotique (IRR) à Paul Sabatier, j'ai effectué mon stage de fin d'année au Laboratoire d'Analyse et d'Architecture des Systèmes, au sein de l'équipe Gepetto, sous la responsabilité de Olivier Stasse, chargé de recherche, au coeur du thème de la robotique humanoïde. Issu d'une formation d'Ingénieur en informatique et télécommunications, et suite à une expérience professionnelle de douze ans, j'ai choisi de reprendre des études pour me spécialiser en Robotique, et pouvoir ainsi explorer ce domaine multidisciplinaire et riche en opportunités d'innovation. Ce qui me motive également c'est de faire un métier dans la recherche, dans un laboratoire ou dans une entreprise en tant qu'ingénieur de recherche. Ces objectifs m'ont amené à suivre le Master I.R.R., qui réunissait toutes les composantes d'une formation équilibrée et complète autour des fonctions robotiques comme la perception, l'intelligence artificielle mais aussi, et surtout, la manipulation et la mobilité. Ces deux derniers points sont au centre de mon intérêt pour la robotique. Je souhaitais développer mes compétences dans le thème de la robotique mobile, plus particulièrement des robots articulés, comme les robots humanoïdes, plus précisément au niveau de la modélisation spatiale et fonctionnelle de ces systèmes, ainsi que le contrôle optimal. Ce domaine est naturellement dans la continuïté de mon expérience dans l'embarqué, le temps réel et l'optimisation. Le LAAS-CNRS m'est alors apparu comme un des meilleurs choix pour effectuer un stage.
+\'{E}tudiant en deuxième année de Master de Robotique (IRR) à Paul Sabatier, j'ai effectué mon stage de fin d'année au Laboratoire d'Analyse et d'Architecture des Systèmes, au sein de l'équipe Gepetto, sous la responsabilité d'Olivier Stasse, chargé de recherche, dans le domaine de la robotique humanoïde. Issu d'une formation d'Ingénieur en informatique et télécommunications, et suite à une expérience professionnelle de douze ans, j'ai choisi de reprendre des études pour me spécialiser en Robotique, et pouvoir ainsi explorer ce domaine multidisciplinaire et riche en opportunités d'innovation. Ce qui me motive également c'est de faire un métier dans la recherche, dans un laboratoire ou dans une entreprise en tant qu'ingénieur de recherche. Ces objectifs m'ont amené à suivre le Master I.R.R., qui réunissait toutes les composantes d'une formation équilibrée et complète autour des fonctions robotiques comme la perception, l'intelligence artificielle mais aussi, et surtout, la manipulation et la mobilité. Ces deux derniers points sont au centre de mon intérêt pour la robotique. Je souhaitais développer mes compétences dans le thème de la robotique mobile, plus particulièrement des robots articulés, comme les robots humanoïdes, plus précisément au niveau de la modélisation spatiale et fonctionnelle de ces systèmes, ainsi que le contrôle optimal. Ce domaine est naturellement dans la continuïté de mon expérience dans l'embarqué, le temps réel et l'optimisation. Le LAAS-CNRS m'est alors apparu comme un des meilleurs choix pour effectuer un stage.
 
 \subsection*{Le LAAS ...}
 En effet, le CNRS, Centre Nationnal de la Recherche Scientifique, est le principal organisme de recherche à caractère pluridisciplinaire en France, menant des recherches dans l'ensemble des domaines scientifiques, technologiques et sociétaux. Il emploie 33 000 personnes (dont 24 955 statutaires, 11 204 chercheurs et 13 751 ingénieurs, techniciens et administratifs), et bénéficie d'une implantation sur l'ensemble du territoire national, s'appuyant sur plus de 1100 unités de recherche et de service.
 
-Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unité propre du CNRS rattachée à l’Institut des Sciences de l'Ingénierie et des Systèmes (INSIS) et à l'Institut des Sciences de l'Information et de leurs Interactions (INS2I), et est associé à par convention à cinq membres fondateurs de la COMUE \og Université de Toulouse \fg{}, dont l'Université Paul Sabatier (UPS). Le laboratoire a le label \textbf{Institut Carnot}. Avec ses 648 employés dont 509 chercheurs et 247 doctorants, le LAAS mène des recherches en sciences et technologies de l’information, de la communication et des systèmes dans 8 thèmes scientifiques :
+Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unité propre du CNRS rattachée à l’Institut des Sciences de l'Ingénierie et des Systèmes (INSIS) et à l'Institut des Sciences de l'Information et de leurs Interactions (INS2I), et est associé par convention à cinq membres fondateurs de la COMUE (\og Université de Toulouse \fg{}), dont l'Université Paul Sabatier (UPS). Le laboratoire a le label \textbf{Institut Carnot}. Avec ses 648 employés dont 509 chercheurs et 247 doctorants, le LAAS mène des recherches en sciences et technologies de l’information, de la communication et des systèmes dans 8 thèmes scientifiques :
 
 \setlength{\columnsep}{10pt}
 \begin{multicols}{2}\raggedcolumns
@@ -146,30 +140,30 @@ Le Laboratoire d’Analyse et d’Architecture des Systèmes (LAAS) est une unit
 Le laboratoire est à la pointe de la recherche en Robotique, notamment en Robotique humanoïde et dispose de moyens importants pour ses activités de recherche, notamment au sein de l'équipe Gepetto. 
 
 \subsection*{L'équipe Gepetto ...}
-Jean-Paul Laumond, roboticien, aujourd'hui directeur de recherche au LAAS-CNRS, a crée en 2006 GEPETTO, une équipe de recherche centrée sur le thème de la robotique humanoïde. De 2005 à 2008, il co-dirige le laboratoire franco-japonais AIST-CNRS JRL en robotique humanoïde. C’est dans ce cadre que le CNRS acquiert le robot humanoïde HRP-2 en 2006. L’activité de recherche de l’équipe Gepetto est aujourd'hui centrée sur l’analyse et la génération de mouvement des systèmes anthropomorphes. Elle est unanimement reconnue pour son expertise dans ce domaine. La difficulté du problème de commande des systèmes anthropomorphes vient de la complexité de leur structure arborescente qui les rend redondants par rapport à la plupart des tâches de positionnement, de l’instabilité naturelle de leur posture bipède, et du sous-actionnement de leurs déplacement dans l’espace. Gepetto étudie ce problème en suivant une approche interdisciplinaire structure en trois niveaux :  fondamental,  d'intégration et applicatif.
+Jean-Paul Laumond, roboticien, aujourd'hui directeur de recherche au LAAS-CNRS, a crée en 2006 GEPETTO, une équipe de recherche centrée sur le thème de la robotique humanoïde. De 2005 à 2008, il co-dirige le laboratoire franco-japonais AIST-CNRS JRL en robotique humanoïde. C’est dans ce cadre que le CNRS acquiert le robot humanoïde HRP-2 en 2006. L’activité de recherche de l’équipe Gepetto est aujourd'hui centrée sur l’analyse et la génération de mouvement des systèmes anthropomorphes. Elle est unanimement reconnue pour son expertise dans ce domaine. La difficulté du problème de commande des systèmes anthropomorphes vient de la complexité de leur structure arborescente qui les rend redondants par rapport à la plupart des tâches de positionnement, de l’instabilité naturelle de leur posture bipède, et du sous-actionnement de leurs déplacement dans l’espace. Gepetto étudie ce problème en suivant une approche interdisciplinaire structuré en trois niveaux :  fondamental,  d'intégration et applicatif.
 \begin{itemize}
-\item Le niveau fondamental inclut, entre autres, la modélisation physique du système robotique, la planification de mouvements des éléments de ce système, et la commande locale de ces éléments. Tout cela s'appuie sur des disciplines comme la mécanique, la biomécanique , les neurosciences du mouvement et d'autres disciplines complémentaires.
+\item Le niveau fondamental inclut, entre autres, la modélisation physique du système robotique, la planification de mouvements des éléments de ce système, et la commande locale de ces éléments.
 \item Le niveau d'intégration concerne l'intégration des développements théoriques ou d'outils techniques dans des paquets open source comme des outils de simulation ou des librairies de modélisation dynamique des robots.
 \end{itemize}
 
-\section*{problème posé et objectifs ...}
+\section*{Problème posé et objectifs ...}
 
-Mon stage s'intègre dans le niveau d'intégration, et plus précisément dans l'intégration de nouveaux algorithmes de modélisation mécanique du robot en vue d'optimiser et rendre plus robuste le contrôle local des différents corps du robot. Ce stage s'insère très bien dans la continuité de ma formation de Master. Celle-ci m'as apporté les concepts fondamentaux et l'application de la modélisation géométrique d'un robot (industriel fixe, ou mobile), ainsi que la modélisation cinématique et dynamique. La modélisation dynamique a abordé le formalisme de Lagrange, qui décrit les équations de mouvement en termes de travail et énergie et exprime l'effort généralisé sur chaque articulation. Ce formalisme serait à priori plus simple que le formalisme de Newton-Euler, qui décrit la dynamique d'un corps rigide en combinant la rotation et la translation. C'est justement le lien exact avec mon sujet de stage, qui explore ce formalisme, qui a été revisité Roy Featherstone, chercheur roboticien à l'IIT, et qui est aujourd'hui intégré dans une librairie open source maintenue par le LAAS.
+Mon stage se situe au niveau de l'intégration, et plus précisément l'intégration de nouveaux algorithmes de modélisation mécanique du robot en vue d'optimiser et rendre plus robuste le contrôle local des différents corps du robot. Ce stage s'insère très bien dans la continuité de ma formation de Master. Celle-ci m'a apporté les concepts fondamentaux et l'application de la modélisation géométrique d'un robot (industriel fixe, ou mobile), ainsi que la modélisation cinématique et dynamique. La modélisation dynamique a abordé le formalisme de Lagrange, qui décrit les équations de mouvement en termes de travail et énergie et exprime l'effort généralisé sur chaque articulation. Ce formalisme serait à priori plus simple que le formalisme de Newton-Euler, qui décrit la dynamique d'un corps rigide en combinant la rotation et la translation. C'est justement le lien exact avec mon sujet de stage, qui explore ce formalisme, qui a été revisité par Roy Featherstone, chercheur roboticien à l'IIT, et qui est aujourd'hui intégré dans une librairie open source maintenue par le LAAS.
 
-L'objectif du stage était dans un premier temps d'implémenter un algorithme de dynamique hybride optimal proposé par Roy Featherstone dans son ouvrage “Rigid Body Dynamics Algorithms” \cite{bib_featherstone} et de l'intégrer dans une librairie open source d'algorithmes de dynamique des modèles, \emph{metapod}.
+L'objectif du stage était dans un premier temps d'implémenter un algorithme de dynamique hybride optimal proposé par Roy Featherstone dans son ouvrage “Rigid Body Dynamics Algorithms” \cite{bib_featherstone} et de l'intégrer dans une librairie open source d'algorithmes de modélisation dynamique, \emph{metapod}.
 
 Dans une seconde phase, le but était d'explorer les diverses optimisations supplémentaires proposées dans cet ouvrage, et d'adapter et d'intégrer à \emph{metapod} celles qui apporteraient un réel avantage par rapport aux optimisations natives de librairies de calcul comme \emph{Eigen}. Ces optimisations répondent aux contraintes de puissance de calcul embarquée dans un robot comme HRP2, face aux contraintes de contrôle optimal, prédictif, d'une structure mécanique sous-actionnée.
 
 Finalement, je devais aborder l'application de cet algorithme à la modélisation de systèmes à articulations rotoïdes flexibles, soit juste contraintes par un ressort, soit intégrant un actionnement (simple ou antagoniste) en série avec un système de ressorts suivant diverses configurations possibles.
 
-\section*{étude bibliographique}
+\section*{Etude bibliographique}
 Parmi les concepts théoriques à comprendre et à analyser en plus de ce que m'a apporté le Master, l'algèbre spatiale revisitée par Featherstone (chercheur roboticien à l'IIT) dans son ouvrage “Rigid Body Dynamics Algorithms” \cite{bib_featherstone} était le point de départ. Cet ouvrage présente l'ensemble des fondements de l'algèbre spatiale, incluant:
 
 \begin{itemize}
 \item la définition des vecteurs spatiaux vitesse, force, accélération, et de l'inertie liés aux corps rigides.
-\item l'expression de ses grandeurs dans la base de Plücker spécifique à l'algèbre spatiale, et les transformations de coordonnées
+\item l'expression de ses grandeurs dans la base de \emph{Plücker} spécifique à l'algèbre spatiale, et les transformations de coordonnées
 \item l'ensemble des opérations possibles entre les vecteurs spatiaux (addition, produit scalaire, produit vectoriel)
-\item la définition des contraintes aux articulations, la modélisation de la dynamique des systèmes multicorps avec la construction de l'équation de mouvement
+\item la définition des contraintes aux articulations, la modélisation de la dynamique des systèmes multi-corps avec la construction de l'équation de mouvement
 \item et enfin, la description de l'ensemble des algorithmes de dynamique pour résoudre ces systèmes (Dynamique directe "Forward Dinamics", Dynamique Inverse "Recursive Newton-Euler Algorithm" (RNEA), et la Dynamique Hybride
 \end{itemize}
 
@@ -205,9 +199,9 @@ Je termine ce chapitre en présentant rapidement:
 
 \section{Definition des problèmes de Dynamique Directe, Inverse, et Hybride, et applications} \label{ch_concepts_definitions}
 
-Lorsqu'un robot en mouvement est constitués de corps légers, de sorte à ce qu'on puisse négliger leur inertie, le modèle cinétique est suffisant pour modéliser les mouvements du robot ainsi que son contrôle. Par contre, lorsque les parties en mouvement ont une inertie significative ou lorsque le robot n'a pas une base fixe (le moindre mouvement est susceptible de perturber sont appui au sol), il faut tenir compte de la dynamique du système. C'est le cas des mouvements de la marche des robots humanoïdes, dont le contrôle est basé sur le modèle dynamique.
+Lorsqu'un robot en mouvement est constitués de corps légers, de sorte à ce qu'on puisse négliger leur inertie, le modèle cinétique est suffisant pour modéliser les mouvements du robot ainsi que son contrôle. Par contre, lorsque les parties en mouvement ont une inertie significative ou lorsque le robot n'a pas une base fixe (le moindre mouvement est susceptible de perturber son appui au sol), il faut tenir compte de la dynamique du système. C'est le cas des mouvements de la marche des robots humanoïdes, dont le contrôle est basé sur le modèle dynamique.
 
-On parle alors de problème de Dynamique Directe ou problème de Dynamique Inverse (respectivement "Forward Dynamics" ou "Inverse Dynamics" dans la littérature internationale). Dans ce rapport, on ne traitera que des systèmes sans boucles dynamiques (le cas par exemple des robots parallèles), aussi désignés comme des arbres cinématiques. En général, pour résoudre le problème dynamique d'un système, on pose une équation de mouvement qui met en relation les grandeurs:
+On parle alors de problème de Dynamique Directe ou problème de Dynamique Inverse (respectivement "Forward Dynamics" ou "Inverse Dynamics" dans la littérature internationale). Dans ce rapport, on ne traitera que des systèmes sans boucles dynamiques, aussi désignés comme des arbres cinématiques. En général, pour résoudre le problème dynamique d'un système, on pose une équation de mouvement qui met en relation les grandeurs:
 
 \begin{description}
   \item[$model$ :] le modèle dynamique du système à multi-corps rigides
@@ -234,7 +228,7 @@ Une des méthodes proposées par Featherstone \cite[(6.2)]{bib_featherstone} pas
 \mathbf{\tau} = \mathrm{ID}(model,\mathbf{q,\dot{q},\ddot{q}})
 \end{equation}
 
-L'algorithme optimal réalisant cette fonction le RNEA (Recursive Newton-Euler Algorithm). La résolution de ce problème s'applique au contrôle optimal d'un système réel dynamique de corps rigides, ou de figures digitales, mais peut aussi être une composante d'un algorithme de Dynamique Directe ou de Dynamique Hybride comme on verra dans le chapitre \ref{ch_impl}. Dans le cas du contrôle optimal, on trouve dans l'état de l'art, plusieurs types de contrôle:
+L'algorithme optimal réalisant cette fonction est le RNEA (Recursive Newton-Euler Algorithm). La résolution de ce problème s'applique au contrôle optimal d'un système réel dynamique de corps rigides, ou de figures digitales, mais peut aussi être une composante d'un algorithme de Dynamique Directe ou de Dynamique Hybride comme on verra dans le chapitre \ref{ch_impl}. Dans le cas du contrôle optimal, on trouve dans l'état de l'art, plusieurs types de contrôle:
 \begin{itemize}
 \item le contrôle en couple, plus rare, à cause de la limitation en puissance des moteurs
 \item le contrôle en position (cas du HRP2). Dans ce cas, le RNEA servira à filtrer dynamiquement la trajectoire désirée du centre de masse \cite{bib_filtrageTrajectoireCoM}. Cette technique consiste à utiliser, par approximation, la trajectoire désirée du \gls{acr_com} pour calculer le \gls{gls_cop} "réel" du robot, dit "Multi-body CoP" ($CoP^{MB}$) et en déduire la correction à appliquer par le filtre dynamique à la trajectoire du \gls{acr_com}.
@@ -244,7 +238,7 @@ Je reviendrai rapidement sur cette méthode dans la section \ref{ch_concepts_imp
 
 \subsection{La Dynamique Hybride}
 
-Justement, le problème de Dynamique Hybride est une généralisation de la Dynamique Directe et de la Dynamique Indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues. Il est applicable aux cas suivants:
+Le problème de Dynamique Hybride est une généralisation de la Dynamique Directe et de la Dynamique Indirecte (\gls{acr_rnea}). En effet, il applique la dynamique directe aux articulations dont on connaît les couples ou forces appliquées, et la dynamique inverse aux articulations dont on connaît les accélérations. Toutes les inconnues sont ainsi résolues. Il est applicable aux cas suivants:
 
 \begin{itemize}
 \item simulation de la réponse d'un système articulé ayant soumis à une excitation cinétique sur une des articulations
@@ -255,31 +249,31 @@ Justement, le problème de Dynamique Hybride est une généralisation de la Dyna
 
 Le robot à liaisons flexibles SEA et le robot humanoïde en général sont des systèmes sous-actionnés, \cad qu'ils ont plus de degrés de liberté que d'actionneurs. Regardons de plus prêt le cas du robot humanoïde. On peut modéliser le robot comme un arbre cinématique à base fixe mais avec une liaison flottante \cite[chap.9 p171]{bib_featherstone}, désignée aussi comme \emph{Freeflyer}, à 6 degrés de liberté, et dont le couple "interne" $\tau$ d'actionnement est considéré nul: cette articulation n'est pas actionnée directement. En effet, le robot ne contrôle sa position dans l'espace que via les forces de contact (extérieures) appliquées sous ses semelles. Ces forces sont une contre-réaction de la résultante de l'action de la gravité sur le corps du robot, ajoutée à l'action des articulations du robot.
 
-Si on veut contrôler avec robustesse la trajectoire du \gls{acr_com} du robot (quelque soit la méthode d'asservissement employée), on doit être capable d'estimer avec la plus grande précision possible la position instantanée de celui-ci. Or dans la modélisation énoncée ci-dessus, on connaît les paramètres $q, \dot{q}, \ddot{q}$ de toutes les articulations sauf celle du \emph{Freeflyer}, mais pour cette articulation on connaît le couple moteur appliqué: il est nul. La Dynamique Hybride sauve alors la partie en calculant tous les couples inconnus (ceux des articulations réellement actionnées), et l'accélération du \emph{Freeflyer}. Sa vitesse et position peuvent alors être déduites par intégration.
+Si on veut contrôler avec robustesse la trajectoire du \gls{acr_com} du robot (quelque soit la méthode d'asservissement employée), on doit être capable d'estimer avec la plus grande précision possible la position instantanée de celui-ci. Or dans la modélisation énoncée ci-dessus, on connaît les paramètres $q, \dot{q}, \ddot{q}$ de toutes les articulations sauf celle du \emph{Freeflyer}, mais pour cette articulation on connaît le couple moteur appliqué: il est nul. La Dynamique Hybride prend alors le relais en calculant tous les couples inconnus (ceux des articulations réellement actionnées), et l'accélération du \emph{Freeflyer}. Sa vitesse et position peuvent alors être déduites par intégration.
 
 
 \section{Contraintes en performances et méthodes d'implémentation} \label{ch_concepts_implEtContr}
 
 \subsection{Contraintes en vitesse d'exécution}
 
-Les algorithmes de Dynamique Directe ou Inverse ont été implémentés en respectant des contraintes strictes en performance, qu'il fallait tenir compte lors de la phase d'optimisation de l'algorithme de Dynamique Hybride. Je me suis alors intéressé aux contraintes mises en évidence dans la description du Filtrage Dynamique Pour La Marche \cite{bib_filtrageTrajectoireCoM}, qui utilise l'algorithme RNEA pour filtrer la trajectoire du centre de masse.
+Les algorithmes de Dynamique Directe ou Inverse ont été implémentés en respectant des contraintes strictes en performance, dont il fallait tenir compte lors de la phase d'optimisation de l'algorithme de Dynamique Hybride. Je me suis alors intéressé aux contraintes mises en évidence dans la description du Filtrage Dynamique Pour La Marche \cite{bib_filtrageTrajectoireCoM}, qui utilise l'algorithme RNEA pour filtrer la trajectoire du centre de masse.
 
-La fréquence d'échantillonnage du robot humanoïde HRP2 s'élève à $200 Hz$ , correspondant à une période de $5 ms$. C'est la fréquence avec laquelle le contrôleur de trajectoire envoie une commande vectorielle de configuration articulaire ($\mathbf{q}$) pour les 30 degrés de liberté du robot. Le filtrage dynamique se fait sur une fenêtre de $1.6 s$ à la même fréquence d'échantillonnage de $200 Hz$, d'après le cahier des charges du \gls{acr_wpg} proposé par Morisawa, ce qui correspond à $200 \times 1.6 = 320$ itérations de calcul d'un vecteur $\mathbf{q}$ \cite[I.B et III.B]{bib_filtrageTrajectoireCoM}, autrement dit à 2 pas de marche. \`{A} chaque période d'échantillonnage, le \gls{acr_wpg} ne dispose que $3 ms$ pour s'exécuter, et cela comprend les 320 itérations de RNEA. Par conséquent ces 320 itérations doivent s'exécuter en moins $400 \mu s$, soit un RNEA en $1.25 \mu s$. comme cette contrainte n'était pas réalisable par les librairies disponibles, la fréquence d'échantillonnage sur la fenêtre de filtrage a été réduite à $20 Hz$, et la cadence des RNEA réduite à 32 toutes les $0.1 s$. Actuellement, les résultats sur HRP2 (Intel(R) Core2(TM) Duo E7500) sont les suivants:
+La fréquence d'échantillonnage du robot humanoïde HRP2 s'élève à $200 Hz$ , correspondant à une période de $5 ms$. C'est la fréquence avec laquelle le contrôleur de trajectoire envoie une commande vectorielle de configuration articulaire ($\mathbf{q}$) pour les 30 degrés de liberté du robot. Le filtrage dynamique se fait sur une fenêtre de $1.6 s$ à la même fréquence d'échantillonnage de $200 Hz$, d'après le cahier des charges du \gls{acr_wpg} proposé par Morisawa, ce qui correspond à $200 \times 1.6 = 320$ itérations de calcul d'un vecteur $\mathbf{q}$ \cite[I.B et III.B]{bib_filtrageTrajectoireCoM}, autrement dit à 2 pas de marche. \`{A} chaque période d'échantillonnage, le \gls{acr_wpg} ne dispose que $3 ms$ pour s'exécuter, et cela comprend les 320 itérations de RNEA. Par conséquent ces 320 itérations doivent s'exécuter en moins $400 \mu s$, soit un RNEA en $1.25 \mu s$. comme cette contrainte n'était pas réalisable par les librairies disponibles, la fréquence d'échantillonnage sur la fenêtre de filtrage a été réduite à $20 Hz$, et la cadence des RNEA réduite à 32 toutes les $0.1 s$. Actuellement, les résultats d'exécution sur HRP2 (Intel(R) Core2(TM) Duo E7500) sont les suivants:
 \begin{itemize}
 \item[$\centerdot$ vitesse moyenne:] $15 \mu s$
 \item[$\centerdot$ vitesse maximale:] $342 \mu s$
 \end{itemize}
-Et sur un Laptop Intel(R) Core(TM) i7-4700HQ CPU, la vitesse moyenne est d'environ $4.2 \mu s$
+Et sur un processeur Intel(R) Core(TM) i7-4700HQ CPU, la vitesse moyenne est d'environ $4.2 \mu s$
 
 
-\subsection{Contrainte en précision}
+\subsection{Contraintes en précision}
 
 Pour la vérification des résultats numériques de l'algorithme à implémenter, les vecteurs de sortie $\ddot{q}$ ou $\tau$ sont comparés à des vecteurs de référence. Ce qui est vérifié est l'écart relatif entre ces grandeurs. L'écart toléré défini pour les algorithmes déjà implémentés est de $10^{-3}$. L'algorithme hybride manipulant les mêmes grandeurs que le RNEA ou CRBA, j'ai supposé cette précision suffisante. Mais idéalement il faudrait faire une étude plus poussée pour vérifier l'impact de cette erreur relative sur la commande du robot, et d'évaluer la marge qu'on a avant que l'impact soit significatif.
 
 
 \subsection{Algèbre spatiale et méta programmation}
 
-\subsubsection*{L'Algèbre Spatiale et la récursivité}
+\subsubsection*{L'Algèbre spatiale et la récursivité}
 
 L'Algèbre Spatiale est à la base des algorithmes de Dynamique décrits par Featherstone. On va rapidement illustrer comment ce formalisme, combiné à la méta programmation, peut nous aider à atteindre le cahier des charges de performance. L'algèbre spatiale est très efficace lorsqu'elle est associée à des algorithmes récursifs, à cause de la composition simplifiée des vecteurs spatiaux de vitesse, accélération et force, et d'autres propriétés particulières comme l'invariance des vecteurs spatiaux par rapport à la base de Plücker choisie (base dans laquelle on exprime le vecteur).
 
@@ -289,7 +283,7 @@ Justement, les algorithmes CRBA et RNEA utilisent beaucoup la récursivité. Ils
 
 La méta programmation signifierait "la programmation d'un programme". C'est en effet un programme qui manipule du code. Le concept est déjà présent dans un compilateur ou un générateur de "parseur" comme YACC. Le mécanisme "template" du C++ fournit méthode native de méta programmation \cite[p2,3]{bib_metaprogramming}. Cette méthode permet de traiter le calcul de grandeur numériques, et de dérouler des séquences de branchement de code à la compilation. La condition dans ces deux cas, est que les grandeurs et branchements sont constants et connus à la compilation.
 
-On peut alors Obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Méta fonction}, dans le deuxième cas en présence d'une \emph{Méta fonction numérique} (\cite[(2.9)]{bib_metaprogramming}. On présente ci-dessous un exemple de méta fonction très connu réalisant la fonction mathématique Factoriel:
+On peut alors Obtenir une optimisation extrême de certaines fonctions en invoquant la totalité de leur traitement à la compilation. Ceci requiert une architecture et écriture particulière de la fonction: tous ses paramètres et variables locales sont statiques, des types purs (champ de la classe le plus souvent désigné par $::type$) ou des types dit "wrapper type" (champ le plus souvent désigné par $::value$) représentant des valeurs numériques. Dans le premier cas on est en présence d'une \emph{Méta fonction}, dans le deuxième cas en présence d'une \emph{Méta fonction numérique} (\cite[(2.9)]{bib_metaprogramming}. On présente ci-dessous un exemple très connu réalisant la fonction mathématique Factoriel:
 
 \begin{verbatim}
 template <int n>
@@ -388,7 +382,7 @@ Un des désavantages des algorithmes basés sur un modèle générique est qu'il
 
 \subsection{L'architecture de \emph{metapod}}
 
-\emph{Metapod} fournit une librairie d'algorithmes de calcul dynamique de robot, applicable à un modèle de robot au format \gls{acr_urdf}. Ce format est représenté dans l'outil sous forme de classes templatées. LA librairie est écrite en langage C++ templaté suivant des techniques de méta programmation. Ainsi, chaque algorithme est indépendant des modèles de robot (le modèle est une variable de type et un paramètre d'entrée pour l'algorithme templaté), mais est optimisé et adapté, lors de la compilation, au modèle spécifique traité. La représentation des modèles cinématiques (arbres) et les algorithmes sont basés sur l'algèbre spatiale selon Featherstone, elle même basée sur les concepts de torseurs \cite{bib_featherstone}. On liste ci-dessous les composants principaux de la librairie (sous la racine de \emph{metapod}):
+\emph{Metapod} fournit une librairie d'algorithmes de calcul dynamique de robot, applicable à un modèle de robot au format \gls{acr_urdf}. Ce format est représenté dans l'outil sous forme de classes templatées. La librairie est écrite en langage C++ templaté suivant des techniques de méta programmation. Ainsi, chaque algorithme est indépendant des modèles de robot (le modèle est une variable de type et un paramètre d'entrée pour l'algorithme templaté), mais est optimisé et adapté, lors de la compilation, au modèle spécifique traité. La représentation des modèles cinématiques (arbres) et les algorithmes sont basés sur l'algèbre spatiale selon Featherstone, elle même basée sur les concepts de torseurs \cite{bib_featherstone}. On liste ci-dessous les composants principaux de la librairie (sous la racine de \emph{metapod}):
 \begin{description}
 \item[$\centerdot$ include/metapod:] algorithmes de dynamique de robot et outils
 \item[$\centerdot$ data:] fichiers XML donnant la définition URDF des modèles de référence "simple\_arm" (chaîne planaire à 3 corps) et "simple\_humanoid" (modèle humanoïde à 29 corps/articulations et 35 degrés de liberté) pour les tests unitaires et les benchmarks
@@ -417,12 +411,12 @@ Il nous reste maintenant à voir un aperçu des concepts et notations en Algèbr
 L'algorithme de dynamique hybride a été implémenté suivant le formalisme présenté par Featherstone dans son ouvrage \cite{bib_featherstone} regroupant l'ensemble des algorithmes sur la dynamique des corps rigides: l'algorithme récursif de Newton-Euler (\emph{\gls{acr_rnea}}) ou algorithme de Dynamique Inverse, l'algorithme "corps rigide composite" (\emph{\gls{acr_crba}}) ou algorithme de Dynamique Directe, et l'algorithme de corps articulés (\emph{\gls{acr_aba}}). Ce formalisme est basé sur l'algèbre spatiale, qui définit les grandeurs dynamiques à l'aide d'une notation condensée et efficace, et utilise très souvent des mécanismes récursifs comme le parcours en profondeur de graphes représentant l'arbre cinématique d'un robot. Nous allons présenter dans cette section les fondements de l'algèbre spatiale.\\
 
 
-\section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle de système}
+\section{Algèbre spatiale: définition des vecteurs spatiaux et d'un modèle géométrique}
 
 L'algèbre spatiale est un système de notation très concis et léger pour décrire la vitesse, l'accélération et les forces appliquées à des corps rigides, à l'aide de vecteurs à six dimensions (torseurs) dits vecteurs spatiaux. Cette notation réduit grandement la taille des équations de mouvement des modèles cinématique et dynamique du robot. En particulier, elle simplifie la transformation des torseurs entre les repères liés aux différents corps du robot. Quelques exemples seront donnés après la présentation de ces fondements.\\
 
 
-\subsection{Vecteurs spatiaux: espaces mathématique et bases}
+\subsection{Vecteurs spatiaux: espaces mathématiques et bases}
 
 Pour décrire le mouvement d'un corps rigide dans un espace 3D, et ayant six degrés de liberté, nous devons décrire le déplacement en translation et en rotation. Pour cela, on définit des torseurs combinant ces deux types de grandeurs dans des espaces de vecteurs à six dimensions (6D). On définit ainsi :\\
 \begin{itemize}
@@ -463,7 +457,7 @@ On veut exprimer la vitesse d'un corps solide dans l'espace $M^{6}$. On considè
 
 
 Soit $P'$ un point quelconque lié au corps solide $C$ (donc fixe dans n'importe quel repère lié au solide). La vitesse du point $P'$ dans $R$ est donnée par	$v_{P'}=v_{P}+\overrightarrow{P'P} \times w$ .\\
-On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de position de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Comme pour le point $P'$ évoqué précedemment, on a:
+On imagine que le solide s'étend maintenant à tout l'espace autour de lui, englobant ainsi le repère $R$. On peut considérer ainsi un champ de vitesses associé au champ de positions de tous les points du solide étendu. Soit le point de ce champ coïncidant avec le centre su repère $O$, autrement dit le point lié au solide (étendu) coïncidant avec $O$ au moment où on mesure la vitesse du solide. Soit $v_{O}$ la vitesse du solide en ce point. Comme pour le point $P'$ évoqué précedemment, on a:
 $$
 v_{O} = v_{P} + w \times \overrightarrow{PO}\\
 \Leftrightarrow v_{P} = v_{O} - w \times \overrightarrow{PO} = v_{O} + w \times \overrightarrow{OP}
@@ -476,7 +470,7 @@ v_{P} = v_{O} + \omega \times \overrightarrow{OP}
 \footnote{Bien que la vitesse $v_{P}$ soit définie en fonction de $O$, elle ne dépend pas de l'origine choisie puisqu'il s'agit du vecteur vitesse associé à $P$ par le champ de vitesses du solide, qui lui est indépendant de l'origine. En effet, $v_{O}$ et $\overrightarrow{OP}$ dépendent tous deux de $O$, mais ces dépendances se compensent.}
 \end{equation}
 \noindent
-Les vecteurs spatiaux sont équivalents à des torseurs, pour lesquels on retrouve les même représentations de champs de position et champs de vitesse (annexe \ref{appx_torseursToalgSpa_torseurs_appl}).\\
+Les vecteurs spatiaux sont équivalents à des torseurs, pour lesquels on retrouve les même représentations de champs de positions et champs de vitesses (annexe \ref{appx_torseursToalgSpa_torseurs_appl}).\\
 
 On veut exprimer les coordonnées de $w$ et $v_{O}$ dans le repère cartésien $R(O,x,y,z)$. Pour cela, on définit la base orthonormée de \emph{Plücker} dans l'espace des torseurs de mouvement $M^{6}$:\\
 
@@ -548,7 +542,7 @@ $$
 
 \vspace{0.3cm} % retour à la ligne
 
-Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie (annexe \ref{appx_dem}). La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver la démonstration complète de cette propriété d'invariance dans l'annexe \ref{appx_dem}.
+Le vecteur spatial $\widehat{v}$ rassemble les six composantes représentant complètement les mouvements $\underline{w}$ et $\underline{v}_{O}$ du corps $C$. Ce vecteur a une propriété majeure qui est l'invariance par rapport à la base de \emph{Plücker} choisie (annexe \ref{appx_dem}). La propriété d'invariance se vérifie pour tout point $O$ et $P$ fixes dans l'espace et une orientation quelconque des repères $R(O,x,y,z)$ et $R'(P,x,y,z)$. Nous pouvons trouver dans l'annexe \ref{appx_dem}, la démonstration de la propriété d'invariance dans le cas de deux repères ayant la même orientation.
 
 
 \subsection{Force}
@@ -569,7 +563,7 @@ Dans cette section, nous allons juste aborder les notation importantes utilisée
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figs/modeleGeoEtArticulations.png}
-  \caption{Modèle géométrique d'un système de corps rigides, et ses repères liés. extrait de la \cite[section 4.2, figure 4.7]{bib_featherstone}}
+  \caption{Modèle géométrique d'un système de corps rigides, et ses repères liés. Extrait de \cite[section 4.2, figure 4.7]{bib_featherstone}}
   \label{fig_corpsEtReperes}
 \end{figure}
 
@@ -597,12 +591,12 @@ On définit la matrice de sélection $S_k$ d'une articulation $k$ donnée, liant
 Ceci exprime la composition des vitesses des corps supportant le corps $k$.
 
 \paragraph*{Différence entre la notion de vitesse relative à un corps et vitesse exprimée dans le repère dans le repère de \emph{Plücker} de ce même corps:} La différence entre $v_{i:j} = {^0v_{i:j}}$ (vitesse du corps $i$ par rapport à $j$ exprimée en un repère fixe quelconque $R_0$), et $^iv_j = {^iv_{0:j}}$ (vitesse du corps $j$ par rapport à un repère fixe quelconque $R_0$, exprimée dans le repère lié à $i$).
-En algèbre spatiale, lorsqu'on note une vitesse spatiale ${^iv_{0:j}}$ exprimée dans le repère lié à un corps $i$ donné, on considère une "photo" instantanée de ce repère, on le considère donc fixe. La composition (somme) des vitesses des différents corps se fait à travers la somme des vecteurs spatiaux, et non pas à travers les matrices de passage $^BX_A$ entre repères de \emph{Plücker}. C'est à dire que si un corps $j$ est immobile par rapport à un autre corps $j$, mais tous les deux sont mobiles par rapport à un repère fixe $R_0$, on a ${^iv_j } = {^iv_{0:j}} \neq 0$.
+En algèbre spatiale, lorsqu'on note une vitesse spatiale ${^iv_{0:j}}$ exprimée dans le repère lié à un corps $i$ donné, on considère la position instantanée de l'origine $O_i$ de ce repère et on calcule la vitesse spatiale en ce point $O_i$. La composition (somme) des vitesses des différents corps se fait à travers la somme des vecteurs spatiaux, et non pas à travers les matrices de passage $^BX_A$ entre repères de \emph{Plücker}. C'est à dire que si un corps $j$ est immobile par rapport à un autre corps $i$, mais que tous les deux sont mobiles par rapport à un repère fixe $R_0$, alors on a ${^iv_j } = {^iv_{0:j}} \neq 0$.
 
 
 
 
-\chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des liaisons flexibles} \label{ch_impl}
+\chapter{Implémentation d'un algorithme dynamique hybride pour la prise en compte des articulations flexibles} \label{ch_impl}
 
 \setmyFiguresFile{hybridDynamics4etapes}
 
@@ -625,7 +619,7 @@ Dans les sections précédentes, nous avons posé les bases de l'algèbre spatia
 \end{itemize}
 
 
-\section{l'algorithme hybride en quatre étapes}
+\section{L'algorithme hybride en quatre étapes}
 
 \subsection{Aperçu de l'algorithme} \label{ch_impl_apercu}
 
@@ -720,7 +714,7 @@ On détaille par la suite la mise en forme de l'équation \eqref{equ_equationMvt
 \end{wrapfigure}
 
 Soit le sous-ensemble d'articulations pour lesquelles on connaît le couple $\tau$ de forces appliquées. On désigne cet ensemble celui des articulations en mode "forward-dynamics" ou "articulations \emph{fd}" ou encore \emph{fd}. L'ensemble complémentaire regroupe les "articulations en mode "inverse-dynamics" ou "id". l'ensemble \emph{fd} est supposé connu et fournit par le modèle du système. Nous noterons $n_{\emph{fd}}=\vert fd \vert$, $n_{\emph{id}}=\vert id \vert$ et $n_{dof}=n_{\emph{fd}}+n_{\emph{id}}=\vert \ddot{q} \vert$. Il s'agit là d'un impact, qu'on détaille en fin de section, sur la définition du modèle standard \gls{acr_urdf} et du "parseur" respectif, tous deux définis à la base dans le standard \gls{acr_ros}.\\
-Avant de pouvoir déplacer toutes les variables inconnues du même côté de l'égalité, nous devons les regrouper. Pour cela, nous appliquons une permutation à tous les éléments de l'équation de mouvement. Commençons par les vecteurs de variables et de coefficients. Nous définissons ainsi la matrice de permutation $\mathbf{Q}$ qui réordonne les vecteurs $q$, $\dot{q}$, $\ddot{q}$ en plaçant les variables inconnues en premier. Considérons l'exemple simple ci-contre. Comme vu dans l'établissement de l'équation de mouvement au chapitre \ref{ch_algSpa_equationMouvement}, l'ordre des variables $q_i$, $\dot{q}_i$, $\ddot{q}_i$, dans les vecteurs respectifs, est donné suivant le parcours de l'arbre cinétique en profondeur d'abord:
+Avant de pouvoir déplacer toutes les variables inconnues du même côté de l'égalité, nous devons les regrouper. Pour cela, nous appliquons une permutation à tous les éléments de l'équation de mouvement. Commençons par les vecteurs de variables et de coefficients. Nous définissons ainsi la matrice de permutation $\mathbf{Q}$ qui réordonne les vecteurs $q$, $\dot{q}$, $\ddot{q}$ en plaçant les variables inconnues en premier. Considérons l'exemple simple ci-contre. L'ordre d'apparition des variables $q_i$ dans le vecteur $\mathbf{q}$ est donné suivant le parcours de l'arbre cinétique en profondeur d'abord: $0\longrightarrow 1\longrightarrow 2\longrightarrow 4\longrightarrow 5\longrightarrow 3\longrightarrow 6\longrightarrow 7.$
 
 \begin{Parallel}[v]{.4\textwidth}{.5\textwidth}
 \ParallelLText{%
@@ -797,7 +791,7 @@ Avec $\underline{\ddot{q}_1}$ et $\underline{\tau_1}$ les sous-vecteurs des vari
 
 %Ces propriétés sont décrites plus en détail en annexe \ref{appx_algLineaire}.
 
-\subsubsection{permutation de la matrice d'inertie et reformulation de l'équation de mouvement}
+\subsubsection{Permutation de la matrice d'inertie et reformulation de l'équation de mouvement}
 
 On applique la permutation $Q$ à tous les éléments de l'équation de mouvement \eqref{equ_equationMvt}:
 \begin{spacing}{1.5}
@@ -831,7 +825,7 @@ On applique la permutation $Q$ à tous les éléments de l'équation de mouvemen
 \end{spacing}
 
 où $H_{11}$ est de dimensions ($n_{fd} \times n_{fd}$), $H_{12}$ de dimensions ($n_{fd} \times n_{id}$), $H_{21}$ est de dimensions ($n_{id} \times n_{fd}$) et $H_{22}$ de dimensions ($n_{id} \times n_{id}$).
-\subsubsection{regroupement des inconnues à gauche de l'équation}
+\subsubsection{Regroupement des inconnues à gauche de l'équation}
 
 Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équation:
 
@@ -935,7 +929,7 @@ Il ne reste plus qu'à regrouper $\ddot{q}_1$ et $\tau_2$ à gauche de l'équati
 \\
 Nous avons ainsi obtenu l'équation de mouvement pour la dynamique hybride.
 
-\subsubsection{implémentation} \label{ch_implURDF}
+\subsubsection{Implémentation} \label{ch_implURDF}
 
 \paragraph{Modifications à apporter au modèle URDF (format XML) et au parseur URDF:}
 
@@ -962,7 +956,7 @@ Nous avons vu, dans la section \ref{ch_concepts_implEtContr}, l'architecture glo
 \end{description}
 \bigskip
 
-\paragraph{méthodes matricielles de permutation de vecteurs et matrices}
+\paragraph{Méthodes matricielles de permutation de vecteurs et matrices:}
 La permutation des vecteurs se fait à l'aide d'une classe de la librairie \emph{Eigen} dédiée à ce type d'opération, la classe: \verb;Eigen::PermutationMatrix;. Un objet de cette classe peut être utilisé sous forme de matrice orthogonale: \verb;Eigen::PermutationMatrix::toDenseMatrix(); ; mais aussi sous la forme d'une base de permutation. Dans le premier cas, le produit d'un objet $Q$ de cette classe par une matrice $A$ carrée est un vrai produit matriciel, qui a une complexité de calcul $O(n^3)$ (où $n$ est la taille de la matrice). Dans le deuxième cas, le produit est surchargé par une méthode de permutation de lignes ou de colonnes, de complexité $O(n)$. Il est donc impératif, pour toutes nos permutations, d'utiliser la deuxième forme (instance directe de la classe \verb;Eigen::PermutationMatrix;). On désignera l'objet de cette classe par "opérateur de permutation".
 
 Nous avons mesuré une différence de performance entre les deux méthodes, dans une configuration i7 quadcore, s'élevant à $20\mu s$ pour le produit $Q H Q^T$, sur un temps total d'exécution de l'hybride dynamics d'environ $36\mu s$, ce qui est considérable.
@@ -975,11 +969,11 @@ La construction de l'opérateur de permutation pouvait se faire pendant l'une de
 \end{itemize}
 l'opérateur de permutation se crée à partir d'un vecteur de permutation (classe \verb;Matrix; de Eigen) qu'on rempli suivant les permutations désirées. Le soin nous est réservé de vérifier que ces permutations équivalent à une matrice de permutation $Q$ orthogonale. Nous avons choisi d'éviter d'introduire dans le module \emph{metapodfromurdf} des dépendances avec les algorithmes de \emph{metapod}. De plus, remplir ces vecteurs en parcourant l'arbre cinématique en phase de compilation est assez complexe, faisant appel à des "metafonctions". On peut se permettre de faire le remplissage en phase d'exécution de \emph{metapod} puisque l'opérateur de permutation est calculé une bonne fois pour toutes. On choisit de le faire dans le constructeur de l'objet de la classe du modèle (classe \verb;<nom_modele>;), donc avant tout appel possible de la méthode de dynamique hybride \verb;chda();.
 
-\paragraph{résolution du système...}
+\paragraph{Résolution du système:}
 Déroulons maintenant les quatre étapes de l'algorithme, énoncées plus haut: calcul de $C'$, calcul de $H_{11}$, résolution de $H_{11} \ddot{q}_1 = \tau_1 - C'_1$ et calcul de $\tau_2$.
 
 
-\subsection{calcul de C'}
+\subsection{Calcul de C'}
 
 $C'$ est l'ensemble des forces et couples de forces motrices $\tau$ assurant une accélération nulle pour les articulations \emph{fd} ($\ddot{q}_1=0$) et l'accélération donnée $\ddot{q}_2$ pour les articulations \emph{id}. en effet on obtient:
 
@@ -1036,7 +1030,7 @@ Parmi les paramètres classiques de la fonction $ID$, nous avons remplacé $\ddo
 ce qui correspond à mettre à 0, dans le vecteur original $\ddot{q}$, toutes les variables qui étaient regroupées dans le vecteur réordonné $\ddot{q}_1$.\\
 
 
-\subsubsection{implémentation}
+\subsubsection{Implémentation}
 
 Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'entrée $\ddot{q}$ pour obtenir la forme désirée \(Q^T \begin{bmatrix} 0 & \ddot{q}_2 \end{bmatrix}^T\):
 \begin{align*}
@@ -1067,7 +1061,7 @@ Nous pouvons visualiser ci-dessous les opérations exécutées sur le vecteur d'
 \end{align*}
 
 
-\subsection{calcul de H11 (sous-matrice d'inertie)}
+\subsection{Calcul de H11 (sous-matrice d'inertie)}
 %description de la construction de H et optimisation par défaut "branch sparsity"
 
 Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs méthodes sont proposées dans l'algèbre spatiale selon Featherstone (\cite{bib_featherstone} section 9.1) . La plus simple, moins performante, consiste à:
@@ -1080,7 +1074,7 @@ Il faut à présent construire la sous-matrice d'inertie $H_{11}$. Plusieurs mé
 La deuxième méthode, beaucoup plus performante dans le cas où $n_{\emph{fd}}$ est signicativement plus petit que $n_{dof}$, consiste à modifier l'algorithme \gls{acr_crba}, de sorte à le réduire aux seuls calculs produisant les termes de $H_{11}$. Cette méthode sera abordée en détail dans la section sur les optimisations \ref{ch_impl_optimisation}.
 
 Nous avons choisi la première solution pour une première implémentation, dans le but de répartir la complexité de la tâche à entreprendre, et de se focaliser sur la validation des résultats numériques ainsi que de leurs précision.\\
-\textbf{Remarque:} le \gls{acr_crba} original inclut déjà une première optimisation qui consiste à exploiter la sparsité de la matrice $H$, \cad à ne pas recalculer les termes nuls ($\forall q$) de $H$ induits par la topologie de l'arbre cinématique du robot. Plus précisément, cette sparsité est dûe à la nature des liaisons entre les corps du robot. Typiquement, pour deux corps $c_i$ et $c_j$ du système n'ayant aucun lien \emph{parent} - \emph{enfant} (voir chap. \ref{ch_algSpa_equationMouvement}), les coefficients respectifs dans la matrice d'inertie, $H_{ij}$ et $H_{ji}$, sont nuls.
+\textbf{Remarque:} le \gls{acr_crba} original inclut déjà une première optimisation qui consiste à exploiter la sparsité de la matrice $H$, \cad à ne pas recalculer les termes nuls ($\forall q$) de $H$ induits par la topologie de l'arbre cinématique du robot. Plus précisément, cette sparsité est dûe à la nature des liaisons entre les corps du robot. Typiquement, pour deux corps $c_i$ et $c_j$ du système n'ayant aucun lien \emph{parent} - \emph{enfant}, les coefficients respectifs dans la matrice d'inertie, $H_{ij}$ et $H_{ji}$, sont nuls.
 
 \subsubsection{Implementation}
 
@@ -1101,7 +1095,7 @@ Q H Q^T =
 L'extraction de la matrice $H_{11}$ se fait simplement à l'aide d'une fonction \emph{Eigen} templatée, de copie de sous blocs de matrice.
 
 
-\subsection{résolution du système linéaire}
+\subsection{Résolution du système linéaire}
 %=> Eigen solver, ddq1
 
 La relation matricielle \eqref{equ_equationMvt_dynHyb2} se décline en deux équations. La première nous permet de calculer ici $\ddot{q}_1$, et la deuxième nous permettra de calculer $\tau_2$ dans l'étape 5 de l'algorithme global. Calculons $\ddot{q}_1$:
@@ -1153,7 +1147,7 @@ Une description un peu plus détaillée de ces algorithmes sera donnée par  la 
 \subsubsection{Implémentation}
 
 
-\paragraph{Choix des librairies d'outils et identification des algorithmes de résolution de système linéaire}.\\
+\paragraph{Choix des librairies d'outils et identification des algorithmes de résolution de système linéaire}:\\
 
 \`{A} ce stade, les coefficients $A$ et $b$ du système d'équations linéaire $Ax=b$ sont connus. Il faut à présent choisir l'\textbf{algorithme de décomposition approprié} pour le résoudre. L'ensemble des composants logiciels liés à la plateforme robotique de \textbf{HRP2} utilisent majoritairement la librairie dynamique d'outils matriciels \emph{Eigen}. Parmi ces composant on distingue:
 \begin{itemize}
@@ -1226,7 +1220,7 @@ ddq1 = ldltOfH11.solve(tau1 - C1prime);
 \end{verbatim}
 
 
-\subsection{résolution de $\mathbf{\tau_2}$ et reconstruction des vecteurs de sortie ddq et tau} \label{ch_impl_calculTau2}
+\subsection{Résolution de $\mathbf{\tau_2}$ et reconstruction des vecteurs de sortie ddq et tau} \label{ch_impl_calculTau2}
 
 Nous reprenons maintenant la deuxième équation du système linéaire \eqref{equ_equationMvt_dynHyb2}:
 \begin{align}
@@ -1340,13 +1334,13 @@ On récapitule ci-dessous l'ensemble des 5 étapes de l'algorithme: \\
 \end{minipage}}
 
 
-\section{mesure de performances et optimisations de l'algorithme} \label{ch_impl_optimisation}
+\section{Mesures de performances et optimisations de l'algorithme} \label{ch_impl_optimisation}
 
 \setmyFiguresFile{optimisations}
 
 \subsection{jcalc et le calcul des matrices de passage $^sX_p$}
 
-\verb;jcalc(); est la fonction appelée pour mettre à jour les matrices de passage $^sX_p$ entre les repères liés aux deux corps $p$ (prédécesseur) et $s$ (successeur) pour chaque articulation du robot. Ces matrices $^sX_p$ sont incluses dans la classe $model$ (modèle du robot), et générées avec ce modèle à la compilation de \emph{metapod}. Elles peuvent être générées comme des matrices génériques: ce sont alors des structures templatées qui peuvent définir n'importe quel axe de rotation suivant ce qu'on leur passe en paramètre à kleur instanciation. Sinon, elles peuvent être définies comme des matrices spéciales, simplifiées, dont l'axe est parallèle à un des axes $(Ox)$, $Oy$  ou $Oz$ du repère lié au corps $s$. Ces matrices $^sX_p$ sont dites à axes fixes. Elles permettent d'accélérer significativement les calculs matriciels dans lesquels elles sont impliquées. Cela est dû au fait qu'elles soient creuses. Pour exploiter cette "sparsité", des règles spécifiques de produit matriciel ont été définies. Le version officielle servant de base à mon développement avait une erreur au niveau des fonction définissant ces règles de calcul.Cette correction a été la première à être intégrée dans la version officiele de \emph{metapod}.
+\verb;jcalc(); est la fonction appelée pour mettre à jour les matrices de passage $^sX_p$ entre les repères liés aux deux corps $p$ (prédécesseur) et $s$ (successeur) pour chaque articulation du robot. Ces matrices $^sX_p$ sont incluses dans la classe $model$ (modèle du robot), et générées avec ce modèle à la compilation de \emph{metapod}. Elles peuvent être générées comme des matrices génériques: ce sont alors des structures templatées qui peuvent définir n'importe quel axe de rotation suivant ce qu'on leur passe en paramètre à leur instanciation. Sinon, elles peuvent être définies comme des matrices spéciales, simplifiées, dont l'axe est parallèle à un des axes $(Ox)$, $Oy$  ou $Oz$ du repère lié au corps $s$. Ces matrices $^sX_p$ sont dites à axes fixes. Elles permettent d'accélérer significativement les calculs matriciels dans lesquels elles sont impliquées. Cela est dû au fait qu'elles soient creuses. Pour exploiter cette "sparsité", des règles spécifiques de produit matriciel ont été définies. Le version officielle servant de base à mon développement avait une erreur au niveau des fonction définissant ces règles de calcul.Cette correction a été la première à être intégrée dans la version officiele de \emph{metapod}.
 
 \subsection{Permutation optimale sous Eigen des variables et coefficients de l'équation de mouvement}
 
@@ -1357,7 +1351,7 @@ Nous allons à présent optimiser le calcul des éléments d'inertie du système
 
 \subsubsection{Principe du CRBA}
 Celui-ci calcule tous les termes de $H$ et est déjà optimisé par rapport à la \gls{gls_sparsite} de la matrice induite par la structure ramifiée de l'arbre cinématique du robot. Le CRBA parcours cet arbre en profondeur d'abord, ce qu'on désigne par un parcours \gls{acr_algoDFS}. L'inertie de chaque corps est initialisée dans le sens descendant de la base (corps 0) vers les feuilles. L'inertie composite de chaque corps assimilé au sous-arbre qu'il supporte est calculée par récursivité dans le sens ascendant des feuilles vers le corps 0. Dans le cas d'un robot humanoïde, le corps 0 pourrait être assimilé au torse, et les feuilles aux mains et aux pieds. S'il n'existe pas de chemin toujours ascendant reliant deux corps $c_i$, $c_j$ à la base $c_0$, alors les termes associés $H_{ij}$ et $H_{ji}$ sont nuls.\\
-Avant de continuer, il est indispensable de tenir compte des concepts fondamentaux sur la représentation des arbres cinématiques \cite{ch_algSpa_equationMouvement}:
+Avant de continuer, il est indispensable de tenir compte des concepts fondamentaux sur la représentation des arbres cinématiques \cite[ch.4.1]{bib_featherstone}:
 
 \begin{itemize}
 \item $p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$
@@ -1437,7 +1431,7 @@ H_{ji} = \sum_{k \in \nu(j) \cap \nu(i)}\mathbf{{S_j^T} I_k S_i} = \sum_{k \in \
 
 Regardons de près comment le CRBA les calcule de façon optimale. Dans les relations \eqref{equ_inertieComposite} et \eqref{equ_momentInertieComposite}, tous les éléments sont exprimés dans le repère base $R_0$. Mais l'algorithme \gls{acr_crba} a été écrit de sorte à exploiter le calcul récursif. En effet, pour chaque itération de calcul sur le corps $i$, l'algorithme utilise l'expression des torseurs dans la base liée à ce même corps. \textbf{Cela permet d'éviter le calcul des matrices de passage $^0X_i$ pour chaque corps $i$ ainsi que le calcul des termes $I$ et $S$ dans le repère $R_0$}.
 
-\subsubsection{calcul récursif de $I_i^c$}
+\subsubsection{Calcul récursif de $I_i^c$}
 
 $I_i^c$ est initialement définie comme la somme des inerties de l'ensemble $\nu(i)$. Mais elle est calculée résursivement en remontant l'arbre des feuilles jusqu'au noeud $i$ compris. Chaque fois qu'un corps $j$ est visité, son inertie est rajoutée au noeud parent $\lambda(j)$, qui cumule ainsi toute l'inertie du sous-arbre qu'il supporte. On exprime chacune des inerties $I_j^c$ dans le repère du corps $j$. \\
 
@@ -1486,7 +1480,7 @@ On présente ci-dessous deux versions (a) et (b) de l'algorithme de calcul récu
 Dans les deux algorithmes, on met à jour les inerties composites en remontant l'arbre des feuilles à la racine. Dans l'algorithme (a), chaque noeud visité est traité en une seule fois. L'inconvénient est que ce n'est pas adapté à un parcours en profondeur de l'arbre cinématique. Or la librairie \emph{metapod} a la majorité de ces outils et algorithmes dynamiques basés sur le parcours \gls{acr_algoDFS}.\\
 Justement, l'algorithme (b) est lui, plus proche du parcours en profondeur. Par un changement de variable, on se place du point de vue d'un noeud enfant. Chaque noeud enfant visité met à jour son noeud parent. La condition nécessaire pour que ces deux versions (a) et (b) soient valables est qu'un noeud $i$ donné n'est jamais visité avant un de ces noeuds parents. C'est justement le cas d'après la méthode de représentation et numérotation présentée par Featherstone (\cite{bib_featherstone} chap.4, section 4.1.2), et le cas du parcours \gls{acr_algoDFS}.
 
-\subsubsection{calcul récursif de $H_{ij}$ et algorithme global du CRBA}
+\subsubsection{Calcul récursif de $H_{ij}$ et algorithme global du CRBA}
 
 Comme pour le calcul de l'inertie composite, nous commençons par faire apparaître dans l'expression de $H_{ij}$ (\eqref{equ_momentInertieComposite} les termes $I$ et $S$ exprimés dans leur repère propre. Nous remplaçons donc ${^0I_j^c}$ par ${^iX_j^*} \: {I_j^c} \: {^jX_i}$ où ${I_j^c}$ est exprimée dans son repère propre (repère lié au corps $j$). Aussi, on obtient, pour les composantes du calcul de $H_{ij}$:\\
 
@@ -1528,7 +1522,7 @@ Donc si on calcule tous les termes $H_{ij}$ et leur transposée $H_{ij}^T$ tels 
 \end{flushleft}
 \dispFig[H]{4}{0.8\textwidth}{Termes $H_{ij}$ tels que $i \in \nu(j)$, et leurs transposées, couvrant toutes les combinaisons entre les noeuds de $\kappa(7)$}{fig_symetrieH}
 
-\paragraph{termes constants dans le parcours remontant $\nu(j)$:}
+\paragraph{Termes constants dans le parcours remontant $\nu(j)$:}
 Nous allons donc calculer tous les $H_{ij}$, tels que $i \in [1,N_B]$ et $j \in \kappa(i)$. C'est à dire que pour $i$ fixé, on parcours l'arbre en remontant de parent en parent. On constate alors que le produit $\mathbf{{S_i^T} \: {I_i^c} \: {^iX_j} S_j}$ a un terme constant lors du parcours ascendant de l'arbre: $\mathbf{{S_i^T} \: {I_i^c}}$. Celui-ci est multiplié à droite par la matrice de passage $^iX_j$. Afin d'avoir la matrice de passage plutôt à gauche, on utilise la transposé de $\mathbf{{S_i^T} \: {I_i^c}}$:
 \begin{align}
 {^iF_i} &= {I_i^c} \: S_i \\
@@ -1742,10 +1736,10 @@ La génération de l'ensemble $\nu(fd)$ se fait via un paramètre de sélection 
 \begin{equation*}
 \lambda(i) \in \nu(fd) \implies i \in \nu(fd)
 \end{equation*}
-Cette relation est suffisante pour construire l'ensemble si on l'applique en parcourant l'arbre cinématique en profondeur d'abord. L'ordre de génération des classes \verb;Node<i>; dans la classe \verb;Robot;, par le module \emph{metapodfromurdf} suit cet ordre de parcours. Il suffit donc d'appliquer cette relation à l'attribut \verb;jointNuOfFwdDyn; de la classe \verb;Robot;.
+Cette relation est suffisante pour construire l'ensemble si on l'applique en parcourant l'arbre cinématique en profondeur d'abord. L'ordre de génération des classes \verb;Node<i>; dans la classe \verb;Robot; suit cet ordre de parcours. Il suffit donc d'appliquer cette relation à l'attribut \verb;jointNuOfFwdDyn; de la classe \verb;Robot;.
 
 \begin{flushleft}
-On implémente l'algorithme \ref{algo_crbaFeatherstone} sous \emph{metapod} comme suis:\\
+On implémente l'algorithme \ref{algo_crbaFeatherstone} sous \emph{metapod} comme suit:\\
 
 \shadowbox{\small%
 \begin{minipage}[t]{\textwidth}
@@ -1958,9 +1952,9 @@ L'algorithme adapté à \emph{metapod} donne: \vspace{0.3cm} \\
 
 
 
-\subsection{impact of branch sparsity on motion equation solving}
-\textbf{impact on Eigen solver}
-On peut exploiter le fait que la matrice soit creuse. Featherstone propose un algorithme de factorisation basé sur le \emph{pattern} de parcours en profondeur \textsc{DepthFirstTraversal} \cite[table 6.3 p112]{bib_featherstone}. Mais faute de temps pour implémenter et valider cet algorithme, et dans le but d'éviter de "surcharger" les fonctions \emph{Eigen}, J'ai choisit d'implémenter la méthode \emph{Eigen} \verb;SimplicialLLT; ou \verb;SimplicialLDLT; qui exploite la sparsité d'une matrice préalablement analysée (à condition que cette sparsité ne varie pas, et c'est le cas). On manipule alors des types de matrices spécifiques (\verb;SparseMatrix;). Nous ne détaillerons pas cette implémentation ici. D'ailleurs, les tests réalisés (non documentés ici) ne révèlent aucune amélioration de performance.
+\subsection{Impact de la "branch sparsity" sur la résolution de l'équation de mouvement}
+\textbf{impact sur le solveur Eigen}
+On peut exploiter le fait que la matrice soit creuse. Featherstone propose un algorithme de factorisation basé sur le \emph{pattern} de parcours en profondeur \textsc{DepthFirstTraversal} \cite[table 6.3 p112]{bib_featherstone}. Mais faute de temps pour implémenter et valider cet algorithme, et dans le but d'éviter de "surcharger" les fonctions \emph{Eigen}; j'ai choisis d'implémenter la méthode \emph{Eigen} \verb;SimplicialLLT; ou \verb;SimplicialLDLT; qui exploite la sparsité d'une matrice préalablement analysée (à condition que cette sparsité ne varie pas, et c'est le cas). On manipule alors des types de matrices spécifiques (\verb;SparseMatrix;). Nous ne détaillerons pas cette implémentation ici. D'ailleurs, les tests réalisés (non documentés ici) ne révèlent aucune amélioration de performance.
 
 
 \subsection{Dynamique inverse differentielle pour le calcul optimal de $\tau_2$}
@@ -2009,9 +2003,9 @@ Q \: \mathrm{ID}_{\delta}(q,\dot{q},Q^T\begin{bmatrix}
 Featherstone nous dit \cite[p103]{bib_featherstone} que la fonction $\mathrm{ID}_{\delta}$ ("differential Inverse Dynamics") a beaucoup de termes qui se sont annulés. Il nous donne l'algorithme qui réalise cette fonction \cite[p104]{bib_featherstone}. On implémente cette fonction. On verra plus loin si cette méthode est plus efficace pour le calcul de $\tau2$.
 
 
-\section{tests unitaires et validation}
+\section{Tests unitaires et validation}
 
-\paragraph{méthodes de test unitaire des fonctions et sous-fonctions implémentées}
+\paragraph{Méthodes de test unitaire des fonctions et sous-fonctions implémentées:}
 
 Chacune des sous fonctions implémentées faisant partie de l'algorithme de dynamique hybride ou servant juste d'outil de test, ainsi que chacune des quatre étapes de l'algorithme principal lui-même ont été testées unitairement. L'algorithme global a ensuite été testé sur des vecteurs d'entrée construits aléatoirement mais de sorte à ce qu'on puisse vérifier les résultats numériques et leur précision (voir le test de l'algorithme hybride CHDA plus loin).
 
@@ -2030,13 +2024,13 @@ Voici la liste de toutes les méthodes créées et testées. On rappelle leur fo
 \noindent
 Toutes les fonctions ont été testées pas à pas à l'aide d'un outil de "debug" \textbf{ddd} (GUI basé sur \textbf{gdb}), ou les plugins de test de \emph{QTcreator}. Des scripts de tests unitaires ont été implémentés pour les fonction réalisant des calculs dynamiques. Nous comparons souvent les vecteurs d'accélérations ($rad \cdot s^{-1}$) ou de couples (Newtons) avec des vecteurs de référence pour valider les résultats obtenus. La précision voulue est de $1 mN$ pour les couples et de $10^{-3} rad \simeq 0.05 deg$.
 
-\paragraph{initnufwddyn}
+\paragraph{Test de initnufwddyn:}
 Pour valider le champ \verb;jointNuOfFwdDyn; de la classe \verb;Node<i>;, le plus simple est de générer une trace complète de ce paramètre pour l'ensemble des classes \verb;Node<i>;. On obtient ainsi une table de booléens \verb;nuOfFwdDyn[i];. Il faut ensuite parcourir l'arbre cinématique à l'aide de la procédure de référence \textsc{DepthFirstTraversal} et recalculer \verb;nuOfFwdDyn[i]; suivant la relation définissant $\nu(fd)$. Les deux tables doivent être identiques. Il s'agit en fait de comparer le résultat d'un calcul obtenu en mode compilation avec celui obtenu en mode exécution.
 
-\paragraph{test du CRBA:}
-Nous avons amélioré la validation de  cet algorithme. Le vecteur en entrée ne permettait pas de mettre en évidence une erreur au niveau des matrices de passage de repère $^jX_i$. Aussi, nous avons rajouté une trace de l'état géométrique et dynamique interne du robot: $^jX_p, X_t, X_j, S, ^iX_0, v_i, a_i, I_i^c$ ainsi que les forces ou couples transmit à travers chaque articulation. Ceci nous a permis de détecter les changements au niveau de ces états, induits par une optimisation appliquée aux matrices de passage $^sX_p$.
+\paragraph{Test du CRBA:}
+Nous avons amélioré la validation de  cet algorithme. Le vecteur en entrée ne permettait pas de mettre en évidence une erreur au niveau des matrices de passage de repère $^jX_i$. Aussi, nous avons rajouté une trace de l'état géométrique et dynamique interne du robot: $^jX_p, X_t, X_j, S, ^iX_0, v_i, a_i, I_i^c$ ainsi que les forces ou couples transmis à travers chaque articulation. Ceci nous a permis de détecter les changements au niveau de ces états, induits par une optimisation appliquée aux matrices de passage $^sX_p$.
 
-\paragraph{test du RNEA:}
+\paragraph{Test du RNEA:}
 Ce test applique le RNEA à une configuration de référence $q, \dot{q}, \ddot{q}$ et compare la sortie, \cad les couples calculés aux couples de référence attendus:
 \begin{equation*}
 \tau = rnea(q,\dot{q},\ddot{q})
@@ -2047,7 +2041,7 @@ H \ddot{q} + C = \tau \qquad \textnormal{où C est l'ensemble des forces de cont
 \end{equation*}  
 Or le RNEA nous donne la valeur de $C$ ($C = rnea(q,\dot{q},\ddot{q}=0)$) et le CRBA nous donne la matrice $H$. Il ne nous reste plus qu'à comparer les deux valeurs de $\tau$.
 
-\paragraph{test de qcalc:}
+\paragraph{Test de qcalc:}
 Nous validons l'opérateur de permutation Q (classe \verb;Eigen::PermutationMatrix;) et sa forme matricielle en vérifiant les propriété de Q:
 %\setlength{\intextsep}{2pt}
 %\begin{wrapfigure}[]{r}{0.4\textwidth}
@@ -2062,12 +2056,12 @@ Nous validons l'opérateur de permutation Q (classe \verb;Eigen::PermutationMatr
 \item[$\centerdot$] la matrice Q est orthogonale ($Q Q^T = I \iff Q^{-1} = Q^T$)
 \item[$\centerdot$] générer un vecteur contenant la liste des numéros de noeud (numéro dans l'arbre cinématique), ordonnés suivant l'ordre utilisé pour un vecteur de configuration $q$ (suivant le champ \verb;q_idx; de la classe \verb;Node<i>;)
 \item[$\centerdot$] appliquer la permutation $Q$ à ce vecteur
-\item[$\centerdot$] générer un autre vecteur du même type mais en deux coups, regroupant ainsi les noeuds $fd$en premier (appliquer l'ordre de parcours \gls{acr_algoDFS} et non le mapping \verb;q_idx;)
+\item[$\centerdot$] générer un autre vecteur du même type mais en deux coups, regroupant ainsi les noeuds $fd$ en premier (appliquer l'ordre de parcours \gls{acr_algoDFS} et non le mapping \verb;q_idx;)
 \item[$\centerdot$] les deux vecteurs générés doivent être identiques
 \end{itemize}
 
 
-\paragraph{test du HCRBA:}
+\paragraph{Test du HCRBA:}
 L'objectif de ce test est de comparer le résultat de l'algorithme HCRBA avec celui du CRBA classique (matrice $H$ complète) auquel on a mis à 0, à posteriori, tous les termes qu'on peut associer à la sous-matrice $H_{22}$:\vspace{-1cm}
 \begin{spacing}{1.5}
 \begin{align*}
@@ -2084,7 +2078,7 @@ H_{red}^Q =
 
 $H_{red}$ st $H_{\textsc{ref}}$ doivent être identiques. Si on observe une différence au niveau du terme $H_{ij}$, on compare l'exécution de \verb;crba.hh; et \verb;hcrba.hh; au moment du calcul de $H_{ij}$. C'est ainsi que nous avons identifié les erreurs sur les matrices $^sX_p$.
 
-\paragraph{test du CHDA:}
+\paragraph{Test du CHDA:}
 
 %COMPLETER
 % wrapfigure of simple humanoide
@@ -2104,7 +2098,7 @@ On a validé l'algorithme sur un modèle de robot humanoïde, simplifié par rap
 %<joint name="LARM_SHOULDER_R" type="revolute">
 %<joint name="LARM_SHOULDER_Y" type="revolute">
 
-En ce qui concerne la validation des sous-étapes de calcul du CHDA sont testées à travers les tests des sous-fonctions précédentes.
+Les tests des sous-fonctions précédentes ont permis de valider les sous-étapes de calcul du CHDA.
 
 Concernant la validation des résultats obtenus pour les couples et accélérations inconnues, la particularité de cet algorithme est qu'il prend en entrée le vecteur d'accélérations $\ddot{q}$ et celui des couples $\tau$, en plus des vecteurs $q$, $\dot{q}$. $\ddot{q}$ et $\tau$ sont à priori incomplets, ou n'ont qu'un sous-ensemble de variables valides:
 \begin{itemize}
@@ -2113,14 +2107,14 @@ Concernant la validation des résultats obtenus pour les couples et accélérati
 \end{itemize}
 On dispose au départ de vecteurs de référence $\ddot{q}$ et $\tau$ complets (tous les éléments sont valides). Le test consiste à:
 \begin{itemize}
-\item[$\centerdot$] générer deux vecteurs de configuration d'entrée, $\ddot{q}$ et $\tau$, à trous, \cad formatés suivant la description ci-dessus, à partir de vecteurs de référence.
+\item[$\centerdot$] générer deux vecteurs de configuration d'entrée, $\ddot{q}$ et $\tau$, à trous, formatés suivant la description ci-dessus, à partir de vecteurs de référence.
 \item[$\centerdot$] appliquer l'algorithme aux vecteurs $\ddot{q}$ et $\tau$. Après cette étape, toutes leurs valeurs sont supposées valides.
-\item[$\centerdot$] comparer les résultats obtenus $\ddot{q}$ et $\tau$ avec les vecteurs de référence respectif.
+\item[$\centerdot$] comparer les résultats obtenus $\ddot{q}$ et $\tau$ avec les vecteurs de référence respectifs.
 \end{itemize}
 
-Dans une deuxième phase, on poussé les tests plus loin en utilisant des vecteurs de référence générés aléatoirement (Eigen::confVector::Random). Les valeurs obtenues par cette méthode sont des flottants (valeurs comprises entre -1 et 1). Pour le vecteur $q$, nous avons choisi de multiplier ses valeurs par $\pi$ pour les ramener dans l'intervalle [$-\pi$,$\pi$]. Effectivement, les limites articulaires d'un robot humanoïde comme HRP2 ne permettent pas de tour complet autour des axes de rotation des liaisons. Les vitesses articulaires peuvent atteindre quelques centaines de $degrés \cdot s^{-1}$, le couple maximal d'une articulation se trouve en moyenne autour de $100 N \cdot m$. Idéalement on aurait dû ramener les valeurs des vecteurs aléatoires respectifs au même ordre de grandeur, mais dans le cadre de la validation fonctionnelle et de précision, cela ne s'est pas avéré indispensable.
+Dans une deuxième phase, on pousse les tests plus loin en utilisant des vecteurs de référence générés aléatoirement (\verb;Eigen::confVector::Random;). Les valeurs obtenues par cette méthode sont des flottants (valeurs comprises entre -1 et 1). Pour le vecteur $q$, nous avons choisi de multiplier ses valeurs par $\pi$ pour les ramener dans l'intervalle [$-\pi$,$\pi$]. Effectivement, les limites articulaires d'un robot humanoïde comme HRP2 ne permettent pas de tour complet autour des axes de rotation des liaisons. Les vitesses articulaires peuvent atteindre quelques centaines de $degrés \cdot s^{-1}$, le couple maximal d'une articulation se trouve en moyenne autour de $100 N \cdot m$. Idéalement on aurait dû ramener les valeurs des vecteurs aléatoires respectifs au même ordre de grandeur, mais dans le cadre de la validation fonctionnelle et de précision, cela ne s'est pas avéré indispensable.
 
-\paragraph{Mesure du temps d'exécution de chacune des étapes}
+\paragraph{Mesure du temps d'exécution de chacune des étapes:}
 Les performances de l'algorithme dépendent du choix des articulations $fd$, puisque celui-ci impacte directement la définition des sous-arbres $\nu(fd)$. On teste premièrement la configuration décrite précédemment, avec 7 articulations $fd$. Pour focaliser l'optimisation de l'algorithme CHDA sur les opérations les plus coûteuses, nous avons mesuré la durée totale de calcul ainsi que la durée de chacune des 4 étapes de traitement de l'algorithme. Pour la mesure de temps en $\mu s$, on utilise la classe \verb;Timer; de \emph{metapod} qui fourni une interface très simple (\verb;start(), stop(), resume();). Nous mesurons le temps sur 100000 boucles, sur une machine munie d'un processeur aux propriétés suivantes:\\
 \begin{flushleft}
 
@@ -2194,12 +2188,12 @@ On peut voir dans la table \ref{table:performancesOptimAxesFixes} que l'optimisa
 
 Dans la table \ref{table:performancesOptimSpecifCHDA}, on a évalué des gains relatifs pour faire abstraction des propriétés du processeur ainsi que les éventuels pics de charge pouvant fausser les mesures. Ces mesures sont donc référencées par rapport à un traitement interne au CHDA, constant (non optimisé) et connu: le RNEA classique. Ainsi, on peut constater que:
 \begin{itemize}
-\item Le CRBA hybride (1) apporte un gain global de 16\% en divisant presque par 2 la duréedu calcul de $H$
+\item Le CRBA hybride (1) apporte un gain global de 16\% en divisant presque par 2 la durée du calcul de $H$
 \item Le solveur \emph{Eigen} du module de sparsité est inefficace sur la matrice d'inertie $H$. La matrice $H$ a environ la moitié des termes à zero, ce qui n'est pas négligeable et pourrait nous faire espérer obtenir de bons résultats avec \emph{Eigen}.  Mais le fait que les valeurs non nulles se regroupent par blocs doit être pénalisant (chaque bloc regroupe l'ensemble des paramètres d'une branche du modèle). Il faudrait implémenter la factorisation "creuse" proposée par Featherstone \cite[p112]{bib_featherstone}. Celle-ci préserve bien la sparsité originale de la matrice et a l'avantage de suivre les branches de l'arbre cinématique, tenant en compte dès le départ, du non couplage entre noeuds de branches différentes.
 \end{itemize}
 
 
-\paragraph{Evolution de ces mesures en fonction du nombre d'articulations FD}
+\paragraph{Evolution de ces mesures en fonction du nombre d'articulations FD:}
 
 Les performances varient significativement en fonction du nombre d'articulations \emph{fd}. En fait, les 3 étapes les plus gourmandes en temps de calcul sont les 3 premières. On liste ci-dessous leur complexité, où $n$ est le nombre de corps du robot (noeuds de l'arbre cinématique), $n_{fd}=|fd|$ la taille de l'ensemble $fd$, et $d_{\nu(fd)}$ la profondeur maximale de $\nu(fd)$:
 \begin{itemize}
@@ -2213,7 +2207,7 @@ La complexité augmentera très rapidement avec la troisième étape, sera const
 On s'est intéressé à deux cas extrêmes: $|fd|=0$ et $|fd|=n$. Dans le cas où $|fd|=0$, le traitement est assimilable à un RNEA, avec un temps de calcul équivalent autour de $5\mu s$. Dans le cas où $|fd|=n$, la complexité est maximale. Pour notre robot humanoïde, $n=35$ et le temps de calcul monte à $20\mu s$. Ce cas de figure correspond à la dynamique directe pure, plus utilisée en simulation où les contraintes en performance sont moindres. Mais dans le cas d'un robot humanoïde intégrant un grand nombre d'articulations flexibles, comme le robot Coman de l'Instiruto Italiano de Technologia, et qu'on veut traiter ces articulations comme des articulations \emph{fd}, la complexité de l'algorithme Dynamique Hybride peut devenir critique, et la factorisation "creuse" de Featherstone devient indispensable, ou d'autres algorithmes globalement plus efficaces comme le \gls{acr_aba}.
 
 
-\paragraph{Mesure du temps d'exécution par instruction}
+\paragraph{Mesure du temps d'exécution par instruction:}
 Ce projet m'a permis de découvrir un autre outil très utile en analyse de profil de fonctions par rapport aux temps de d'exécution. Il s'agit de \verb;cachegrind;, outil de la suite logicielle \verb;Valgrind;. De plus, à l'aide de \verb;Kcachegrind;on peut visualiser ces données graphiquement. On donne quelques détails supplémentaires en annexe \ref{appx_cachegrind}.
 
 
@@ -2231,7 +2225,7 @@ Ce projet m'a permis de découvrir un autre outil très utile en analyse de prof
 
 On peut appliquer le problème de Dynamique Hybride au contrôle d'un robot sous-actionné ayant des articulations flexibles dont le seul "actionneur" est équivalent à un système de ressorts. C'est le cas du HRP2 avec ses semelles flexibles. Dans ce cas, la flexibilité se situe entre la semelle et le corps du pied, juste en dessous de l'articulation de la cheville. Il existe des études en cours visant à définir un observateur performant de cette flexibilité. Kajita avait déjà abordé le sujet dans son article sur l'utilisation du retour de moment angulaire du robot pour le contrôle du couple appliqué à la cheville \cite{bib_backdrive}. On illustre ci-contre le modèle tel que décrit par Kajita. Lorsque la cheville fait pivoter le corps du pied, celui-ci appuie sur le matériaux souple ("compliant material") appliquant ainsi un couple au sol.
 \paragraph{Contrôle du couple:} Kajita utilise une boucle de contrôle pour asservir le couple appliqué au sol. Le contrôleur se sert de l'estimation de couple au sol fournie par les mesures des capteurs de pression intégrés à la semelle. On connaît donc le couple associé à l'articulation flexible. On désigne par $q_f, \dot{q}_f, \ddot{q}_f$ et $\tau_f$ les paramètres articulaires associés.
-\paragraph{paramètres $q_f$ et $\dot{q}_f$:} Le couple d'appui résulte de la compression du ressort équivalent de raideur $k_e$ (figure \ref{fig_hrp2ankle}). Ceci nous permettrait d'estimer $q_f$ à tout instant, donc $\dot{q}_f$ par dérivation. $q_f$ servirait à estimer la position du \gls{acr_com} du robot en tenant compte de sa flexibilité.
+\paragraph{Paramètres $q_f$ et $\dot{q}_f$:} Le couple d'appui résulte de la compression du ressort équivalent de raideur $k_e$ (figure \ref{fig_hrp2ankle}). Ceci nous permettrait d'estimer $q_f$ à tout instant, donc $\dot{q}_f$ par dérivation. $q_f$ servirait à estimer la position du \gls{acr_com} du robot en tenant compte de sa flexibilité.
 
 \begin{figure}[H]
   \centering
@@ -2263,7 +2257,7 @@ En phase initiale du stage, j'ai dû me familiariser avec les outils et procéd�
 \item les outils de compilation \emph{cmake}, que j'ai eu l'occasion de découvrir et qui apportent une certaine souplesse et simplicité par rapport à l'outil de compilation \emph{make}
 \item de nouveaux IDE permettant d'accélérer le développement, dont qtcreator, le plus adapté à \emph{cmake} selon mon point de vue
 \item la librairie \emph{Eigen} incontournable pour les opérations matricielles templatées et optimisées, et des "solveurs" systèmes linéaires spécialisés et optimisés pour divers types de matrices (décompositions, factorisations, ...)
-\item un outil d'analyse de profil de fonctions, \verb;cachegrind; (de la suite \verb;Valgrind;). Il établi un profil de coût en temps d'exécution et crée des liens avec le code source, ce qui rend l'outil très efficace.
+\item un outil d'analyse de profil de fonctions, \verb;cachegrind; (de la suite \verb;Valgrind;). Il établi un profil de coût en temps d'exécution et crée des liens avec le code source, ce qui rend l'outil très efficace
 \item la méta programmation C++, et la librairie BOOST qui introduisent une approche de programmation nouvelle et prometteuse, et apportent de nouvelles perspectives d'optimisation d'algorithmes
 \item et enfin le formalisme de l'Algèbre Spatiale et les algorithmes optimisés de Featherstone.
 \end{itemize}
@@ -2286,7 +2280,7 @@ Dans la phase finale de mon stage, j'ai eu l'occasion de discuter avec mon maît
 
 \section*{} %Bilan personnel
 
-Ce stage m'a apporté une première expérience dans le monde de la Robotique très appréciable. J'ai pu appliquer une partie des concepts appris en Master, et aussi développé mes compétences en programmation, en analyse et en optimisation d'algorithmes.
+Ce stage m'a apporté une première expérience dans le monde de la Robotique très appréciable. J'ai pu appliquer une partie des concepts appris en Master, et aussi développer mes compétences en programmation, en analyse et en optimisation d'algorithmes.
 
 Mais surtout, j'ai étendu considérablement mes connaissances en Dynamique des corps solides, qui est une de mes disciplines préférées. Plus précisément  j'ai acquis une expertise dans le formalisme de Featherstone très appréciée pour la résolution de problèmes dynamiques de systèmes articulés, notamment les robots humanoïdes.
 
@@ -2300,15 +2294,57 @@ Cette expérience a ainsi conforté mon désir de travailler dans la recherche e
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter*{Glossaire}
+\addcontentsline{toc}{chapter}{Glossaire}
+
+
+\begin{description}
+% acronymes
+\item[RNEA   ]{Recursive Newton-Euler Algorithm}
+\item[CRBA   ]{Composite Rigid Body Algorithm}
+\item[ABA   ]{Articulated Body Algorithm}
+\item[ROS   ]{Robotics Operating System \cite{bib_ros}}
+\item[URDF   ]{Universal Robotic Description Format \cite{bib_urdf}}
+\item[SOT   ]{Stack Of Tasks}
+\item[DFS   ]{Deep First Search}
+\item[CoP   ]{centre de pression}
+\item[CoM   ]{centre de masse}
+\item[WPG   ]{Générateur De Marche ou "Walking Pattern Generator"}
+%% définitions
+\item[vecteur lié   ]{Un vecteur lié $(A,\textbf{V})$ est l'ensemble d'un point $A$ et d'un vecteur $\textbf{V}$ associé à $A$. Par exemple une force ou une vitesse appliquées à un point fixe d'un solide.}
+%\item[champ de vecteurs   ]{On appelle champ de vecteurs l'application qui fait correspondre, à tout point $A$ de $\varepsilon$, un vecteur $U$ d'un espace vectoriel $F$ de même dimension que \varepsilon. Par exemple les champs électrique $E$ et magnétique $B$ liés à une charge électrique \cite{bib_champVecteurs}.}
+\item[champ antisymétrique   ]{Un champ de vecteurs est \emph{antisymétrique} s'il existe un vecteur $S$ tel que, quels que soient les points $A$ et $B$, on ait: $M(A)=M(B)+AB \times S$. Le vecteur $S$ est \emph{le vecteur} du champ antisymétrique \cite{bib_champVecteurs}.}
+\item[torseur   ]{un outil mathématique utilisé principalement en mécanique du solide, pour décrire leurs mouvements et les actions mécaniques qu'ils subissent. Un \emph{torseur} $[T]$ est l'ensemble d'un champ antisymétrique $M(A)$ et de son vecteur $S$. $M(A)$ et $S$ sont appelés respectivement \emph{moment} et \emph{vecteur} du torseur $[T]$.}
+\item[Bias   ]{Précontrainte. En mécanique, désigne une force de précontrainte, souvent extérieure au système, comme les forces de Coriolis ou le champ de gravitation terrestre.}
+\item[jcalc   ]{"Joint calculation" désigne un algorithme élémentaire qui met à jour la matrice de passage entre deux corps successifs de l'arbre cinétique d'un système robotique, et ce pour tous les corps du sytème, en parcourant l'arbre en profondeur d'abord.}
+\item[metapod   ]{librairie dynamique implémentant les algorithmes de dynamique inverse et directe génériques et donc applicables à tout modèle d'arbre cinétique. Cette librairie est écrite en langage C++ templaté suivant des techniques de meta-programmation. Cela lui permet d'assurer des performances optimales en vitesse d'exécution tout en gardant son aspect générique.}
+\item[Eigen   ]{Librairie dynamique d'outils pour la manipulation optimale de matrices et pour la résolution de sytèmes linéaires de grande taille. Cette librairie est templatée, permettant la prise en compte de plusieurs type de données dans les matrices.}
+\item[Open Multi-Processing   ]{is an API that supports multi-platform shared memory multiprocessing programming in C, C++, and Fortran,[4] on most processor architectures and operating systems, including Solaris, AIX, HP-UX, Linux, Mac OS X, and Windows platforms. It consists of a set of compiler directives, library routines, and environment variables that influence run-time behavior.}
+\item[STack Of Tasks   ]{Gestionnaire de l'ensemble des tâches de la plateforme robotique.}
+\item[Deep First Search   ]{Algorithme parcourant un arbre en profondeur d'abord.}
+\item[sparsité   ]{une matrice est dite \emph{sparse} si elle est creuse, c'est à dire si elle contient un nombre important de termes nuls. La même notion existe pour une fonction. Une fonction $f$ est dite \emph{sparse} si pour un vecteur de variables $X$, très peu de variables de ce vecteur déterminent le résultat de $f(X)$.}
+\item[centre de pression   ]{Position du point où le moment résultant de la force de réaction au sol s'annule \cite{bib_commandeRobotsHumKajita}.}
+\end{description}
+
+\pagebreak
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 % Annexes
 \appendix
+\addcontentsline{toc}{chapter}{Annexes}
 \input{./tex/appendix.tex}
 
 
 
 % Bibliography:
 \clearpage
-\addcontentsline{toc}{chapter}{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliographie}
 \input{./tex/bib.tex}
 
 

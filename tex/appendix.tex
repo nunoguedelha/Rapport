@@ -7,12 +7,12 @@ L'outil \textbf{cachegrind} est très efficace pour détecter des instructions o
 \item[$\centerdot$ génération de l'analyse:]  \emph{callgrind} prend comme entrée l'exécutable de l'application à analyser et génère un seul fichier en sortie contenant toutes les données d'analyse ( \verb;callgrind.out.xxxxx; ). C'est le fichier à ouvrir avec \verb;Kcachegrind;.
 \end{itemize}
 
-Voici une capture écran de \verb;Kcachegrind; montrant une fenêtre où on peut visualiser l'ensemble des fonctions appelées par la fonction $BOOST$ "test\_chda". La taille des boîtes est proportionnelle au coût en temps d'exécution de la fonction associée:
+Voici une capture écran de \verb;Kcachegrind; montrant une fenêtre où on peut visualiser l'ensemble des fonctions appelées par la fonction $\mathbf{BOOST}$ test\_chda;. La taille des boîtes est proportionnelle au coût en temps d'exécution de la fonction associée:
 
 \begin{figure}[H]
   \begin{center}
   \includegraphics[width=\textwidth]{figs/snapshotKcachegrind1.png}
-  \caption{Capture d'écran de Kcachegrind. Visualisation sous Kcachegrind du profil d'exécution des fonctions appelées par $test_chda$.}         % legende
+  \caption{Capture d'écran de Kcachegrind. Visualisation sous Kcachegrind du profil d'exécution des fonctions appelées par $test\_chda$.}         % legende
   \label{fig:Kcachegrind1} % pour citer le numéro de figure
   \end{center}
 \end{figure}
